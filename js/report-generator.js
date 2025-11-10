@@ -576,12 +576,13 @@ class ReportGenerator {
         const canvas = document.getElementById('trendChart');
         if (!canvas) return;
 
-        // 같은 시리즈의 시험들 찾기
+        // 같은 시리즈의 시험들 찾기 (최근 5개만)
         const allExams = storage.getAllExams().filter(e =>
             e.school === this.currentExam.school &&
             e.grade === this.currentExam.grade &&
             e.series === this.currentExam.series
-        ).sort((a, b) => new Date(a.date) - new Date(b.date));
+        ).sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(-5); // 최근 5개 시험만 표시
 
         if (allExams.length === 0) {
             // 시리즈가 없으면 차트 숨김
