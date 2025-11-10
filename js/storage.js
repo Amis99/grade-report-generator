@@ -1,23 +1,68 @@
 /**
- * 로컬 스토리지 기반 데이터 저장소
+ * Firebase Realtime Database 기반 데이터 저장소
  * 단일 진실 공급원(Single Source of Truth)
  */
 
 class DataStorage {
     constructor() {
-        this.STORAGE_KEYS = {
-            EXAMS: 'gradeapp_exams',
-            QUESTIONS: 'gradeapp_questions',
-            STUDENTS: 'gradeapp_students',
-            ANSWERS: 'gradeapp_answers'
+        this.useFirebase = typeof firebase !== 'undefined' && typeof firebaseDatabase !== 'undefined';
+        this.cache = {
+            exams: [],
+            questions: [],
+            students: [],
+            answers: []
         };
+        this.cacheLoaded = false;
+
+        if (this.useFirebase) {
+            console.log('🔥 Firebase 모드로 실행');
+            this.loadAllDataToCache();
+        } else {
+            console.log('💾 로컬 스토리지 모드로 실행 (Firebase 연결 실패)');
+            this.STORAGE_KEYS = {
+                EXAMS: 'gradeapp_exams',
+                QUESTIONS: 'gradeapp_questions',
+                STUDENTS: 'gradeapp_students',
+                ANSWERS: 'gradeapp_answers'
+            };
+        }
+    }
+
+    // === Firebase 초기 데이터 로드 ===
+    async loadAllDataToCache() {
+        if (!this.useFirebase) return;
+
+        try {
+            const snapshot = await firebaseDatabase.ref('/').once('value');
+            const data = snapshot.val() || {};
+
+            this.cache.exams = Object.values(data.exams || {}).map(e => new Exam(e));
+            this.cache.questions = Object.values(data.questions || {}).map(q => new Question(q));
+            this.cache.students = Object.values(data.students || {}).map(s => new Student(s));
+            this.cache.answers = Object.values(data.answers || {}).map(a => new Answer(a));
+
+            this.cacheLoaded = true;
+            console.log('✅ Firebase 데이터 로드 완료:', {
+                exams: this.cache.exams.length,
+                questions: this.cache.questions.length,
+                students: this.cache.students.length,
+                answers: this.cache.answers.length
+            });
+        } catch (error) {
+            console.error('❌ Firebase 데이터 로드 실패:', error);
+            this.useFirebase = false;
+        }
     }
 
     // === 시험(Exam) 관리 ===
 
     getAllExams() {
-        const data = localStorage.getItem(this.STORAGE_KEYS.EXAMS);
-        return data ? JSON.parse(data).map(e => new Exam(e)) : [];
+        if (this.useFirebase) {
+            return this.cache.exams;
+        } else {
+            const data = localStorage.getItem(this.STORAGE_KEYS.EXAMS);
+            return data ? JSON.parse(data).map(e => new Exam(e)) : [];
+        }
     }
 
     getExam(id) {
@@ -26,36 +71,70 @@ class DataStorage {
         return exam ? new Exam(exam) : null;
     }
 
-    saveExam(exam) {
-        const exams = this.getAllExams();
-        const index = exams.findIndex(e => e.id === exam.id);
-
+    async saveExam(exam) {
         exam.updatedAt = new Date().toISOString();
 
-        if (index >= 0) {
-            exams[index] = exam;
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`exams/${exam.id}`).set(exam);
+
+                // 캐시 업데이트
+                const index = this.cache.exams.findIndex(e => e.id === exam.id);
+                if (index >= 0) {
+                    this.cache.exams[index] = exam;
+                } else {
+                    this.cache.exams.push(exam);
+                }
+            } catch (error) {
+                console.error('Firebase 저장 실패:', error);
+                alert('데이터 저장에 실패했습니다. 인터넷 연결을 확인해주세요.');
+            }
         } else {
-            exams.push(exam);
+            const exams = this.getAllExams();
+            const index = exams.findIndex(e => e.id === exam.id);
+
+            if (index >= 0) {
+                exams[index] = exam;
+            } else {
+                exams.push(exam);
+            }
+
+            localStorage.setItem(this.STORAGE_KEYS.EXAMS, JSON.stringify(exams));
         }
 
-        localStorage.setItem(this.STORAGE_KEYS.EXAMS, JSON.stringify(exams));
         return exam;
     }
 
-    deleteExam(id) {
-        const exams = this.getAllExams().filter(e => e.id !== id);
-        localStorage.setItem(this.STORAGE_KEYS.EXAMS, JSON.stringify(exams));
+    async deleteExam(id) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`exams/${id}`).remove();
+                this.cache.exams = this.cache.exams.filter(e => e.id !== id);
 
-        // 관련 문제와 답안도 삭제
-        this.deleteQuestionsByExamId(id);
-        this.deleteAnswersByExamId(id);
+                // 관련 문제와 답안도 삭제
+                await this.deleteQuestionsByExamId(id);
+                await this.deleteAnswersByExamId(id);
+            } catch (error) {
+                console.error('Firebase 삭제 실패:', error);
+            }
+        } else {
+            const exams = this.getAllExams().filter(e => e.id !== id);
+            localStorage.setItem(this.STORAGE_KEYS.EXAMS, JSON.stringify(exams));
+
+            this.deleteQuestionsByExamId(id);
+            this.deleteAnswersByExamId(id);
+        }
     }
 
     // === 문제(Question) 관리 ===
 
     getAllQuestions() {
-        const data = localStorage.getItem(this.STORAGE_KEYS.QUESTIONS);
-        return data ? JSON.parse(data).map(q => new Question(q)) : [];
+        if (this.useFirebase) {
+            return this.cache.questions;
+        } else {
+            const data = localStorage.getItem(this.STORAGE_KEYS.QUESTIONS);
+            return data ? JSON.parse(data).map(q => new Question(q)) : [];
+        }
     }
 
     getQuestion(id) {
@@ -70,42 +149,80 @@ class DataStorage {
             .sort((a, b) => a.number - b.number);
     }
 
-    saveQuestion(question) {
-        const questions = this.getAllQuestions();
-        const index = questions.findIndex(q => q.id === question.id);
+    async saveQuestion(question) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`questions/${question.id}`).set(question);
 
-        if (index >= 0) {
-            questions[index] = question;
+                const index = this.cache.questions.findIndex(q => q.id === question.id);
+                if (index >= 0) {
+                    this.cache.questions[index] = question;
+                } else {
+                    this.cache.questions.push(question);
+                }
+            } catch (error) {
+                console.error('Firebase 저장 실패:', error);
+            }
         } else {
-            questions.push(question);
+            const questions = this.getAllQuestions();
+            const index = questions.findIndex(q => q.id === question.id);
+
+            if (index >= 0) {
+                questions[index] = question;
+            } else {
+                questions.push(question);
+            }
+
+            localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
         }
 
-        localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
         return question;
     }
 
-    saveQuestions(questionsArray) {
-        questionsArray.forEach(q => this.saveQuestion(q));
+    async saveQuestions(questionsArray) {
+        for (const q of questionsArray) {
+            await this.saveQuestion(q);
+        }
     }
 
-    deleteQuestion(id) {
-        const questions = this.getAllQuestions().filter(q => q.id !== id);
-        localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
-
-        // 관련 답안도 삭제
-        this.deleteAnswersByQuestionId(id);
+    async deleteQuestion(id) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`questions/${id}`).remove();
+                this.cache.questions = this.cache.questions.filter(q => q.id !== id);
+                await this.deleteAnswersByQuestionId(id);
+            } catch (error) {
+                console.error('Firebase 삭제 실패:', error);
+            }
+        } else {
+            const questions = this.getAllQuestions().filter(q => q.id !== id);
+            localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
+            this.deleteAnswersByQuestionId(id);
+        }
     }
 
-    deleteQuestionsByExamId(examId) {
-        const questions = this.getAllQuestions().filter(q => q.examId !== examId);
-        localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
+    async deleteQuestionsByExamId(examId) {
+        if (this.useFirebase) {
+            const questionsToDelete = this.cache.questions.filter(q => q.examId === examId);
+            for (const q of questionsToDelete) {
+                await firebaseDatabase.ref(`questions/${q.id}`).remove();
+            }
+            this.cache.questions = this.cache.questions.filter(q => q.examId !== examId);
+        } else {
+            const questions = this.getAllQuestions().filter(q => q.examId !== examId);
+            localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
+        }
     }
 
     // === 학생(Student) 관리 ===
 
     getAllStudents() {
-        const data = localStorage.getItem(this.STORAGE_KEYS.STUDENTS);
-        return data ? JSON.parse(data).map(s => new Student(s)) : [];
+        if (this.useFirebase) {
+            return this.cache.students;
+        } else {
+            const data = localStorage.getItem(this.STORAGE_KEYS.STUDENTS);
+            return data ? JSON.parse(data).map(s => new Student(s)) : [];
+        }
     }
 
     getStudent(id) {
@@ -123,33 +240,61 @@ class DataStorage {
         );
     }
 
-    saveStudent(student) {
-        const students = this.getAllStudents();
-        const index = students.findIndex(s => s.id === student.id);
+    async saveStudent(student) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`students/${student.id}`).set(student);
 
-        if (index >= 0) {
-            students[index] = student;
+                const index = this.cache.students.findIndex(s => s.id === student.id);
+                if (index >= 0) {
+                    this.cache.students[index] = student;
+                } else {
+                    this.cache.students.push(student);
+                }
+            } catch (error) {
+                console.error('Firebase 저장 실패:', error);
+            }
         } else {
-            students.push(student);
+            const students = this.getAllStudents();
+            const index = students.findIndex(s => s.id === student.id);
+
+            if (index >= 0) {
+                students[index] = student;
+            } else {
+                students.push(student);
+            }
+
+            localStorage.setItem(this.STORAGE_KEYS.STUDENTS, JSON.stringify(students));
         }
 
-        localStorage.setItem(this.STORAGE_KEYS.STUDENTS, JSON.stringify(students));
         return student;
     }
 
-    deleteStudent(id) {
-        const students = this.getAllStudents().filter(s => s.id !== id);
-        localStorage.setItem(this.STORAGE_KEYS.STUDENTS, JSON.stringify(students));
-
-        // 관련 답안도 삭제
-        this.deleteAnswersByStudentId(id);
+    async deleteStudent(id) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`students/${id}`).remove();
+                this.cache.students = this.cache.students.filter(s => s.id !== id);
+                await this.deleteAnswersByStudentId(id);
+            } catch (error) {
+                console.error('Firebase 삭제 실패:', error);
+            }
+        } else {
+            const students = this.getAllStudents().filter(s => s.id !== id);
+            localStorage.setItem(this.STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+            this.deleteAnswersByStudentId(id);
+        }
     }
 
     // === 답안(Answer) 관리 ===
 
     getAllAnswers() {
-        const data = localStorage.getItem(this.STORAGE_KEYS.ANSWERS);
-        return data ? JSON.parse(data).map(a => new Answer(a)) : [];
+        if (this.useFirebase) {
+            return this.cache.answers;
+        } else {
+            const data = localStorage.getItem(this.STORAGE_KEYS.ANSWERS);
+            return data ? JSON.parse(data).map(a => new Answer(a)) : [];
+        }
     }
 
     getAnswer(id) {
@@ -168,79 +313,132 @@ class DataStorage {
             .filter(a => a.examId === examId);
     }
 
-    saveAnswer(answer) {
-        const answers = this.getAllAnswers();
-
-        // ID가 있으면 ID로 찾고, 없으면 examId + studentId + questionId 조합으로 찾기
-        let index = answers.findIndex(a => a.id === answer.id);
-
-        if (index < 0) {
-            // ID로 못 찾으면 같은 시험/학생/문제 조합의 기존 답안 찾기 (중복 방지)
-            index = answers.findIndex(a =>
-                a.examId === answer.examId &&
-                a.studentId === answer.studentId &&
-                a.questionId === answer.questionId
-            );
-
-            // 기존 답안이 있으면 그 ID를 사용
-            if (index >= 0) {
-                answer.id = answers[index].id;
-            }
-        }
-
+    async saveAnswer(answer) {
         answer.updatedAt = new Date().toISOString();
 
-        if (index >= 0) {
-            answers[index] = answer;
+        if (this.useFirebase) {
+            try {
+                // 중복 방지: examId + studentId + questionId 조합으로 ID 생성
+                if (!answer.id) {
+                    const existingIndex = this.cache.answers.findIndex(a =>
+                        a.examId === answer.examId &&
+                        a.studentId === answer.studentId &&
+                        a.questionId === answer.questionId
+                    );
+                    if (existingIndex >= 0) {
+                        answer.id = this.cache.answers[existingIndex].id;
+                    }
+                }
+
+                await firebaseDatabase.ref(`answers/${answer.id}`).set(answer);
+
+                const index = this.cache.answers.findIndex(a => a.id === answer.id);
+                if (index >= 0) {
+                    this.cache.answers[index] = answer;
+                } else {
+                    this.cache.answers.push(answer);
+                }
+            } catch (error) {
+                console.error('Firebase 저장 실패:', error);
+            }
         } else {
-            answers.push(answer);
+            const answers = this.getAllAnswers();
+            let index = answers.findIndex(a => a.id === answer.id);
+
+            if (index < 0) {
+                index = answers.findIndex(a =>
+                    a.examId === answer.examId &&
+                    a.studentId === answer.studentId &&
+                    a.questionId === answer.questionId
+                );
+
+                if (index >= 0) {
+                    answer.id = answers[index].id;
+                }
+            }
+
+            if (index >= 0) {
+                answers[index] = answer;
+            } else {
+                answers.push(answer);
+            }
+
+            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
         }
 
-        localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
         return answer;
     }
 
-    saveAnswers(answersArray) {
-        answersArray.forEach(a => this.saveAnswer(a));
+    async saveAnswers(answersArray) {
+        for (const a of answersArray) {
+            await this.saveAnswer(a);
+        }
     }
 
-    deleteAnswer(id) {
-        const answers = this.getAllAnswers().filter(a => a.id !== id);
-        localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+    async deleteAnswer(id) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`answers/${id}`).remove();
+                this.cache.answers = this.cache.answers.filter(a => a.id !== id);
+            } catch (error) {
+                console.error('Firebase 삭제 실패:', error);
+            }
+        } else {
+            const answers = this.getAllAnswers().filter(a => a.id !== id);
+            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+        }
     }
 
-    deleteAnswersByExamId(examId) {
-        const answers = this.getAllAnswers().filter(a => a.examId !== examId);
-        localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+    async deleteAnswersByExamId(examId) {
+        if (this.useFirebase) {
+            const answersToDelete = this.cache.answers.filter(a => a.examId === examId);
+            for (const a of answersToDelete) {
+                await firebaseDatabase.ref(`answers/${a.id}`).remove();
+            }
+            this.cache.answers = this.cache.answers.filter(a => a.examId !== examId);
+        } else {
+            const answers = this.getAllAnswers().filter(a => a.examId !== examId);
+            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+        }
     }
 
-    deleteAnswersByStudentId(studentId) {
-        const answers = this.getAllAnswers().filter(a => a.studentId !== studentId);
-        localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+    async deleteAnswersByStudentId(studentId) {
+        if (this.useFirebase) {
+            const answersToDelete = this.cache.answers.filter(a => a.studentId === studentId);
+            for (const a of answersToDelete) {
+                await firebaseDatabase.ref(`answers/${a.id}`).remove();
+            }
+            this.cache.answers = this.cache.answers.filter(a => a.studentId !== studentId);
+        } else {
+            const answers = this.getAllAnswers().filter(a => a.studentId !== studentId);
+            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+        }
     }
 
-    deleteAnswersByQuestionId(questionId) {
-        const answers = this.getAllAnswers().filter(a => a.questionId !== questionId);
-        localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+    async deleteAnswersByQuestionId(questionId) {
+        if (this.useFirebase) {
+            const answersToDelete = this.cache.answers.filter(a => a.questionId === questionId);
+            for (const a of answersToDelete) {
+                await firebaseDatabase.ref(`answers/${a.id}`).remove();
+            }
+            this.cache.answers = this.cache.answers.filter(a => a.questionId !== questionId);
+        } else {
+            const answers = this.getAllAnswers().filter(a => a.questionId !== questionId);
+            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+        }
     }
 
-    /**
-     * 중복 답안 제거 (같은 시험/학생/문제 조합)
-     * 가장 최근에 업데이트된 답안만 남김
-     */
     removeDuplicateAnswers() {
         const answers = this.getAllAnswers();
         const uniqueAnswers = [];
         const seenKeys = new Set();
 
-        // updatedAt 기준으로 최신순 정렬
         answers.sort((a, b) => {
             const dateA = new Date(a.updatedAt || 0);
             const dateB = new Date(b.updatedAt || 0);
-            return dateB - dateA; // 최신이 먼저
+            return dateB - dateA;
         });
 
-        // 중복 제거 (최신 것만 유지)
         answers.forEach(answer => {
             const key = `${answer.examId}_${answer.studentId}_${answer.questionId}`;
             if (!seenKeys.has(key)) {
@@ -252,20 +450,17 @@ class DataStorage {
         const removedCount = answers.length - uniqueAnswers.length;
 
         if (removedCount > 0) {
-            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(uniqueAnswers));
+            if (this.useFirebase) {
+                this.cache.answers = uniqueAnswers;
+            } else {
+                localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(uniqueAnswers));
+            }
             console.log(`중복 답안 ${removedCount}개가 제거되었습니다.`);
-        } else {
-            console.log('중복 답안이 없습니다.');
         }
 
         return removedCount;
     }
 
-    // === 데이터 디버깅 ===
-
-    /**
-     * 특정 시험의 모든 문제 데이터 출력 (디버깅용)
-     */
     debugQuestions(examId) {
         const questions = this.getQuestionsByExamId(examId);
         console.log('=== 문제 데이터 디버깅 ===');
@@ -284,8 +479,6 @@ class DataStorage {
         return questions;
     }
 
-    // === 시험 결과 계산 ===
-
     getExamResult(examId, studentId) {
         const exam = this.getExam(examId);
         const student = this.getStudent(studentId);
@@ -298,7 +491,6 @@ class DataStorage {
 
         const result = new ExamResult(exam, student, questions, answers);
 
-        // 등수 계산을 위해 모든 결과 가져오기
         const allResults = this.getAllExamResults(examId);
         const myResult = allResults.find(r => r.student.id === studentId);
 
@@ -317,7 +509,6 @@ class DataStorage {
         const questions = this.getQuestionsByExamId(examId);
         const allAnswers = this.getAnswersByExamId(examId);
 
-        // 시험을 본 학생 ID 추출
         const studentIds = [...new Set(allAnswers.map(a => a.studentId))];
 
         const results = studentIds.map(studentId => {
@@ -326,12 +517,10 @@ class DataStorage {
             return new ExamResult(exam, student, questions, answers);
         });
 
-        // 점수 순으로 정렬하고 등수 계산 (동점자 처리)
         results.sort((a, b) => b.totalScore - a.totalScore);
 
         let currentRank = 1;
         results.forEach((result, index) => {
-            // 이전 학생과 점수가 다르면 등수 업데이트
             if (index > 0 && results[index - 1].totalScore !== result.totalScore) {
                 currentRank = index + 1;
             }
@@ -342,15 +531,18 @@ class DataStorage {
         return results;
     }
 
-    // === 데이터 전체 삭제 (초기화) ===
-
     clearAllData() {
-        Object.values(this.STORAGE_KEYS).forEach(key => {
-            localStorage.removeItem(key);
-        });
+        if (this.useFirebase) {
+            if (confirm('⚠️ Firebase의 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다!')) {
+                firebaseDatabase.ref('/').remove();
+                this.cache = { exams: [], questions: [], students: [], answers: [] };
+            }
+        } else {
+            Object.values(this.STORAGE_KEYS).forEach(key => {
+                localStorage.removeItem(key);
+            });
+        }
     }
-
-    // === 데이터 내보내기/가져오기 (백업) ===
 
     exportAllData() {
         return {
@@ -362,18 +554,42 @@ class DataStorage {
         };
     }
 
-    importAllData(data) {
-        if (data.exams) {
-            localStorage.setItem(this.STORAGE_KEYS.EXAMS, JSON.stringify(data.exams));
-        }
-        if (data.questions) {
-            localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(data.questions));
-        }
-        if (data.students) {
-            localStorage.setItem(this.STORAGE_KEYS.STUDENTS, JSON.stringify(data.students));
-        }
-        if (data.answers) {
-            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(data.answers));
+    async importAllData(data) {
+        if (this.useFirebase) {
+            try {
+                const updates = {};
+
+                if (data.exams) {
+                    data.exams.forEach(e => updates[`exams/${e.id}`] = e);
+                }
+                if (data.questions) {
+                    data.questions.forEach(q => updates[`questions/${q.id}`] = q);
+                }
+                if (data.students) {
+                    data.students.forEach(s => updates[`students/${s.id}`] = s);
+                }
+                if (data.answers) {
+                    data.answers.forEach(a => updates[`answers/${a.id}`] = a);
+                }
+
+                await firebaseDatabase.ref('/').update(updates);
+                await this.loadAllDataToCache();
+            } catch (error) {
+                console.error('Firebase 가져오기 실패:', error);
+            }
+        } else {
+            if (data.exams) {
+                localStorage.setItem(this.STORAGE_KEYS.EXAMS, JSON.stringify(data.exams));
+            }
+            if (data.questions) {
+                localStorage.setItem(this.STORAGE_KEYS.QUESTIONS, JSON.stringify(data.questions));
+            }
+            if (data.students) {
+                localStorage.setItem(this.STORAGE_KEYS.STUDENTS, JSON.stringify(data.students));
+            }
+            if (data.answers) {
+                localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(data.answers));
+            }
         }
     }
 }

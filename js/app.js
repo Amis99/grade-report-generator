@@ -25,8 +25,102 @@ class App {
             if (removedCount > 0) {
                 console.log(`✅ 중복 답안 ${removedCount}개가 자동으로 정리되었습니다.`);
             }
+
+            // Firebase 사용 중이고 로컬 스토리지에 데이터가 있으면 마이그레이션 제안
+            if (storage.useFirebase) {
+                this.checkLocalDataMigration();
+            }
         } catch (error) {
             console.error('데이터 정리 중 오류:', error);
+        }
+    }
+
+    /**
+     * 로컬 스토리지 데이터를 Firebase로 마이그레이션
+     */
+    async checkLocalDataMigration() {
+        const localKeys = ['gradeapp_exams', 'gradeapp_questions', 'gradeapp_students', 'gradeapp_answers'];
+        const hasLocalData = localKeys.some(key => localStorage.getItem(key));
+
+        if (hasLocalData && storage.cacheLoaded) {
+            const hasFirebaseData = storage.cache.exams.length > 0 ||
+                                   storage.cache.questions.length > 0 ||
+                                   storage.cache.students.length > 0 ||
+                                   storage.cache.answers.length > 0;
+
+            if (!hasFirebaseData) {
+                const migrate = confirm(
+                    '🔥 로컬 브라우저에 저장된 데이터를 발견했습니다.\n\n' +
+                    '클라우드(Firebase)로 데이터를 이동하시겠습니까?\n' +
+                    '이동하면 모든 브라우저와 기기에서 동일한 데이터를 사용할 수 있습니다.\n\n' +
+                    '※ 로컬 데이터는 백업 후 삭제됩니다.'
+                );
+
+                if (migrate) {
+                    await this.migrateLocalToFirebase();
+                }
+            }
+        }
+    }
+
+    /**
+     * 로컬 데이터를 Firebase로 마이그레이션
+     */
+    async migrateLocalToFirebase() {
+        try {
+            console.log('🔄 로컬 데이터를 Firebase로 마이그레이션 중...');
+
+            // 로컬 스토리지에서 데이터 읽기
+            const localExams = JSON.parse(localStorage.getItem('gradeapp_exams') || '[]');
+            const localQuestions = JSON.parse(localStorage.getItem('gradeapp_questions') || '[]');
+            const localStudents = JSON.parse(localStorage.getItem('gradeapp_students') || '[]');
+            const localAnswers = JSON.parse(localStorage.getItem('gradeapp_answers') || '[]');
+
+            const totalItems = localExams.length + localQuestions.length +
+                             localStudents.length + localAnswers.length;
+
+            if (totalItems === 0) {
+                alert('마이그레이션할 데이터가 없습니다.');
+                return;
+            }
+
+            // Firebase에 업로드
+            const updates = {};
+
+            localExams.forEach(e => updates[`exams/${e.id}`] = e);
+            localQuestions.forEach(q => updates[`questions/${q.id}`] = q);
+            localStudents.forEach(s => updates[`students/${s.id}`] = s);
+            localAnswers.forEach(a => updates[`answers/${a.id}`] = a);
+
+            await firebaseDatabase.ref('/').update(updates);
+
+            // 캐시 업데이트
+            await storage.loadAllDataToCache();
+
+            console.log(`✅ 마이그레이션 완료: ${totalItems}개 항목`);
+
+            alert(
+                `✅ 데이터 마이그레이션 완료!\n\n` +
+                `시험: ${localExams.length}개\n` +
+                `문제: ${localQuestions.length}개\n` +
+                `학생: ${localStudents.length}명\n` +
+                `답안: ${localAnswers.length}개\n\n` +
+                `이제 모든 브라우저에서 동일한 데이터를 사용할 수 있습니다.`
+            );
+
+            // 로컬 스토리지 데이터 삭제 (백업은 유지)
+            const backup = confirm('로컬 브라우저 데이터를 삭제하시겠습니까?\n(클라우드에 이미 저장되었습니다)');
+            if (backup) {
+                localStorage.removeItem('gradeapp_exams');
+                localStorage.removeItem('gradeapp_questions');
+                localStorage.removeItem('gradeapp_students');
+                localStorage.removeItem('gradeapp_answers');
+                console.log('✅ 로컬 데이터 삭제 완료');
+            }
+
+        } catch (error) {
+            console.error('❌ 마이그레이션 실패:', error);
+            alert('데이터 마이그레이션에 실패했습니다. 인터넷 연결을 확인해주세요.');
         }
     }
 
