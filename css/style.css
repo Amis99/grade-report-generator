@@ -1497,9 +1497,23 @@ body {
     font-size: 80%;
 }
 
-/* 학생별 성적 테이블 추가 20% 축소 */
-.results-table {
-    font-size: 80%;
+/* 학생별 성적 테이블 추가 축소 */
+.results-table-section {
+    font-size: 75%;
+}
+
+.results-table table {
+    font-size: 85%;
+}
+
+.results-table th,
+.results-table td {
+    padding: 0.4rem 0.3rem;
+    white-space: nowrap;
+}
+
+.results-table td {
+    font-size: 0.9em;
 }
 
 /* 모바일 반응형 스타일 */
