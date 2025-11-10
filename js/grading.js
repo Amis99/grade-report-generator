@@ -122,7 +122,7 @@ class Grading {
             </div>
             <div class="summary-card">
                 <h4>만점</h4>
-                <div class="value">${maxScore}점</div>
+                <div class="value">${maxScore.toFixed(1)}점</div>
             </div>
             <div class="summary-card">
                 <h4>서술형 미채점</h4>
@@ -279,12 +279,12 @@ class Grading {
                             <td>${result.student.name}</td>
                             <td>${result.student.school}</td>
                             <td>${result.student.grade}</td>
-                            <td><strong>${result.totalScore.toFixed(1)}</strong> / ${result.maxScore}</td>
+                            <td><strong>${result.totalScore.toFixed(1)}</strong> / ${result.maxScore.toFixed(1)}</td>
                             <td>${result.multipleChoiceScore.toFixed(1)}</td>
                             <td>${result.essayScore.toFixed(1)}</td>
                             ${domainList.map(d => {
                                 const ds = result.domainScores[d] || { score: 0, maxScore: 0 };
-                                return `<td>${ds.score.toFixed(1)} / ${ds.maxScore}</td>`;
+                                return `<td>${ds.score.toFixed(1)} / ${ds.maxScore.toFixed(1)}</td>`;
                             }).join('')}
                             <td>${result.wrongQuestions.map(wq => wq.question.number).join(', ')}</td>
                         </tr>

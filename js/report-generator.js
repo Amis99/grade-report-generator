@@ -147,7 +147,7 @@ class ReportGenerator {
                     <div class="score-cards">
                         <div class="score-card primary">
                             <div class="score-label">총점</div>
-                            <div class="score-value">${this.currentResult.totalScore.toFixed(1)} / ${this.currentResult.maxScore}</div>
+                            <div class="score-value">${this.currentResult.totalScore.toFixed(1)} / ${this.currentResult.maxScore.toFixed(1)}</div>
                             <div class="score-percent">${((this.currentResult.totalScore / this.currentResult.maxScore) * 100).toFixed(1)}%</div>
                         </div>
                         <div class="score-card">
@@ -189,7 +189,7 @@ class ReportGenerator {
                                             <tr>
                                                 <td>${domain}</td>
                                                 <td>${ds.score.toFixed(1)}</td>
-                                                <td>${ds.maxScore}</td>
+                                                <td>${ds.maxScore.toFixed(1)}</td>
                                                 <td>${rate.toFixed(1)}% (${ds.correct}/${ds.total})</td>
                                             </tr>
                                         `;
