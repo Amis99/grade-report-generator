@@ -230,30 +230,91 @@ class ExamManager {
                 const text = await CSVUtils.readFile(file);
                 const result = CSVUtils.importQuestionsFromCSV(text, this.currentExam.id);
 
-                // CSV에서 시험명과 날짜 가져오기
-                let updated = false;
-                if (result.examName && result.examName.trim() !== '') {
-                    this.currentExam.name = result.examName;
-                    updated = true;
-                    console.log(`시험명 업데이트: ${result.examName}`);
-                }
-                if (result.examDate && result.examDate.trim() !== '') {
-                    this.currentExam.date = result.examDate;
-                    updated = true;
-                    console.log(`시험일 업데이트: ${result.examDate}`);
-                }
-                if (updated) {
-                    await storage.saveExam(this.currentExam);
-                }
+                // 기존 문제 확인
+                const existingQuestions = storage.getQuestionsByExamId(this.currentExam.id);
+                const csvExamName = result.examName && result.examName.trim() !== '' ? result.examName.trim() : '';
+                const currentExamName = this.currentExam.name.trim();
 
-                if (confirm(`${result.questions.length}개의 문제를 가져왔습니다. 저장하시겠습니까?`)) {
-                    storage.saveQuestions(result.questions);
-                    this.loadQuestionList();
-                    this.loadExamList(); // 시험 목록도 새로고침
-                    alert('문제가 저장되었습니다.');
+                // 시험명 충돌 체크
+                if (existingQuestions.length > 0 && csvExamName && csvExamName !== currentExamName) {
+                    // 기존 문제가 있고 시험명이 다른 경우
+                    const action = confirm(
+                        `⚠️ 시험명이 다릅니다!\n\n` +
+                        `현재 시험: "${currentExamName}"\n` +
+                        `CSV 시험: "${csvExamName}"\n\n` +
+                        `[확인] 새 시험으로 생성 (권장)\n` +
+                        `[취소] 현재 시험에 덮어쓰기 (기존 문제 삭제됨)`
+                    );
+
+                    if (action) {
+                        // 새 시험 생성
+                        const newExam = new Exam({
+                            name: csvExamName,
+                            school: this.currentExam.school,
+                            grade: this.currentExam.grade,
+                            series: this.currentExam.series,
+                            date: result.examDate || ''
+                        });
+                        await storage.saveExam(newExam);
+
+                        // 새 시험 ID로 문제 생성
+                        result.questions.forEach(q => q.examId = newExam.id);
+
+                        await storage.saveQuestions(result.questions);
+                        this.loadExamList();
+                        this.loadExamDetail(newExam.id);
+
+                        alert(`✅ 새 시험 "${csvExamName}"이(가) 생성되었습니다.\n\n문제 ${result.questions.length}개가 추가되었습니다.`);
+                    } else {
+                        // 기존 시험 덮어쓰기
+                        if (confirm('⚠️ 기존 문제를 모두 삭제하고 새 문제로 교체하시겠습니까?')) {
+                            // 기존 문제 삭제
+                            for (const q of existingQuestions) {
+                                await storage.deleteQuestion(q.id);
+                            }
+
+                            // 시험 정보 업데이트
+                            this.currentExam.name = csvExamName;
+                            if (result.examDate && result.examDate.trim() !== '') {
+                                this.currentExam.date = result.examDate;
+                            }
+                            await storage.saveExam(this.currentExam);
+
+                            // 새 문제 저장
+                            await storage.saveQuestions(result.questions);
+                            this.loadQuestionList();
+                            this.loadExamList();
+
+                            alert(`✅ 시험이 업데이트되었습니다.\n\n문제 ${result.questions.length}개가 추가되었습니다.`);
+                        }
+                    }
+                } else {
+                    // 빈 시험이거나 시험명이 같은 경우 - 기존 로직
+                    let updated = false;
+                    if (csvExamName) {
+                        this.currentExam.name = csvExamName;
+                        updated = true;
+                        console.log(`시험명 업데이트: ${csvExamName}`);
+                    }
+                    if (result.examDate && result.examDate.trim() !== '') {
+                        this.currentExam.date = result.examDate;
+                        updated = true;
+                        console.log(`시험일 업데이트: ${result.examDate}`);
+                    }
+                    if (updated) {
+                        await storage.saveExam(this.currentExam);
+                    }
+
+                    if (confirm(`${result.questions.length}개의 문제를 가져왔습니다. 저장하시겠습니까?`)) {
+                        await storage.saveQuestions(result.questions);
+                        this.loadQuestionList();
+                        this.loadExamList();
+                        alert('문제가 저장되었습니다.');
+                    }
                 }
             } catch (error) {
                 alert('CSV 가져오기 실패: ' + error.message);
+                console.error(error);
             }
 
             e.target.value = '';
