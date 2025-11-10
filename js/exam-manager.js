@@ -230,11 +230,20 @@ class ExamManager {
                 const text = await CSVUtils.readFile(file);
                 const result = CSVUtils.importQuestionsFromCSV(text, this.currentExam.id);
 
-                // CSV에서 시험명 가져오기
+                // CSV에서 시험명과 날짜 가져오기
+                let updated = false;
                 if (result.examName && result.examName.trim() !== '') {
                     this.currentExam.name = result.examName;
-                    storage.saveExam(this.currentExam);
+                    updated = true;
                     console.log(`시험명 업데이트: ${result.examName}`);
+                }
+                if (result.examDate && result.examDate.trim() !== '') {
+                    this.currentExam.date = result.examDate;
+                    updated = true;
+                    console.log(`시험일 업데이트: ${result.examDate}`);
+                }
+                if (updated) {
+                    await storage.saveExam(this.currentExam);
                 }
 
                 if (confirm(`${result.questions.length}개의 문제를 가져왔습니다. 저장하시겠습니까?`)) {

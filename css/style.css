@@ -1490,6 +1490,115 @@ body {
     margin-bottom: 0;
 }
 
+/* 데이터 로딩 완료 모달 */
+.loading-complete-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.loading-complete-content {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 90%;
+    animation: slideIn 0.3s ease-out;
+}
+
+.loading-complete-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.loading-complete-icon {
+    font-size: 2rem;
+}
+
+.loading-complete-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--primary-color);
+}
+
+.loading-complete-body {
+    padding: 1.5rem;
+}
+
+.loading-complete-body p {
+    margin: 0 0 1rem 0;
+    color: var(--text-secondary);
+}
+
+.loading-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.loading-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--background-color);
+    border-radius: 0.375rem;
+}
+
+.loading-stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.loading-stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.loading-time {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+}
+
+.loading-complete-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 /* 특정 탭 글자 크기 조정 (성적표, 오답노트 제외) */
 #exam-management,
 #answer-input,

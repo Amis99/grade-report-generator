@@ -38,7 +38,70 @@ class App {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
 
-        console.log('✅ Firebase 데이터 로드 완료, UI 초기화 시작');
+        const loadTime = Date.now() - startTime;
+        console.log(`✅ Firebase 데이터 로드 완료 (${loadTime}ms), UI 초기화 시작`);
+
+        // 로딩 시간이 500ms 이상이면 사용자에게 안내
+        if (loadTime > 500 && storage.cacheLoaded) {
+            const stats = storage.cache;
+            const totalItems = stats.exams.length + stats.questions.length +
+                             stats.students.length + stats.answers.length;
+
+            if (totalItems > 0) {
+                this.showLoadingCompleteModal(stats, loadTime);
+            }
+        }
+    }
+
+    /**
+     * 데이터 로딩 완료 모달 표시
+     */
+    showLoadingCompleteModal(stats, loadTime) {
+        const modal = document.createElement('div');
+        modal.className = 'loading-complete-modal';
+        modal.innerHTML = `
+            <div class="loading-complete-content">
+                <div class="loading-complete-header">
+                    <span class="loading-complete-icon">✅</span>
+                    <h3>데이터 로딩 완료</h3>
+                </div>
+                <div class="loading-complete-body">
+                    <p>클라우드에서 데이터를 성공적으로 가져왔습니다.</p>
+                    <div class="loading-stats">
+                        <div class="loading-stat-item">
+                            <span class="loading-stat-label">시험</span>
+                            <span class="loading-stat-value">${stats.exams.length}개</span>
+                        </div>
+                        <div class="loading-stat-item">
+                            <span class="loading-stat-label">문제</span>
+                            <span class="loading-stat-value">${stats.questions.length}개</span>
+                        </div>
+                        <div class="loading-stat-item">
+                            <span class="loading-stat-label">학생</span>
+                            <span class="loading-stat-value">${stats.students.length}명</span>
+                        </div>
+                        <div class="loading-stat-item">
+                            <span class="loading-stat-label">답안</span>
+                            <span class="loading-stat-value">${stats.answers.length}개</span>
+                        </div>
+                    </div>
+                    <p class="loading-time">로딩 시간: ${(loadTime / 1000).toFixed(2)}초</p>
+                </div>
+                <div class="loading-complete-footer">
+                    <button class="btn btn-primary" onclick="this.closest('.loading-complete-modal').remove()">
+                        확인
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // 3초 후 자동 닫기
+        setTimeout(() => {
+            if (modal.parentElement) {
+                modal.remove();
+            }
+        }, 3000);
     }
 
     /**

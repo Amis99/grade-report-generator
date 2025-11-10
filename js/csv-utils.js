@@ -120,14 +120,21 @@ class CSVUtils {
         const rows = this.csvToObjects(text);
         const questions = [];
         let examName = '';
+        let examDate = '';
 
         console.log('=== CSV 가져오기 시작 ===');
         console.log(`총 ${rows.length}개 행 발견`);
 
-        // 첫 번째 행에서 시험명 추출
-        if (rows.length > 0 && rows[0]['시험명']) {
-            examName = rows[0]['시험명'];
-            console.log(`CSV 시험명: ${examName}`);
+        // 첫 번째 행에서 시험명과 날짜 추출
+        if (rows.length > 0) {
+            if (rows[0]['시험명']) {
+                examName = rows[0]['시험명'];
+                console.log(`CSV 시험명: ${examName}`);
+            }
+            if (rows[0]['시험일'] || rows[0]['날짜'] || rows[0]['시행일']) {
+                examDate = rows[0]['시험일'] || rows[0]['날짜'] || rows[0]['시행일'];
+                console.log(`CSV 시험일: ${examDate}`);
+            }
         }
 
         rows.forEach((row, idx) => {
@@ -202,7 +209,8 @@ class CSVUtils {
 
         return {
             questions: questions,
-            examName: examName
+            examName: examName,
+            examDate: examDate
         };
     }
 
@@ -210,16 +218,21 @@ class CSVUtils {
      * Question 객체 배열을 CSV로 변환 (원본 CSV 형식과 동일)
      */
     static exportQuestionsToCSV(questions) {
-        // 첫 번째 문제에서 시험명 가져오기
+        // 첫 번째 문제에서 시험명과 날짜 가져오기
         let examName = '';
+        let examDate = '';
         if (questions.length > 0 && typeof storage !== 'undefined') {
             const exam = storage.getExam(questions[0].examId);
-            examName = exam ? exam.name : '';
+            if (exam) {
+                examName = exam.name || '';
+                examDate = exam.date || '';
+            }
         }
 
         const rows = questions.map(q => {
             const row = {
                 '시험명': examName,
+                '시험일': examDate,
                 '문항 번호': q.number,
                 '객관식/서술형': q.type,
                 '영역': q.domain,
