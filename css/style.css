@@ -1490,6 +1490,13 @@ body {
     margin-bottom: 0;
 }
 
+/* 특정 탭 글자 크기 조정 (성적표, 오답노트 제외) */
+#exam-management,
+#answer-input,
+#grading {
+    font-size: 80%;
+}
+
 /* 모바일 반응형 스타일 */
 @media (max-width: 768px) {
     /* 기본 폰트 크기 50% 축소 */
