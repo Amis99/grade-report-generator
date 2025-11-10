@@ -1497,6 +1497,11 @@ body {
     font-size: 80%;
 }
 
+/* 학생별 성적 테이블 추가 20% 축소 */
+.results-table {
+    font-size: 80%;
+}
+
 /* 모바일 반응형 스타일 */
 @media (max-width: 768px) {
     /* 기본 폰트 크기 50% 축소 */
