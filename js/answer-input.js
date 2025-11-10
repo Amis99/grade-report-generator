@@ -78,7 +78,7 @@ class AnswerInput {
     /**
      * 학생 선택 또는 생성 (시트 형식에서 오버라이드됨)
      */
-    selectOrCreateStudent() {
+    async selectOrCreateStudent() {
         if (!this.currentExam) {
             alert('먼저 시험을 선택해주세요.');
             return;
@@ -111,7 +111,7 @@ class AnswerInput {
         if (!student) {
             // 새 학생 생성
             student = new Student({ name, school, grade });
-            storage.saveStudent(student);
+            await storage.saveStudent(student);
         }
 
         this.currentStudent = student;
@@ -237,7 +237,7 @@ class AnswerInput {
     /**
      * 답안 저장
      */
-    saveAnswers() {
+    async saveAnswers() {
         if (!this.currentExam || !this.currentStudent) return;
 
         const questions = storage.getQuestionsByExamId(this.currentExam.id);
@@ -287,7 +287,7 @@ class AnswerInput {
         }
 
         // 저장
-        storage.saveAnswers(answers);
+        await storage.saveAnswers(answers);
 
         alert(`답안이 저장되었습니다. (${answers.length}개 문제)`);
 
@@ -328,7 +328,7 @@ class AnswerInput {
                 const answers = CSVUtils.importAnswersFromCSV(text, examId);
 
                 if (confirm(`${answers.length}개의 답안을 가져왔습니다. 저장하시겠습니까?`)) {
-                    storage.saveAnswers(answers);
+                    await storage.saveAnswers(answers);
                     alert('답안이 저장되었습니다.');
 
                     // 시험 선택되어 있으면 답안 시트 갱신

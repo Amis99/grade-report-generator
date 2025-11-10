@@ -237,20 +237,20 @@ ExamManager.prototype.attachSheetEventListeners = function() {
 
     // 문제 입력 필드 변경 감지
     tbody.querySelectorAll('.sheet-cell-input, .sheet-cell-select, .sheet-cell-textarea').forEach(input => {
-        input.addEventListener('change', (e) => {
-            this.updateQuestionField(e.target);
+        input.addEventListener('change', async (e) => {
+            await this.updateQuestionField(e.target);
         });
 
         if (input.tagName === 'TEXTAREA') {
-            input.addEventListener('blur', (e) => {
-                this.updateQuestionField(e.target);
+            input.addEventListener('blur', async (e) => {
+                await this.updateQuestionField(e.target);
             });
         }
     });
 
     // 유형 변경 시 선택지 해설 필드 활성화/비활성화
     tbody.querySelectorAll('select[data-field="type"]').forEach(select => {
-        select.addEventListener('change', (e) => {
+        select.addEventListener('change', async (e) => {
             const row = e.target.closest('tr');
             const isMultiple = e.target.value === '객관식';
             const isEssay = e.target.value === '서술형';
@@ -299,7 +299,7 @@ ExamManager.prototype.attachSheetEventListeners = function() {
             }
 
             // 타입 변경 저장
-            this.updateQuestionField(e.target);
+            await this.updateQuestionField(e.target);
         });
     });
 };
@@ -307,7 +307,7 @@ ExamManager.prototype.attachSheetEventListeners = function() {
 /**
  * 시험 정보 저장
  */
-ExamManager.prototype.saveExamInfo = function() {
+ExamManager.prototype.saveExamInfo = async function() {
     if (!this.currentExam) return;
 
     this.currentExam.name = document.getElementById('sheetExamName').value;
@@ -317,14 +317,14 @@ ExamManager.prototype.saveExamInfo = function() {
     this.currentExam.date = document.getElementById('sheetExamDate').value;
     this.currentExam.series = document.getElementById('sheetExamSeries').value;
 
-    storage.saveExam(this.currentExam);
+    await storage.saveExam(this.currentExam);
     this.loadExamList(); // 목록 새로고침
 };
 
 /**
  * 문제 필드 업데이트
  */
-ExamManager.prototype.updateQuestionField = function(inputElement) {
+ExamManager.prototype.updateQuestionField = async function(inputElement) {
     const row = inputElement.closest('tr');
     const questionId = row.getAttribute('data-question-id');
     const field = inputElement.getAttribute('data-field');
@@ -358,7 +358,7 @@ ExamManager.prototype.updateQuestionField = function(inputElement) {
     }
 
     // 저장
-    storage.saveQuestion(question);
+    await storage.saveQuestion(question);
 
     // 시각적 피드백
     inputElement.classList.add('success');
@@ -393,7 +393,7 @@ ExamManager.prototype.updateStatistics = function() {
 /**
  * 새 문제 행 추가
  */
-ExamManager.prototype.addNewQuestionRow = function() {
+ExamManager.prototype.addNewQuestionRow = async function() {
     if (!this.currentExam) return;
 
     const questions = storage.getQuestionsByExamId(this.currentExam.id);
@@ -412,7 +412,7 @@ ExamManager.prototype.addNewQuestionRow = function() {
         choiceExplanations: {}
     });
 
-    storage.saveQuestion(newQuestion);
+    await storage.saveQuestion(newQuestion);
     this.loadQuestionList();
 
     // 새로 추가된 행으로 스크롤
@@ -429,10 +429,10 @@ ExamManager.prototype.addNewQuestionRow = function() {
 /**
  * 시트에서 문제 삭제
  */
-ExamManager.prototype.deleteQuestionFromSheet = function(questionId) {
+ExamManager.prototype.deleteQuestionFromSheet = async function(questionId) {
     if (!confirm('이 문제를 삭제하시겠습니까?')) return;
 
-    storage.deleteQuestion(questionId);
+    await storage.deleteQuestion(questionId);
     this.loadQuestionList();
 };
 

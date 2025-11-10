@@ -16,13 +16,13 @@ class ExamManager {
 
     setupEventListeners() {
         // 새 시험 만들기
-        document.getElementById('createExamBtn').addEventListener('click', () => {
-            this.createNewExam();
+        document.getElementById('createExamBtn').addEventListener('click', async () => {
+            await this.createNewExam();
         });
 
         // 시험 삭제
-        document.getElementById('deleteExamBtn').addEventListener('click', () => {
-            this.deleteExam();
+        document.getElementById('deleteExamBtn').addEventListener('click', async () => {
+            await this.deleteExam();
         });
 
         // 문제 CSV 가져오기/내보내기
@@ -116,7 +116,7 @@ class ExamManager {
     /**
      * 새 시험 만들기
      */
-    createNewExam() {
+    async createNewExam() {
         const exam = new Exam({
             name: '새 시험',
             school: '',
@@ -124,7 +124,7 @@ class ExamManager {
             series: ''
         });
 
-        storage.saveExam(exam);
+        await storage.saveExam(exam);
         this.loadExamList();
         this.loadExamDetail(exam.id);
 
@@ -150,14 +150,14 @@ class ExamManager {
     /**
      * 시험 삭제
      */
-    deleteExam() {
+    async deleteExam() {
         if (!this.currentExam) return;
 
         if (!confirm('이 시험과 관련된 모든 데이터(문제, 답안)가 삭제됩니다. 계속하시겠습니까?')) {
             return;
         }
 
-        storage.deleteExam(this.currentExam.id);
+        await storage.deleteExam(this.currentExam.id);
         this.currentExam = null;
 
         document.getElementById('examDetailSection').style.display = 'none';

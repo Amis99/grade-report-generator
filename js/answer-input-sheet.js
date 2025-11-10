@@ -227,13 +227,13 @@ AnswerInput.prototype.attachAnswerSheetListeners = function() {
 
     // 학생 정보 및 답안 자동 저장
     tbody.querySelectorAll('.sheet-cell-input, .sheet-cell-select').forEach(input => {
-        input.addEventListener('change', (e) => {
-            this.autoSaveRow(e.target);
+        input.addEventListener('change', async (e) => {
+            await this.autoSaveRow(e.target);
         });
 
         if (input.classList.contains('sheet-cell-input')) {
-            input.addEventListener('blur', (e) => {
-                this.autoSaveRow(e.target);
+            input.addEventListener('blur', async (e) => {
+                await this.autoSaveRow(e.target);
             });
         }
     });
@@ -242,7 +242,7 @@ AnswerInput.prototype.attachAnswerSheetListeners = function() {
 /**
  * 행 자동 저장
  */
-AnswerInput.prototype.autoSaveRow = function(inputElement) {
+AnswerInput.prototype.autoSaveRow = async function(inputElement) {
     const row = inputElement.closest('tr');
     const studentId = row.getAttribute('data-student-id');
 
@@ -263,7 +263,7 @@ AnswerInput.prototype.autoSaveRow = function(inputElement) {
         student = storage.getStudentByName(name, school, grade);
         if (!student) {
             student = new Student({ name, school, grade });
-            storage.saveStudent(student);
+            await storage.saveStudent(student);
             row.setAttribute('data-student-id', student.id);
         }
     } else {
@@ -272,7 +272,7 @@ AnswerInput.prototype.autoSaveRow = function(inputElement) {
             student.name = name;
             student.school = school;
             student.grade = grade;
-            storage.saveStudent(student);
+            await storage.saveStudent(student);
         }
     }
 
@@ -306,11 +306,11 @@ AnswerInput.prototype.autoSaveRow = function(inputElement) {
                 answer.scoreReceived = parseFloat(value) || 0;
             }
 
-            storage.saveAnswer(answer);
+            await storage.saveAnswer(answer);
         } else {
             // 값이 없으면 기존 답안 삭제
             if (answer) {
-                storage.deleteAnswer(answer.id);
+                await storage.deleteAnswer(answer.id);
             }
         }
     }
@@ -360,7 +360,7 @@ AnswerInput.prototype.addStudentRow = function() {
 /**
  * 학생 행 삭제
  */
-AnswerInput.prototype.deleteStudentRow = function(button) {
+AnswerInput.prototype.deleteStudentRow = async function(button) {
     const row = button.closest('tr');
     const studentId = row.getAttribute('data-student-id');
 
@@ -371,9 +371,9 @@ AnswerInput.prototype.deleteStudentRow = function(button) {
 
         // 답안 삭제
         const answers = storage.getAnswersByExamAndStudent(this.currentExam.id, studentId);
-        answers.forEach(answer => {
-            storage.deleteAnswer(answer.id);
-        });
+        for (const answer of answers) {
+            await storage.deleteAnswer(answer.id);
+        }
     }
 
     row.remove();
