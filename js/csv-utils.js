@@ -138,6 +138,20 @@ class CSVUtils {
         }
 
         rows.forEach((row, idx) => {
+            // 시험명이 없는 행은 건너뛰기 (헤더 행이나 빈 행)
+            const rowExamName = row['시험명'] || '';
+            if (!rowExamName || rowExamName.trim() === '') {
+                console.log(`${idx + 1}번 행: 시험명이 없어 건너뜀`);
+                return;
+            }
+
+            // 문항 번호가 없거나 0인 행도 건너뛰기
+            const questionNumber = parseInt(row['문항 번호'] || row['번호'] || row['문항번호']) || 0;
+            if (questionNumber === 0) {
+                console.log(`${idx + 1}번 행: 문항 번호가 없어 건너뜀`);
+                return;
+            }
+
             // 문제 유형 판단
             const type = row['객관식/서술형'] || row['유형'] || row['문제유형'] || '객관식';
 
@@ -159,7 +173,7 @@ class CSVUtils {
             // 컬럼명 매핑
             const questionData = {
                 examId: examId,
-                number: parseInt(row['문항 번호'] || row['번호'] || row['문항번호']) || 0,
+                number: questionNumber,
                 type: type,
                 domain: row['영역'] || row['대영역'] || '',
                 subDomain: row['세부 영역'] || row['세부영역'] || row['소영역'] || '',
