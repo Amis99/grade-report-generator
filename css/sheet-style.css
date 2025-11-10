@@ -1,0 +1,428 @@
+/* 시트 형식 테이블 스타일 */
+
+/* 시험 정보 섹션 */
+.exam-info-sheet {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.exam-info-sheet h4 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.exam-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.exam-info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.exam-info-item label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.exam-info-item .form-control {
+    padding: 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.exam-info-item .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.question-sheet-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: white;
+}
+
+.question-sheet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 1400px;
+}
+
+.question-sheet thead {
+    background: var(--background-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.question-sheet th {
+    padding: 0.8rem 0.5rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.question-sheet th:last-child {
+    border-right: none;
+}
+
+.question-sheet tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.question-sheet tbody tr:hover {
+    background: rgba(37, 99, 235, 0.03);
+}
+
+.question-sheet td {
+    padding: 0;
+    border-right: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.question-sheet td:last-child {
+    border-right: none;
+}
+
+/* 셀 입력 필드 스타일 */
+.sheet-cell-input,
+.sheet-cell-select,
+.sheet-cell-textarea {
+    width: 100%;
+    padding: 0.6rem 0.5rem;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: background-color 0.2s;
+}
+
+.sheet-cell-input:focus,
+.sheet-cell-select:focus,
+.sheet-cell-textarea:focus {
+    background: #fffbeb;
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
+.sheet-cell-select {
+    cursor: pointer;
+    padding-right: 1.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    appearance: none;
+}
+
+.sheet-cell-textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+/* 컬럼별 너비 */
+.col-number {
+    width: 60px;
+}
+
+.col-type {
+    width: 100px;
+}
+
+.col-domain {
+    width: 100px;
+}
+
+.col-subdomain {
+    width: 120px;
+}
+
+.col-passage {
+    width: 200px;
+}
+
+.col-points {
+    width: 80px;
+}
+
+.col-answer {
+    width: 100px;
+}
+
+.col-intent {
+    width: 200px;
+}
+
+.col-explanation {
+    width: 200px;
+}
+
+.col-actions {
+    width: 80px;
+    text-align: center;
+}
+
+.col-answer-input {
+    width: 200px;
+}
+
+.col-student-name {
+    width: 120px;
+    min-width: 120px;
+}
+
+.col-student-info {
+    width: 100px;
+    min-width: 100px;
+}
+
+.col-answer-cell {
+    width: 80px;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* 답안 시트 전용 */
+.answer-sheet {
+    font-size: 0.85rem;
+}
+
+.answer-sheet .sheet-cell-input,
+.answer-sheet .sheet-cell-select {
+    padding: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.question-info-row th {
+    background: var(--background-color);
+    font-weight: normal;
+    padding: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.question-info-cell {
+    text-align: center;
+}
+
+.question-info-cell .question-type-badge {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+}
+
+/* 답안 시트 전용 스타일 */
+.answer-sheet-wrapper {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.student-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.student-info-header h4 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.student-info-display {
+    font-size: 1.1rem;
+}
+
+.student-info-display strong {
+    color: var(--text-primary);
+}
+
+/* 액션 버튼 */
+.sheet-action-cell {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.5rem;
+    justify-content: center;
+}
+
+.sheet-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sheet-btn-edit {
+    background: var(--primary-color);
+    color: white;
+}
+
+.sheet-btn-edit:hover {
+    background: #1d4ed8;
+}
+
+.sheet-btn-delete {
+    background: var(--danger-color);
+    color: white;
+}
+
+.sheet-btn-delete:hover {
+    background: #b91c1c;
+}
+
+/* 행 추가 버튼 */
+.add-row-section {
+    padding: 1rem;
+    text-align: center;
+    border-top: 2px solid var(--border-color);
+    background: var(--background-color);
+}
+
+.add-row-btn {
+    padding: 0.6rem 1.2rem;
+    background: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-row-btn:hover {
+    background: #15803d;
+    transform: translateY(-1px);
+}
+
+/* 타입 배지 (읽기 전용 표시) */
+.type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.type-badge.multiple {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+}
+
+.type-badge.essay {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+/* 입력 유효성 피드백 */
+.sheet-cell-input.error {
+    background: #fee;
+    box-shadow: inset 0 0 0 1px var(--danger-color);
+}
+
+.sheet-cell-input.success {
+    background: #efe;
+}
+
+/* 로딩 상태 */
+.sheet-loading {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* 빈 상태 */
+.sheet-empty {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.sheet-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+/* 툴바 */
+.sheet-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sheet-toolbar-left,
+.sheet-toolbar-right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.sheet-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.sheet-info strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .question-sheet-container {
+        font-size: 0.85rem;
+    }
+
+    .sheet-cell-input,
+    .sheet-cell-select,
+    .sheet-cell-textarea {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.4rem;
+    }
+
+    .sheet-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* 프린트 시 숨김 */
+@media print {
+    .sheet-toolbar,
+    .add-row-section,
+    .col-actions {
+        display: none;
+    }
+
+    .question-sheet-container {
+        border: none;
+    }
+
+    .sheet-cell-input,
+    .sheet-cell-select {
+        border: 1px solid #ddd;
+    }
+}

@@ -1,0 +1,31 @@
+# 테스트 데이터 및 생성된 파일
+*.csv
+*.pdf
+*.json
+
+# 백업 파일
+*.bak
+*.backup
+*_백업.*
+*_새 버전.*
+
+# 시스템 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+~*
+
+# Claude Code 설정은 포함 (프로젝트 관련 설정이므로)
+# .claude/

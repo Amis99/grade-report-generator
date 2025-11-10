@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>성적표 생성 프로그램</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sheet-style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 헤더 -->
+        <header class="app-header">
+            <h1>성적표 생성 프로그램</h1>
+            <div class="header-actions">
+                <button id="exportDataBtn" class="btn btn-secondary">데이터 백업</button>
+                <button id="importDataBtn" class="btn btn-secondary">데이터 복원</button>
+            </div>
+        </header>
+
+        <!-- 탭 네비게이션 -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="exam-management">시험 관리</button>
+            <button class="tab-btn" data-tab="answer-input">답안 입력</button>
+            <button class="tab-btn" data-tab="grading">채점 및 분석</button>
+            <button class="tab-btn" data-tab="report">성적표 생성</button>
+            <button class="tab-btn" data-tab="wrong-note">학생별 오답 노트</button>
+        </nav>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 시험 관리 탭 -->
+            <section id="exam-management" class="tab-content active">
+                <div class="section-header">
+                    <h2>시험 관리</h2>
+                    <button id="createExamBtn" class="btn btn-primary">새 시험 만들기</button>
+                </div>
+
+                <div class="exam-list-container">
+                    <h3>시험 목록</h3>
+                    <div class="exam-list-filter">
+                        <input type="text" id="examSearchInput" class="form-control" placeholder="시험명, 시행 기관, 학교, 학년으로 검색...">
+                    </div>
+                    <div id="examList" class="exam-list">
+                        <!-- 시험 목록이 여기에 동적으로 추가됨 -->
+                    </div>
+                </div>
+
+                <div id="examDetailSection" class="exam-detail-section" style="display: none;">
+                    <div class="detail-header">
+                        <h3>시험 및 문제 관리 (총 <span id="questionCount">0</span>문제, <span id="totalPoints">0</span>점)</h3>
+                        <div class="detail-actions">
+                            <button id="importQuestionsBtn" class="btn btn-secondary">CSV 가져오기</button>
+                            <button id="exportQuestionsBtn" class="btn btn-secondary">CSV 내보내기</button>
+                            <button id="deleteExamBtn" class="btn btn-danger">시험 삭제</button>
+                        </div>
+                    </div>
+
+                    <div id="questionList" class="question-list">
+                        <!-- 시험 정보 + 문제 시트가 여기에 동적으로 추가됨 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 답안 입력 탭 -->
+            <section id="answer-input" class="tab-content">
+                <div class="section-header">
+                    <h2>답안 입력</h2>
+                </div>
+
+                <div class="answer-input-controls">
+                    <div class="form-group">
+                        <label>시험 선택</label>
+                        <div class="searchable-select" id="answerExamSelectWrapper">
+                            <select id="answerExamSelect" class="form-control">
+                                <option value="">시험을 선택하세요</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="answer-toolbar">
+                        <button id="selectStudentBtn" class="btn btn-primary">답안 입력 시작</button>
+                        <button id="importAnswersBtn" class="btn btn-secondary">답안 CSV 일괄 업로드</button>
+                        <button id="exportAnswersBtn" class="btn btn-secondary">답안 CSV 내보내기</button>
+                    </div>
+                </div>
+
+                <div id="answerFormSection" class="answer-form-section" style="display: none;">
+                    <div id="answerFormContainer" class="answer-form-container">
+                        <!-- 답안 입력 시트가 여기에 동적으로 생성됨 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 채점 및 분석 탭 -->
+            <section id="grading" class="tab-content">
+                <div class="section-header">
+                    <h2>채점 및 분석</h2>
+                </div>
+
+                <div class="grading-controls">
+                    <div class="form-group">
+                        <label>시험 선택</label>
+                        <div class="searchable-select" id="gradingExamSelectWrapper">
+                            <select id="gradingExamSelect" class="form-control">
+                                <option value="">시험을 선택하세요</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gradingResultsSection" class="grading-results-section" style="display: none;">
+                    <div class="grading-summary">
+                        <h3>채점 현황</h3>
+                        <div id="gradingSummary" class="summary-cards">
+                            <!-- 요약 정보가 여기에 표시됨 -->
+                        </div>
+                    </div>
+
+                    <div class="results-table-section">
+                        <h3>학생별 성적</h3>
+                        <button id="exportResultsBtn" class="btn btn-secondary">성적표 CSV 내보내기</button>
+                        <div id="resultsTable" class="results-table">
+                            <!-- 성적표 테이블이 여기에 표시됨 -->
+                        </div>
+                    </div>
+
+                    <div class="question-analysis-section">
+                        <h3>문제별 분석</h3>
+                        <div id="questionAnalysis" class="question-analysis">
+                            <!-- 문제별 분석이 여기에 표시됨 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 성적표 생성 탭 -->
+            <section id="report" class="tab-content">
+                <div class="section-header">
+                    <h2>성적표 생성</h2>
+                </div>
+
+                <div class="report-controls">
+                    <div class="form-group">
+                        <label>시험 선택</label>
+                        <div class="searchable-select" id="reportExamSelectWrapper">
+                            <select id="reportExamSelect" class="form-control">
+                                <option value="">시험을 선택하세요</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>학생 선택</label>
+                        <div class="searchable-select" id="reportStudentSelectWrapper">
+                            <select id="reportStudentSelect" class="form-control">
+                                <option value="">학생을 선택하세요</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="report-actions">
+                        <button id="generateReportBtn" class="btn btn-primary">성적표 생성</button>
+                        <button id="printReportBtn" class="btn btn-secondary">인쇄</button>
+                        <button id="exportPdfBtn" class="btn btn-secondary">PDF 저장</button>
+                    </div>
+                </div>
+
+                <div id="reportPreview" class="report-preview">
+                    <!-- 성적표 미리보기가 여기에 표시됨 -->
+                </div>
+            </section>
+
+            <!-- 학생별 오답 노트 탭 -->
+            <section id="wrong-note" class="tab-content">
+                <div class="section-header">
+                    <h2>학생별 오답 노트</h2>
+                </div>
+
+                <div class="wrong-note-controls">
+                    <div class="form-group">
+                        <label>학생 선택</label>
+                        <div class="searchable-select" id="wrongNoteStudentSelectWrapper">
+                            <select id="wrongNoteStudentSelect" class="form-control">
+                                <option value="">학생을 선택하세요</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="wrongNoteExamSelection" class="exam-selection-section" style="display: none;">
+                        <div class="form-group">
+                            <label>시험 선택 (복수 선택 가능)</label>
+                            <div id="wrongNoteExamList" class="exam-checkbox-list">
+                                <!-- 시험 체크박스 목록이 여기에 표시됨 -->
+                            </div>
+                        </div>
+
+                        <div class="wrong-note-actions">
+                            <button id="generateWrongNoteBtn" class="btn btn-primary">오답 노트 생성</button>
+                            <button id="printWrongNoteBtn" class="btn btn-secondary">인쇄</button>
+                            <button id="exportWrongNotePdfBtn" class="btn btn-secondary">PDF 저장</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wrongNoteResultsSection" class="wrong-note-results-section" style="display: none;">
+                    <div class="wrong-note-summary">
+                        <h3>학습 통계</h3>
+                        <div id="wrongNoteSummary" class="summary-cards">
+                            <!-- 요약 정보가 여기에 표시됨 -->
+                        </div>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="trend-chart-section">
+                            <h3>성적 추이</h3>
+                            <div class="trend-chart">
+                                <canvas id="wrongNoteTrendChart" width="800" height="320"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="domain-stats-section">
+                            <h3>영역별 정답률</h3>
+                            <div class="domain-chart">
+                                <canvas id="wrongNoteDomainChart" width="400" height="400"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="passage-stats-section">
+                            <h3>단원/지문별 통계</h3>
+                            <div id="wrongNotePassageStats" class="passage-stats-container">
+                                <!-- 단원/지문별 통계가 여기에 표시됨 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="wrongNotePreview" class="wrong-note-preview">
+                        <!-- 오답 노트가 여기에 표시됨 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 모달: 문제 추가/편집 -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="questionModalTitle">문제 추가</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>문항 번호</label>
+                    <input type="number" id="questionNumber" class="form-control" min="1">
+                </div>
+                <div class="form-group">
+                    <label>문제 유형</label>
+                    <select id="questionType" class="form-control">
+                        <option value="객관식">객관식</option>
+                        <option value="서술형">서술형</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>영역 (대분류)</label>
+                    <input type="text" id="questionDomain" class="form-control" placeholder="예: 문학, 독서, 문법">
+                </div>
+                <div class="form-group">
+                    <label>세부 영역 (소분류)</label>
+                    <input type="text" id="questionSubDomain" class="form-control" placeholder="예: 고전 시가, 현대 소설">
+                </div>
+                <div class="form-group">
+                    <label>작품/지문/단원</label>
+                    <input type="text" id="questionPassage" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>배점</label>
+                    <input type="number" id="questionPoints" class="form-control" step="0.1" min="0">
+                </div>
+                <div class="form-group">
+                    <label>출제 의도</label>
+                    <textarea id="questionIntent" class="form-control" rows="3"></textarea>
+                </div>
+                <div id="multipleChoiceFields" class="multiple-choice-fields">
+                    <div class="form-group">
+                        <label>정답 (선택지 번호)</label>
+                        <input type="number" id="questionCorrectAnswer" class="form-control" min="1" max="5">
+                    </div>
+                    <div id="choicesContainer">
+                        <!-- 선택지 입력 필드들 -->
+                    </div>
+                    <button id="addChoiceBtn" class="btn btn-secondary btn-sm">선택지 추가</button>
+                </div>
+                <div id="essayFields" class="essay-fields" style="display: none;">
+                    <div class="form-group">
+                        <label>모범 답안</label>
+                        <textarea id="questionModelAnswer" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveQuestionBtn" class="btn btn-primary">저장</button>
+                <button id="cancelQuestionBtn" class="btn btn-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 파일 입력 (숨김) -->
+    <input type="file" id="fileInput" accept=".csv" style="display: none;">
+    <input type="file" id="backupInput" accept=".json" style="display: none;">
+
+    <!-- 문제 분석 모달 -->
+    <div id="questionAnalysisModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="modalQuestionTitle">문제 분석</h3>
+                <button class="modal-close" onclick="grading.closeQuestionModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalQuestionBody">
+                <!-- 문제 상세 분석이 여기에 표시됨 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 학생 목록 모달 -->
+    <div id="studentListModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="studentListModalTitle">학생 목록</h3>
+                <button class="modal-close" onclick="grading.closeStudentListModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="studentListModalBody">
+                <!-- 학생 목록이 여기에 표시됨 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 외부 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- 애플리케이션 스크립트 -->
+    <script src="js/data-model.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/csv-utils.js"></script>
+    <script src="js/searchable-select.js"></script>
+    <script src="js/exam-manager.js"></script>
+    <script src="js/exam-manager-sheet.js"></script>
+    <script src="js/answer-input.js"></script>
+    <script src="js/answer-input-sheet.js"></script>
+    <script src="js/grading.js"></script>
+    <script src="js/report-generator.js"></script>
+    <script src="js/wrong-note.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
