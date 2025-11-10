@@ -325,11 +325,17 @@ class AnswerInput {
 
             try {
                 const text = await CSVUtils.readFile(file);
-                const answers = CSVUtils.importAnswersFromCSV(text, examId);
+                const result = CSVUtils.importAnswersFromCSV(text, examId);
 
-                if (confirm(`${answers.length}개의 답안을 가져왔습니다. 저장하시겠습니까?`)) {
-                    await storage.saveAnswers(answers);
-                    alert('답안이 저장되었습니다.');
+                const message = `답안 가져오기 완료:\n\n` +
+                    `• 새로 추가: ${result.stats.new}개\n` +
+                    `• 업데이트: ${result.stats.updated}개\n` +
+                    `• 전체: ${result.stats.total}개\n\n` +
+                    `저장하시겠습니까?`;
+
+                if (confirm(message)) {
+                    await storage.saveAnswers(result.answers);
+                    alert(`✅ 답안 저장 완료!\n\n새로 추가: ${result.stats.new}개\n업데이트: ${result.stats.updated}개`);
 
                     // 시험 선택되어 있으면 답안 시트 갱신
                     if (this.currentExam) {

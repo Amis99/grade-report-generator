@@ -267,12 +267,26 @@ class CSVUtils {
 
     /**
      * 답안 CSV를 Answer 객체 배열로 변환
+     * 중복 데이터는 제외하고 기존 답안을 업데이트
      */
     static importAnswersFromCSV(text, examId) {
         const rows = this.csvToObjects(text);
         const questions = storage.getQuestionsByExamId(examId);
         const answers = [];
         const studentsMap = new Map();
+
+        // 기존 답안 가져오기
+        const existingAnswers = storage.getAnswersByExamId(examId);
+
+        // 중복 체크를 위한 Map (key: examId_studentId_questionId, value: existing answer)
+        const existingAnswerMap = new Map();
+        existingAnswers.forEach(answer => {
+            const key = `${answer.examId}_${answer.studentId}_${answer.questionId}`;
+            existingAnswerMap.set(key, answer);
+        });
+
+        let newCount = 0;
+        let updateCount = 0;
 
         rows.forEach(row => {
             const studentName = row['이름'] || '';
@@ -297,37 +311,58 @@ class CSVUtils {
                 const answerValue = row[String(question.number)] || '';
                 if (!answerValue) return;
 
-                const answerData = {
-                    examId: examId,
-                    studentId: student.id,
-                    questionId: question.id,
-                    answerText: '',
-                    scoreReceived: null
-                };
+                // 중복 체크
+                const key = `${examId}_${student.id}_${question.id}`;
+                const existingAnswer = existingAnswerMap.get(key);
+
+                let answer;
+                if (existingAnswer) {
+                    // 기존 답안이 있으면 업데이트
+                    answer = existingAnswer;
+                    updateCount++;
+                } else {
+                    // 새 답안 생성
+                    answer = new Answer({
+                        examId: examId,
+                        studentId: student.id,
+                        questionId: question.id
+                    });
+                    newCount++;
+                }
 
                 if (question.type === '객관식') {
                     // 객관식: 선택지 번호
-                    answerData.answerText = answerValue;
+                    answer.answerText = answerValue;
+                    answer.scoreReceived = null;
                 } else if (question.type === '서술형') {
                     // 서술형: 기존 CSV는 점수만 있음
                     // 점수인지 텍스트인지 판단
                     const scoreValue = parseFloat(answerValue);
                     if (!isNaN(scoreValue) && scoreValue <= question.points) {
                         // 점수로 판단
-                        answerData.scoreReceived = scoreValue;
-                        answerData.answerText = '(답안 없음)'; // 실제 답안 텍스트는 없음
+                        answer.scoreReceived = scoreValue;
+                        answer.answerText = '(답안 없음)'; // 실제 답안 텍스트는 없음
                     } else {
                         // 텍스트로 판단
-                        answerData.answerText = answerValue;
-                        answerData.scoreReceived = null; // 채점 필요
+                        answer.answerText = answerValue;
+                        answer.scoreReceived = null; // 채점 필요
                     }
                 }
 
-                answers.push(new Answer(answerData));
+                answers.push(answer);
             });
         });
 
-        return answers;
+        console.log(`답안 가져오기 완료: 새로 추가 ${newCount}개, 업데이트 ${updateCount}개`);
+
+        return {
+            answers: answers,
+            stats: {
+                new: newCount,
+                updated: updateCount,
+                total: answers.length
+            }
+        };
     }
 
     /**
