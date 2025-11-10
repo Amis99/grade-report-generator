@@ -8,18 +8,43 @@ class App {
         this.init();
     }
 
-    init() {
+    async init() {
+        // Firebase 캐시 로드 대기
+        if (storage.useFirebase && !storage.cacheLoaded) {
+            console.log('⏳ Firebase 데이터 로딩 중...');
+            await this.waitForCache();
+        }
+
         // 중복 답안 데이터 정리 (앱 시작 시 자동 실행)
-        this.cleanupData();
+        await this.cleanupData();
         this.setupTabNavigation();
         this.setupBackupRestore();
         this.initializeModules();
     }
 
     /**
+     * Firebase 캐시 로드 대기
+     */
+    async waitForCache() {
+        const maxWait = 10000; // 최대 10초 대기
+        const startTime = Date.now();
+
+        while (!storage.cacheLoaded) {
+            if (Date.now() - startTime > maxWait) {
+                console.error('❌ Firebase 캐시 로드 시간 초과');
+                alert('데이터 로드에 시간이 걸리고 있습니다. 인터넷 연결을 확인해주세요.');
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        console.log('✅ Firebase 데이터 로드 완료, UI 초기화 시작');
+    }
+
+    /**
      * 데이터 정리 (중복 답안 제거)
      */
-    cleanupData() {
+    async cleanupData() {
         try {
             const removedCount = storage.removeDuplicateAnswers();
             if (removedCount > 0) {
@@ -28,7 +53,7 @@ class App {
 
             // Firebase 사용 중이고 로컬 스토리지에 데이터가 있으면 마이그레이션 제안
             if (storage.useFirebase) {
-                this.checkLocalDataMigration();
+                await this.checkLocalDataMigration();
             }
         } catch (error) {
             console.error('데이터 정리 중 오류:', error);
