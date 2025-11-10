@@ -401,9 +401,9 @@ class WrongNote {
             });
         });
 
-        // 정렬: 오답이 많은 순
+        // 정렬: 단원/지문명 순 (가나다순)
         const sortedPassages = Object.entries(passageStats)
-            .sort((a, b) => b[1].wrong - a[1].wrong);
+            .sort((a, b) => a[0].localeCompare(b[0], 'ko-KR'));
 
         const statsDiv = document.getElementById('wrongNotePassageStats');
         statsDiv.innerHTML = sortedPassages.map(([passage, stats]) => {
@@ -644,45 +644,111 @@ class WrongNote {
 
             document.body.removeChild(firstPageContent);
 
-            // 2. 단원/지문별 통계 페이지
-            pdf.addPage();
+            // 2. 단원/지문별 통계 페이지 (10개씩 분할)
 
-            const passagePageContent = document.createElement('div');
-            passagePageContent.style.width = '900px';
-            passagePageContent.style.padding = '20px';
-            passagePageContent.style.backgroundColor = 'white';
+            // 통계 데이터 재계산 (정렬된 상태)
+            const passageStatsData = {};
+            this.selectedExams.forEach(exam => {
+                const questions = storage.getQuestionsByExamId(exam.id);
+                const result = storage.getExamResult(exam.id, this.currentStudent.id);
+                if (!result) return;
 
-            const passageTitle = document.createElement('h3');
-            passageTitle.textContent = '단원/지문별 통계';
-            passageTitle.style.fontSize = '18px';
-            passageTitle.style.marginBottom = '15px';
-            passageTitle.style.marginTop = '0';
-            passageTitle.style.color = '#1e293b';
-            passagePageContent.appendChild(passageTitle);
+                const wrongQuestionIds = result.wrongQuestions.map(wq => wq.question.id);
 
-            // 단원/지문별 통계 복사
-            const passageStats = document.querySelector('#wrongNotePassageStats').cloneNode(true);
-            passagePageContent.appendChild(passageStats);
+                questions.forEach(question => {
+                    const key = question.passage || '기타';
+                    if (!passageStatsData[key]) {
+                        passageStatsData[key] = { correct: 0, wrong: 0 };
+                    }
 
-            document.body.appendChild(passagePageContent);
-
-            const passagePageCanvas = await html2canvas(passagePageContent, {
-                scale: 2,
-                logging: false,
-                useCORS: true,
-                backgroundColor: '#ffffff'
+                    if (wrongQuestionIds.includes(question.id)) {
+                        passageStatsData[key].wrong++;
+                    } else {
+                        passageStatsData[key].correct++;
+                    }
+                });
             });
 
-            const passagePageImgHeight = (passagePageCanvas.height * contentWidth) / passagePageCanvas.width;
-            const passagePageImgData = passagePageCanvas.toDataURL('image/png');
+            // 단원/지문명 순 정렬
+            const sortedPassageStats = Object.entries(passageStatsData)
+                .sort((a, b) => a[0].localeCompare(b[0], 'ko-KR'));
 
-            // 페이지 높이를 넘지 않도록 조정
-            const maxHeight = pageHeight - (margin * 2);
-            const passageFinalHeight = Math.min(passagePageImgHeight, maxHeight);
+            // 10개씩 페이지 분할
+            const passagesPerPage = 10;
+            const totalPassagePages = Math.ceil(sortedPassageStats.length / passagesPerPage);
 
-            pdf.addImage(passagePageImgData, 'PNG', margin, margin, contentWidth, passageFinalHeight);
+            for (let page = 0; page < totalPassagePages; page++) {
+                pdf.addPage();
 
-            document.body.removeChild(passagePageContent);
+                const startIdx = page * passagesPerPage;
+                const endIdx = Math.min(startIdx + passagesPerPage, sortedPassageStats.length);
+                const pagePassages = sortedPassageStats.slice(startIdx, endIdx);
+
+                const passagePageContent = document.createElement('div');
+                passagePageContent.style.width = '900px';
+                passagePageContent.style.padding = '20px';
+                passagePageContent.style.backgroundColor = 'white';
+
+                const passageTitle = document.createElement('h3');
+                passageTitle.textContent = `단원/지문별 통계 (${startIdx + 1}~${endIdx})`;
+                passageTitle.style.fontSize = '18px';
+                passageTitle.style.marginBottom = '15px';
+                passageTitle.style.marginTop = '0';
+                passageTitle.style.color = '#1e293b';
+                passagePageContent.appendChild(passageTitle);
+
+                // 통계 항목 생성
+                const statsContainer = document.createElement('div');
+                statsContainer.style.display = 'flex';
+                statsContainer.style.flexDirection = 'column';
+                statsContainer.style.gap = '1rem';
+
+                pagePassages.forEach(([passage, stats]) => {
+                    const total = stats.correct + stats.wrong;
+                    const correctRate = total > 0 ? (stats.correct / total * 100) : 0;
+                    const wrongRate = total > 0 ? (stats.wrong / total * 100) : 0;
+
+                    const statItem = document.createElement('div');
+                    statItem.style.padding = '1rem';
+                    statItem.style.background = '#f8fafc';
+                    statItem.style.borderRadius = '6px';
+                    statItem.style.borderLeft = '4px solid #2563eb';
+
+                    statItem.innerHTML = `
+                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">${passage}</div>
+                        <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden; background: #e5e7eb; margin-bottom: 0.5rem;">
+                            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: white; background: #16a34a; width: ${correctRate}%;"></div>
+                            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: white; background: #ef4444; width: ${wrongRate}%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0;">
+                            <span style="color: #16a34a; font-weight: 600;">정답 ${stats.correct}</span>
+                            <span style="color: #ef4444; font-weight: 600;">오답 ${stats.wrong}</span>
+                        </div>
+                    `;
+                    statsContainer.appendChild(statItem);
+                });
+
+                passagePageContent.appendChild(statsContainer);
+                document.body.appendChild(passagePageContent);
+
+                const passagePageCanvas = await html2canvas(passagePageContent, {
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const passagePageImgHeight = (passagePageCanvas.height * contentWidth) / passagePageCanvas.width;
+                const passagePageImgData = passagePageCanvas.toDataURL('image/png');
+
+                // 페이지 높이를 넘지 않도록 조정
+                const maxHeight = pageHeight - (margin * 2);
+                const passageFinalHeight = Math.min(passagePageImgHeight, maxHeight);
+
+                pdf.addImage(passagePageImgData, 'PNG', margin, margin, contentWidth, passageFinalHeight);
+
+                document.body.removeChild(passagePageContent);
+            }
 
             // 3. 오답 문제 페이지 (한 페이지에 4문항씩)
             const allWrongQuestions = [];
