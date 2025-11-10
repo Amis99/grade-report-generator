@@ -209,6 +209,11 @@ class WrongNote {
             this.trendChart.destroy();
         }
 
+        // 점수 축 범위 계산
+        const minScore = Math.min(...scores);
+        const yAxisMin = Math.max(0, Math.floor(minScore / 10) * 10 - 10); // 최저점에서 10점 아래, 최소 0
+        const yAxisMax = 100;
+
         const ctx = canvas.getContext('2d');
         this.trendChart = new Chart(ctx, {
             type: 'line',
@@ -255,7 +260,9 @@ class WrongNote {
                         title: {
                             display: true,
                             text: '점수'
-                        }
+                        },
+                        min: yAxisMin,
+                        max: yAxisMax
                     },
                     y1: {
                         type: 'linear',
