@@ -1778,4 +1778,46 @@ body {
     .empty-state-icon {
         font-size: 1.5rem;
     }
+
+    /* 차트 크기 축소 (성적표, 오답 노트) */
+    #report canvas,
+    #wrong-note canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* 차트 컨테이너 크기 조정 */
+    .trend-chart,
+    .domain-chart,
+    .trend-scores canvas,
+    .domain-stats canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* 차트 섹션 여백 축소 */
+    .charts-section,
+    .trend-chart-section,
+    .domain-stats-section {
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+    }
+
+    /* Canvas 요소 크기 제한 */
+    canvas#trendChart,
+    canvas#domainChart,
+    canvas#wrongNoteTrendChart,
+    canvas#wrongNoteDomainChart {
+        width: 100% !important;
+        max-width: 300px !important;
+        height: auto !important;
+        max-height: 120px !important;
+    }
+
+    /* 레이더 차트는 정사각형 유지 */
+    canvas#domainChart,
+    canvas#wrongNoteDomainChart {
+        max-width: 200px !important;
+        max-height: 200px !important;
+    }
 }
