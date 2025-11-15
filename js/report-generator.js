@@ -343,11 +343,12 @@ class ReportGenerator {
                 .domain-table {
                     width: 100%;
                     border-collapse: collapse;
+                    font-size: 0.5em;
                 }
 
                 .domain-table th,
                 .domain-table td {
-                    padding: 0.8rem;
+                    padding: 0.4rem;
                     text-align: left;
                     border-bottom: 1px solid var(--border-color);
                 }

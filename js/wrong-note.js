@@ -600,9 +600,9 @@ class WrongNote {
                         const rate = stats.total > 0 ? (stats.correct / stats.total * 100).toFixed(1) : 0;
                         return `
                             <tr>
-                                <td style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 500;">${domain}</td>
-                                <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center;">${stats.correct} / ${stats.total}</td>
-                                <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-weight: 600; color: ${rate >= 70 ? '#16a34a' : rate >= 50 ? '#f59e0b' : '#ef4444'};">${rate}%</td>
+                                <td style="padding: 4px; border: 1px solid #e5e7eb; font-weight: 500;">${domain}</td>
+                                <td style="padding: 4px; border: 1px solid #e5e7eb; text-align: center;">${stats.correct} / ${stats.total}</td>
+                                <td style="padding: 4px; border: 1px solid #e5e7eb; text-align: center; font-weight: 600; color: ${rate >= 70 ? '#16a34a' : rate >= 50 ? '#f59e0b' : '#ef4444'};">${rate}%</td>
                             </tr>
                         `;
                     }).join('');
@@ -616,12 +616,12 @@ class WrongNote {
                             <img src="${domainImgData}" style="width: 100%; height: auto; max-width: 350px;" />
                         </div>
                         <div style="flex: 1;">
-                            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 13px;">
+                            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 6.5px;">
                                 <thead>
                                     <tr style="background: #f3f4f6;">
-                                        <th style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 600;">영역</th>
-                                        <th style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 600;">정답 수</th>
-                                        <th style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 600;">정답률</th>
+                                        <th style="padding: 4px; border: 1px solid #e5e7eb; font-weight: 600;">영역</th>
+                                        <th style="padding: 4px; border: 1px solid #e5e7eb; font-weight: 600;">정답 수</th>
+                                        <th style="padding: 4px; border: 1px solid #e5e7eb; font-weight: 600;">정답률</th>
                                     </tr>
                                 </thead>
                                 <tbody>
