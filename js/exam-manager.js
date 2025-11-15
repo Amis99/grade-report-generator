@@ -60,14 +60,20 @@ class ExamManager {
             return;
         }
 
-        examListDiv.innerHTML = exams.map(exam => {
+        // 시험을 최신순으로 정렬 (updatedAt 기준)
+        const sortedExams = [...exams].sort((a, b) => {
+            return new Date(b.updatedAt) - new Date(a.updatedAt);
+        });
+
+        examListDiv.innerHTML = sortedExams.map((exam, index) => {
             const questions = storage.getQuestionsByExamId(exam.id);
             return `
                 <div class="exam-item" data-exam-id="${exam.id}"
                      data-name="${exam.name}"
                      data-organization="${exam.organization || ''}"
                      data-school="${exam.school}"
-                     data-grade="${exam.grade}">
+                     data-grade="${exam.grade}"
+                     style="${index >= 5 ? 'display: none;' : ''}">
                     <div class="exam-item-info">
                         <h4>${exam.name}</h4>
                         <div class="exam-item-meta">
@@ -96,9 +102,9 @@ class ExamManager {
      */
     filterExamList(searchText) {
         const examItems = document.querySelectorAll('.exam-item');
-        const lowerSearch = searchText.toLowerCase();
+        const lowerSearch = searchText.trim().toLowerCase();
 
-        examItems.forEach(item => {
+        examItems.forEach((item, index) => {
             const name = item.getAttribute('data-name').toLowerCase();
             const organization = item.getAttribute('data-organization').toLowerCase();
             const school = item.getAttribute('data-school').toLowerCase();
@@ -109,7 +115,13 @@ class ExamManager {
                           school.includes(lowerSearch) ||
                           grade.includes(lowerSearch);
 
-            item.style.display = matches ? 'flex' : 'none';
+            if (lowerSearch === '') {
+                // 검색어가 없으면 최근 5개만 표시
+                item.style.display = index < 5 ? 'flex' : 'none';
+            } else {
+                // 검색어가 있으면 모든 항목을 검색 대상으로
+                item.style.display = matches ? 'flex' : 'none';
+            }
         });
     }
 
