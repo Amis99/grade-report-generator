@@ -6,6 +6,10 @@ class ExamManager {
     constructor() {
         this.currentExam = null;
         this.currentQuestion = null;
+        this.currentPage = 1;
+        this.itemsPerPage = 5;
+        this.allExams = [];
+        this.filteredExams = [];
         this.init();
     }
 
@@ -48,9 +52,25 @@ class ExamManager {
      */
     loadExamList() {
         const exams = storage.getAllExams();
+
+        // 시험을 최신순으로 정렬 (updatedAt 기준)
+        this.allExams = [...exams].sort((a, b) => {
+            return new Date(b.updatedAt) - new Date(a.updatedAt);
+        });
+
+        this.filteredExams = this.allExams;
+        this.currentPage = 1;
+        this.renderExamList();
+        this.renderPagination();
+    }
+
+    /**
+     * 시험 목록 렌더링 (현재 페이지만)
+     */
+    renderExamList() {
         const examListDiv = document.getElementById('examList');
 
-        if (exams.length === 0) {
+        if (this.filteredExams.length === 0) {
             examListDiv.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📋</div>
@@ -60,20 +80,19 @@ class ExamManager {
             return;
         }
 
-        // 시험을 최신순으로 정렬 (updatedAt 기준)
-        const sortedExams = [...exams].sort((a, b) => {
-            return new Date(b.updatedAt) - new Date(a.updatedAt);
-        });
+        // 현재 페이지의 시작/끝 인덱스 계산
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const pageExams = this.filteredExams.slice(startIndex, endIndex);
 
-        examListDiv.innerHTML = sortedExams.map((exam, index) => {
+        examListDiv.innerHTML = pageExams.map(exam => {
             const questions = storage.getQuestionsByExamId(exam.id);
             return `
                 <div class="exam-item" data-exam-id="${exam.id}"
                      data-name="${exam.name}"
                      data-organization="${exam.organization || ''}"
                      data-school="${exam.school}"
-                     data-grade="${exam.grade}"
-                     style="${index >= 5 ? 'display: none;' : ''}">
+                     data-grade="${exam.grade}">
                     <div class="exam-item-info">
                         <h4>${exam.name}</h4>
                         <div class="exam-item-meta">
@@ -98,31 +117,90 @@ class ExamManager {
     }
 
     /**
+     * 페이지네이션 렌더링
+     */
+    renderPagination() {
+        const paginationDiv = document.getElementById('examPagination');
+        const totalPages = Math.ceil(this.filteredExams.length / this.itemsPerPage);
+
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '';
+
+        // 이전 버튼
+        if (this.currentPage > 1) {
+            paginationHTML += `<button class="pagination-btn" data-page="${this.currentPage - 1}">‹ 이전</button>`;
+        }
+
+        // 페이지 번호 버튼
+        const maxButtons = 5;
+        let startPage = Math.max(1, this.currentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+        if (endPage - startPage < maxButtons - 1) {
+            startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === this.currentPage ? ' active' : '';
+            paginationHTML += `<button class="pagination-btn${activeClass}" data-page="${i}">${i}</button>`;
+        }
+
+        // 다음 버튼
+        if (this.currentPage < totalPages) {
+            paginationHTML += `<button class="pagination-btn" data-page="${this.currentPage + 1}">다음 ›</button>`;
+        }
+
+        paginationDiv.innerHTML = paginationHTML;
+
+        // 페이지 버튼 클릭 이벤트
+        paginationDiv.querySelectorAll('.pagination-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.getAttribute('data-page'));
+                this.goToPage(page);
+            });
+        });
+    }
+
+    /**
+     * 특정 페이지로 이동
+     */
+    goToPage(page) {
+        this.currentPage = page;
+        this.renderExamList();
+        this.renderPagination();
+    }
+
+    /**
      * 시험 목록 필터링
      */
     filterExamList(searchText) {
-        const examItems = document.querySelectorAll('.exam-item');
         const lowerSearch = searchText.trim().toLowerCase();
 
-        examItems.forEach((item, index) => {
-            const name = item.getAttribute('data-name').toLowerCase();
-            const organization = item.getAttribute('data-organization').toLowerCase();
-            const school = item.getAttribute('data-school').toLowerCase();
-            const grade = item.getAttribute('data-grade').toLowerCase();
+        if (lowerSearch === '') {
+            // 검색어가 없으면 전체 목록
+            this.filteredExams = this.allExams;
+        } else {
+            // 검색어로 필터링
+            this.filteredExams = this.allExams.filter(exam => {
+                const name = exam.name.toLowerCase();
+                const organization = (exam.organization || '').toLowerCase();
+                const school = exam.school.toLowerCase();
+                const grade = exam.grade.toLowerCase();
 
-            const matches = name.includes(lowerSearch) ||
-                          organization.includes(lowerSearch) ||
-                          school.includes(lowerSearch) ||
-                          grade.includes(lowerSearch);
+                return name.includes(lowerSearch) ||
+                       organization.includes(lowerSearch) ||
+                       school.includes(lowerSearch) ||
+                       grade.includes(lowerSearch);
+            });
+        }
 
-            if (lowerSearch === '') {
-                // 검색어가 없으면 최근 5개만 표시
-                item.style.display = index < 5 ? 'flex' : 'none';
-            } else {
-                // 검색어가 있으면 모든 항목을 검색 대상으로
-                item.style.display = matches ? 'flex' : 'none';
-            }
-        });
+        this.currentPage = 1;
+        this.renderExamList();
+        this.renderPagination();
     }
 
     /**
