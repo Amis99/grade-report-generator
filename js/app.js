@@ -105,13 +105,18 @@ class App {
     }
 
     /**
-     * 데이터 정리 (중복 답안 제거)
+     * 데이터 정리 (중복 답안 제거 및 고아 답안 제거)
      */
     async cleanupData() {
         try {
             const removedCount = storage.removeDuplicateAnswers();
             if (removedCount > 0) {
                 console.log(`✅ 중복 답안 ${removedCount}개가 자동으로 정리되었습니다.`);
+            }
+
+            const orphanedCount = storage.removeOrphanedAnswers();
+            if (orphanedCount > 0) {
+                console.log(`✅ 고아 답안 ${orphanedCount}개가 자동으로 정리되었습니다.`);
             }
 
             // Firebase 사용 중이고 로컬 스토리지에 데이터가 있으면 마이그레이션 제안

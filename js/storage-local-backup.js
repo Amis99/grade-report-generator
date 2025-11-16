@@ -345,6 +345,35 @@ class DataStorage {
         return removedCount;
     }
 
+    /**
+     * 존재하지 않는 학생/시험/문제의 답안 제거 (고아 답안 정리)
+     */
+    removeOrphanedAnswers() {
+        const answers = this.getAllAnswers();
+        const students = this.getAllStudents();
+        const exams = this.getAllExams();
+        const questions = this.getAllQuestions();
+
+        const studentIds = new Set(students.map(s => s.id));
+        const examIds = new Set(exams.map(e => e.id));
+        const questionIds = new Set(questions.map(q => q.id));
+
+        const validAnswers = answers.filter(answer => {
+            return studentIds.has(answer.studentId) &&
+                   examIds.has(answer.examId) &&
+                   questionIds.has(answer.questionId);
+        });
+
+        const removedCount = answers.length - validAnswers.length;
+
+        if (removedCount > 0) {
+            localStorage.setItem(this.STORAGE_KEYS.ANSWERS, JSON.stringify(validAnswers));
+            console.log(`고아 답안 ${removedCount}개가 제거되었습니다.`);
+        }
+
+        return removedCount;
+    }
+
     // === 데이터 디버깅 ===
 
     /**
@@ -407,8 +436,9 @@ class DataStorage {
         const results = studentIds.map(studentId => {
             const student = this.getStudent(studentId);
             const answers = allAnswers.filter(a => a.studentId === studentId);
-            return new ExamResult(exam, student, questions, answers);
-        });
+            return { student, exam, questions, answers };
+        }).filter(data => data.student !== null) // 존재하지 않는 학생 필터링
+        .map(data => new ExamResult(data.exam, data.student, data.questions, data.answers));
 
         // 점수 순으로 정렬하고 등수 계산 (동점자 처리)
         results.sort((a, b) => b.totalScore - a.totalScore);
