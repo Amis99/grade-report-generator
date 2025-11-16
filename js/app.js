@@ -249,6 +249,11 @@ class App {
                     examManager.loadExamList();
                 }
                 break;
+            case 'student-management':
+                if (window.studentManager) {
+                    studentManager.loadStudentList();
+                }
+                break;
             case 'answer-input':
                 if (window.answerInput) {
                     answerInput.loadExamSelect();
@@ -323,6 +328,7 @@ class App {
     initializeModules() {
         // 각 모듈이 로드되면 자동으로 초기화됨
         window.examManager = new ExamManager();
+        window.studentManager = new StudentManager();
         window.answerInput = new AnswerInput();
         window.grading = new Grading();
         window.reportGenerator = new ReportGenerator();

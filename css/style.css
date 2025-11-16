@@ -287,6 +287,185 @@ body {
     cursor: not-allowed;
 }
 
+/* 학생 관리 */
+.student-management-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+    color: #1565c0;
+}
+
+.alert-warning {
+    background: #fff3e0;
+    border: 1px solid #ff9800;
+    color: #e65100;
+}
+
+.all-students-section {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+}
+
+.student-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.student-item {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.student-item:hover {
+    background: var(--background-color);
+    border-color: var(--primary-color);
+}
+
+.student-item-info h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.student-item-meta {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.student-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* 중복 학생 */
+#duplicateStudentsSection {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+}
+
+.duplicate-students-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.duplicate-group {
+    border: 2px solid #ff9800;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    background: #fff3e0;
+}
+
+.duplicate-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ff9800;
+    font-size: 1.1rem;
+}
+
+.badge {
+    background: #ff9800;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.duplicate-group-students {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.duplicate-student-card {
+    position: relative;
+}
+
+.duplicate-student-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.duplicate-student-card label {
+    display: block;
+    padding: 1rem;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.duplicate-student-card input[type="radio"]:checked + label {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.duplicate-student-card label:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.student-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.student-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.student-stats {
+    font-size: 0.8rem;
+    color: var(--success-color);
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.student-id {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    font-family: monospace;
+}
+
+.duplicate-group-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
 /* 시험 상세 정보 */
 .exam-detail-section {
     background: var(--card-background);

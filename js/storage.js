@@ -216,6 +216,21 @@ class DataStorage {
 
     // === 학생(Student) 관리 ===
 
+    /**
+     * 학생 정보 정규화 함수들
+     */
+    normalizeStudentName(name) {
+        return name.trim().replace(/\s+/g, '');
+    }
+
+    normalizeSchoolName(school) {
+        return school.trim().replace(/\s+/g, '').replace(/고등학교|고교/g, '고');
+    }
+
+    normalizeGrade(grade) {
+        return grade.trim().replace(/\s+|학년|반/g, '');
+    }
+
     getAllStudents() {
         if (this.useFirebase) {
             return this.cache.students;
@@ -233,11 +248,77 @@ class DataStorage {
 
     getStudentByName(name, school, grade) {
         const students = this.getAllStudents();
-        return students.find(s =>
+
+        // 먼저 정확히 일치하는 학생 찾기
+        let student = students.find(s =>
             s.name === name &&
             s.school === school &&
             s.grade === grade
         );
+
+        // 정확히 일치하는 학생이 없으면 정규화하여 찾기
+        if (!student) {
+            const normalizedName = this.normalizeStudentName(name);
+            const normalizedSchool = this.normalizeSchoolName(school);
+            const normalizedGrade = this.normalizeGrade(grade);
+
+            student = students.find(s =>
+                this.normalizeStudentName(s.name) === normalizedName &&
+                this.normalizeSchoolName(s.school) === normalizedSchool &&
+                this.normalizeGrade(s.grade) === normalizedGrade
+            );
+        }
+
+        return student;
+    }
+
+    /**
+     * 중복 가능성이 있는 학생 찾기
+     */
+    findDuplicateStudents() {
+        const students = this.getAllStudents();
+        const groups = new Map();
+
+        students.forEach(student => {
+            const key = `${this.normalizeStudentName(student.name)}_${this.normalizeSchoolName(student.school)}_${this.normalizeGrade(student.grade)}`;
+
+            if (!groups.has(key)) {
+                groups.set(key, []);
+            }
+            groups.get(key).push(student);
+        });
+
+        // 2명 이상인 그룹만 반환
+        return Array.from(groups.values()).filter(group => group.length > 1);
+    }
+
+    /**
+     * 학생 병합 (sourceId의 모든 답안을 targetId로 이전)
+     */
+    async mergeStudents(targetId, sourceId) {
+        if (targetId === sourceId) {
+            throw new Error('같은 학생은 병합할 수 없습니다.');
+        }
+
+        const target = this.getStudent(targetId);
+        const source = this.getStudent(sourceId);
+
+        if (!target || !source) {
+            throw new Error('학생을 찾을 수 없습니다.');
+        }
+
+        // source 학생의 모든 답안을 target 학생으로 변경
+        const sourceAnswers = this.getAllAnswers().filter(a => a.studentId === sourceId);
+
+        for (const answer of sourceAnswers) {
+            answer.studentId = targetId;
+            await this.saveAnswer(answer);
+        }
+
+        // source 학생 삭제
+        await this.deleteStudent(sourceId);
+
+        return target;
     }
 
     async saveStudent(student) {
