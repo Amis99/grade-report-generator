@@ -166,6 +166,17 @@ body {
     margin-bottom: 1.2rem;
 }
 
+.form-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.form-group-header label {
+    margin-bottom: 0;
+}
+
 .form-group label {
     display: block;
     margin-bottom: 0.4rem;

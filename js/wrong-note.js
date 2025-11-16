@@ -30,6 +30,11 @@ class WrongNote {
             }
         });
 
+        // 모두 선택/해제
+        document.getElementById('selectAllExamsBtn').addEventListener('click', () => {
+            this.toggleSelectAllExams();
+        });
+
         // 오답 노트 생성
         document.getElementById('generateWrongNoteBtn').addEventListener('click', () => {
             this.generateWrongNote();
@@ -95,6 +100,22 @@ class WrongNote {
         }).join('');
 
         document.getElementById('wrongNoteExamSelection').style.display = 'block';
+    }
+
+    /**
+     * 모두 선택/해제 토글
+     */
+    toggleSelectAllExams() {
+        const checkboxes = document.querySelectorAll('.exam-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        const btn = document.getElementById('selectAllExamsBtn');
+
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+        });
+
+        // 버튼 텍스트 변경
+        btn.textContent = allChecked ? '모두 선택' : '선택 해제';
     }
 
     /**
