@@ -19,6 +19,15 @@ class StudentManager {
             this.detectDuplicates();
         });
 
+        // 모두 자동 병합 버튼
+        document.getElementById('autoMergeBtn').addEventListener('click', async () => {
+            if (typeof autoMergeAllDuplicates === 'function') {
+                await autoMergeAllDuplicates();
+            } else {
+                alert('자동 병합 스크립트가 로드되지 않았습니다.');
+            }
+        });
+
         // 학생 검색
         document.getElementById('studentSearchInput').addEventListener('input', (e) => {
             this.filterStudentList(e.target.value);

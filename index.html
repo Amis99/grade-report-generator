@@ -70,7 +70,10 @@
             <section id="student-management" class="tab-content">
                 <div class="section-header">
                     <h2>학생 관리</h2>
-                    <button id="detectDuplicatesBtn" class="btn btn-warning">중복 학생 찾기</button>
+                    <div class="header-actions">
+                        <button id="detectDuplicatesBtn" class="btn btn-warning">중복 학생 찾기</button>
+                        <button id="autoMergeBtn" class="btn btn-danger">모두 자동 병합</button>
+                    </div>
                 </div>
 
                 <div class="student-management-container">
@@ -396,6 +399,7 @@
     <script src="js/report-generator.js"></script>
     <script src="js/wrong-note.js"></script>
     <script src="js/student-manager.js"></script>
+    <script src="js/auto-merge-students.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
