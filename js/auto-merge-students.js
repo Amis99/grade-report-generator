@@ -97,10 +97,15 @@ async function autoMergeAllDuplicates() {
         console.log(`실패: ${failCount}명`);
     }
 
+    // 답안이 없는 학생 삭제
+    console.log('\n🧹 답안이 없는 학생 정리 중...');
+    const deletedCount = await storage.removeStudentsWithNoAnswers();
+
     alert(
         `✅ 중복 학생 병합 완료!\n\n` +
         `병합 성공: ${successCount}명\n` +
         (failCount > 0 ? `병합 실패: ${failCount}명\n` : '') +
+        (deletedCount > 0 ? `답안 없는 학생 삭제: ${deletedCount}명\n` : '') +
         `\n페이지를 새로고침하여 결과를 확인하세요.`
     );
 

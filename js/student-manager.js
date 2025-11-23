@@ -196,7 +196,15 @@ class StudentManager {
                 await storage.mergeStudents(targetId, sourceId);
             }
 
-            alert('학생 병합이 완료되었습니다.');
+            // 답안이 없는 학생 삭제
+            const deletedCount = await storage.removeStudentsWithNoAnswers();
+
+            let message = '학생 병합이 완료되었습니다.';
+            if (deletedCount > 0) {
+                message += `\n답안이 없는 학생 ${deletedCount}명이 삭제되었습니다.`;
+            }
+
+            alert(message);
             this.detectDuplicates();
             this.loadStudentList();
         } catch (error) {

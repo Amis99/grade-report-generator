@@ -374,6 +374,28 @@ class DataStorage {
         return removedCount;
     }
 
+    /**
+     * 답안이 없는 학생 삭제
+     */
+    removeStudentsWithNoAnswers() {
+        const students = this.getAllStudents();
+        const answers = this.getAllAnswers();
+
+        const studentsToDelete = students.filter(student => {
+            const studentAnswers = answers.filter(a => a.studentId === student.id);
+            return studentAnswers.length === 0;
+        });
+
+        if (studentsToDelete.length > 0) {
+            for (const student of studentsToDelete) {
+                this.deleteStudent(student.id);
+            }
+            console.log(`답안이 없는 학생 ${studentsToDelete.length}명이 삭제되었습니다.`);
+        }
+
+        return studentsToDelete.length;
+    }
+
     // === 데이터 디버깅 ===
 
     /**
