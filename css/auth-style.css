@@ -26,6 +26,17 @@
     padding: 2.5rem;
 }
 
+/* 로고 */
+.auth-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.auth-logo-image {
+    height: 60px;
+    width: auto;
+}
+
 /* 타이틀 */
 .auth-title {
     text-align: center;
