@@ -55,7 +55,11 @@ class WrongNote {
      * 학생 선택 드롭다운 로드
      */
     loadStudentSelect() {
-        const students = storage.getAllStudents();
+        let students = storage.getAllStudents();
+
+        // 권한에 따른 학생 필터링
+        students = AuthService.filterStudents(students);
+
         const select = document.getElementById('wrongNoteStudentSelect');
 
         select.innerHTML = '<option value="">학생을 선택하세요</option>' +

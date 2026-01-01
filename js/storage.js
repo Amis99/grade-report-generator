@@ -10,7 +10,9 @@ class DataStorage {
             exams: [],
             questions: [],
             students: [],
-            answers: []
+            answers: [],
+            users: [],
+            registrations: []
         };
         this.cacheLoaded = false;
 
@@ -23,7 +25,9 @@ class DataStorage {
                 EXAMS: 'gradeapp_exams',
                 QUESTIONS: 'gradeapp_questions',
                 STUDENTS: 'gradeapp_students',
-                ANSWERS: 'gradeapp_answers'
+                ANSWERS: 'gradeapp_answers',
+                USERS: 'gradeapp_users',
+                REGISTRATIONS: 'gradeapp_registrations'
             };
         }
     }
@@ -40,13 +44,16 @@ class DataStorage {
             this.cache.questions = Object.values(data.questions || {}).map(q => new Question(q));
             this.cache.students = Object.values(data.students || {}).map(s => new Student(s));
             this.cache.answers = Object.values(data.answers || {}).map(a => new Answer(a));
+            this.cache.users = Object.values(data.users || {}).map(u => new User(u));
+            this.cache.registrations = Object.values(data.registrations || {}).map(r => new RegistrationRequest(r));
 
             this.cacheLoaded = true;
             console.log('✅ Firebase 데이터 로드 완료:', {
                 exams: this.cache.exams.length,
                 questions: this.cache.questions.length,
                 students: this.cache.students.length,
-                answers: this.cache.answers.length
+                answers: this.cache.answers.length,
+                users: this.cache.users.length
             });
         } catch (error) {
             console.error('❌ Firebase 데이터 로드 실패:', error);
@@ -675,11 +682,198 @@ class DataStorage {
         return results;
     }
 
+    // === 사용자(User) 관리 ===
+
+    getAllUsers() {
+        if (this.useFirebase) {
+            return this.cache.users;
+        } else {
+            const data = localStorage.getItem(this.STORAGE_KEYS.USERS);
+            return data ? JSON.parse(data).map(u => new User(u)) : [];
+        }
+    }
+
+    getUser(id) {
+        const users = this.getAllUsers();
+        const user = users.find(u => u.id === id);
+        return user ? new User(user) : null;
+    }
+
+    getUserByUsername(username) {
+        const users = this.getAllUsers();
+        const user = users.find(u => u.username === username);
+        return user ? new User(user) : null;
+    }
+
+    async saveUser(user) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`users/${user.id}`).set(user);
+
+                const index = this.cache.users.findIndex(u => u.id === user.id);
+                if (index >= 0) {
+                    this.cache.users[index] = user;
+                } else {
+                    this.cache.users.push(user);
+                }
+            } catch (error) {
+                console.error('Firebase 저장 실패:', error);
+            }
+        } else {
+            const users = this.getAllUsers();
+            const index = users.findIndex(u => u.id === user.id);
+
+            if (index >= 0) {
+                users[index] = user;
+            } else {
+                users.push(user);
+            }
+
+            localStorage.setItem(this.STORAGE_KEYS.USERS, JSON.stringify(users));
+        }
+
+        return user;
+    }
+
+    async deleteUser(id) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`users/${id}`).remove();
+                this.cache.users = this.cache.users.filter(u => u.id !== id);
+            } catch (error) {
+                console.error('Firebase 삭제 실패:', error);
+            }
+        } else {
+            const users = this.getAllUsers().filter(u => u.id !== id);
+            localStorage.setItem(this.STORAGE_KEYS.USERS, JSON.stringify(users));
+        }
+    }
+
+    // === 가입 신청(Registration) 관리 ===
+
+    getAllRegistrations() {
+        if (this.useFirebase) {
+            return this.cache.registrations;
+        } else {
+            const data = localStorage.getItem(this.STORAGE_KEYS.REGISTRATIONS);
+            return data ? JSON.parse(data).map(r => new RegistrationRequest(r)) : [];
+        }
+    }
+
+    getPendingRegistrations() {
+        return this.getAllRegistrations().filter(r => r.status === 'pending');
+    }
+
+    getRegistration(id) {
+        const registrations = this.getAllRegistrations();
+        const reg = registrations.find(r => r.id === id);
+        return reg ? new RegistrationRequest(reg) : null;
+    }
+
+    getRegistrationByUsername(username) {
+        const registrations = this.getAllRegistrations();
+        const reg = registrations.find(r => r.username === username);
+        return reg ? new RegistrationRequest(reg) : null;
+    }
+
+    async saveRegistration(registration) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`registrations/${registration.id}`).set(registration);
+
+                const index = this.cache.registrations.findIndex(r => r.id === registration.id);
+                if (index >= 0) {
+                    this.cache.registrations[index] = registration;
+                } else {
+                    this.cache.registrations.push(registration);
+                }
+            } catch (error) {
+                console.error('Firebase 저장 실패:', error);
+            }
+        } else {
+            const registrations = this.getAllRegistrations();
+            const index = registrations.findIndex(r => r.id === registration.id);
+
+            if (index >= 0) {
+                registrations[index] = registration;
+            } else {
+                registrations.push(registration);
+            }
+
+            localStorage.setItem(this.STORAGE_KEYS.REGISTRATIONS, JSON.stringify(registrations));
+        }
+
+        return registration;
+    }
+
+    async deleteRegistration(id) {
+        if (this.useFirebase) {
+            try {
+                await firebaseDatabase.ref(`registrations/${id}`).remove();
+                this.cache.registrations = this.cache.registrations.filter(r => r.id !== id);
+            } catch (error) {
+                console.error('Firebase 삭제 실패:', error);
+            }
+        } else {
+            const registrations = this.getAllRegistrations().filter(r => r.id !== id);
+            localStorage.setItem(this.STORAGE_KEYS.REGISTRATIONS, JSON.stringify(registrations));
+        }
+    }
+
+    /**
+     * 가입 신청 승인
+     */
+    async approveRegistration(registrationId, approvedBy) {
+        const registration = this.getRegistration(registrationId);
+        if (!registration) {
+            throw new Error('가입 신청을 찾을 수 없습니다.');
+        }
+
+        // 새 사용자 생성
+        const user = new User({
+            username: registration.username,
+            passwordHash: registration.passwordHash,
+            salt: registration.salt,
+            name: registration.name,
+            email: registration.email,
+            organization: registration.organization,
+            role: 'org_admin',
+            isActive: true
+        });
+
+        await this.saveUser(user);
+
+        // 가입 신청 상태 업데이트
+        registration.status = 'approved';
+        registration.processedAt = new Date().toISOString();
+        registration.processedBy = approvedBy;
+        await this.saveRegistration(registration);
+
+        return user;
+    }
+
+    /**
+     * 가입 신청 거절
+     */
+    async rejectRegistration(registrationId, rejectedBy) {
+        const registration = this.getRegistration(registrationId);
+        if (!registration) {
+            throw new Error('가입 신청을 찾을 수 없습니다.');
+        }
+
+        registration.status = 'rejected';
+        registration.processedAt = new Date().toISOString();
+        registration.processedBy = rejectedBy;
+        await this.saveRegistration(registration);
+
+        return registration;
+    }
+
     clearAllData() {
         if (this.useFirebase) {
             if (confirm('⚠️ Firebase의 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다!')) {
                 firebaseDatabase.ref('/').remove();
-                this.cache = { exams: [], questions: [], students: [], answers: [] };
+                this.cache = { exams: [], questions: [], students: [], answers: [], users: [], registrations: [] };
             }
         } else {
             Object.values(this.STORAGE_KEYS).forEach(key => {

@@ -51,7 +51,10 @@ class ExamManager {
      * 시험 목록 로드
      */
     loadExamList() {
-        const exams = storage.getAllExams();
+        let exams = storage.getAllExams();
+
+        // 권한에 따른 시험 필터링
+        exams = AuthService.filterExams(exams);
 
         // 시험을 최신순으로 정렬 (updatedAt 기준)
         this.allExams = [...exams].sort((a, b) => {
@@ -207,8 +210,12 @@ class ExamManager {
      * 새 시험 만들기
      */
     async createNewExam() {
+        // 현재 사용자의 기관 정보 가져오기
+        const currentOrg = AuthService.getCurrentOrganization() || '국어농장';
+
         const exam = new Exam({
             name: '새 시험',
+            organization: currentOrg,
             school: '',
             grade: '',
             series: ''

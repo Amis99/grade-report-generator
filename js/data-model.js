@@ -85,6 +85,7 @@ class Student {
         this.name = data.name || '';
         this.school = data.school || '';
         this.grade = data.grade || '';
+        this.organization = data.organization || '국어농장'; // 소속 기관
         this.createdAt = data.createdAt || new Date().toISOString();
     }
 
@@ -94,6 +95,7 @@ class Student {
             name: this.name,
             school: this.school,
             grade: this.grade,
+            organization: this.organization,
             createdAt: this.createdAt
         };
     }
@@ -246,6 +248,76 @@ class ExamResult {
             })),
             rank: this.rank,
             totalStudents: this.totalStudents
+        };
+    }
+}
+
+/**
+ * 사용자 클래스
+ */
+class User {
+    constructor(data = {}) {
+        this.id = data.id || generateId();
+        this.username = data.username || '';
+        this.passwordHash = data.passwordHash || '';
+        this.salt = data.salt || '';
+        this.name = data.name || '';
+        this.email = data.email || '';
+        this.organization = data.organization || '';
+        this.role = data.role || 'pending'; // 'admin', 'org_admin', 'pending'
+        this.isActive = data.isActive !== undefined ? data.isActive : false;
+        this.createdAt = data.createdAt || new Date().toISOString();
+        this.lastLoginAt = data.lastLoginAt || null;
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            username: this.username,
+            passwordHash: this.passwordHash,
+            salt: this.salt,
+            name: this.name,
+            email: this.email,
+            organization: this.organization,
+            role: this.role,
+            isActive: this.isActive,
+            createdAt: this.createdAt,
+            lastLoginAt: this.lastLoginAt
+        };
+    }
+}
+
+/**
+ * 가입 신청 클래스
+ */
+class RegistrationRequest {
+    constructor(data = {}) {
+        this.id = data.id || generateId();
+        this.username = data.username || '';
+        this.passwordHash = data.passwordHash || '';
+        this.salt = data.salt || '';
+        this.name = data.name || '';
+        this.email = data.email || '';
+        this.organization = data.organization || '';
+        this.status = data.status || 'pending'; // 'pending', 'approved', 'rejected'
+        this.createdAt = data.createdAt || new Date().toISOString();
+        this.processedAt = data.processedAt || null;
+        this.processedBy = data.processedBy || null;
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            username: this.username,
+            passwordHash: this.passwordHash,
+            salt: this.salt,
+            name: this.name,
+            email: this.email,
+            organization: this.organization,
+            status: this.status,
+            createdAt: this.createdAt,
+            processedAt: this.processedAt,
+            processedBy: this.processedBy
         };
     }
 }

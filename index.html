@@ -6,6 +6,7 @@
     <title>성적표 생성 프로그램</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/sheet-style.css">
+    <link rel="stylesheet" href="css/auth-style.css">
 </head>
 <body>
     <div class="app-container">
@@ -13,8 +14,16 @@
         <header class="app-header">
             <h1>성적표 생성 프로그램</h1>
             <div class="header-actions">
+                <div id="userInfoDisplay" class="user-info-header" style="display: none;">
+                    <span class="user-name" id="headerUserName"></span>
+                    <span class="user-org" id="headerUserOrg"></span>
+                </div>
+                <button id="adminMenuBtn" class="btn btn-secondary" style="display: none;">
+                    관리 <span id="pendingCount" class="badge"></span>
+                </button>
                 <button id="exportDataBtn" class="btn btn-secondary">데이터 백업</button>
                 <button id="importDataBtn" class="btn btn-secondary">데이터 복원</button>
+                <button id="logoutBtn" class="btn btn-danger" style="display: none;">로그아웃</button>
             </div>
         </header>
 
@@ -421,6 +430,10 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/data-model.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/auth-utils.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/auth-service.js"></script>
+    <script src="js/admin-panel.js"></script>
     <script src="js/csv-utils.js"></script>
     <script src="js/searchable-select.js"></script>
     <script src="js/exam-manager.js"></script>

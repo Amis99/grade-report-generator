@@ -59,7 +59,11 @@ class AnswerInput {
      * 시험 선택 드롭다운 로드
      */
     loadExamSelect() {
-        const exams = storage.getAllExams();
+        let exams = storage.getAllExams();
+
+        // 권한에 따른 시험 필터링
+        exams = AuthService.filterExams(exams);
+
         const select = document.getElementById('answerExamSelect');
 
         select.innerHTML = '<option value="">시험을 선택하세요</option>' +
@@ -109,8 +113,9 @@ class AnswerInput {
         let student = storage.getStudentByName(name, school, grade);
 
         if (!student) {
-            // 새 학생 생성
-            student = new Student({ name, school, grade });
+            // 새 학생 생성 (현재 사용자의 기관 정보 설정)
+            const currentOrg = AuthService.getCurrentOrganization() || '국어농장';
+            student = new Student({ name, school, grade, organization: currentOrg });
             await storage.saveStudent(student);
         }
 

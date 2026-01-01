@@ -5,7 +5,11 @@
 
 // 기존 AnswerInput의 탭 전환 로직을 유지하고 시트만 교체
 AnswerInput.prototype.loadExamSelect = function() {
-    const exams = storage.getAllExams();
+    let exams = storage.getAllExams();
+
+    // 권한에 따른 시험 필터링
+    exams = AuthService.filterExams(exams);
+
     const select = document.getElementById('answerExamSelect');
 
     select.innerHTML = '<option value="">시험을 선택하세요</option>' +
@@ -262,7 +266,9 @@ AnswerInput.prototype.autoSaveRow = async function(inputElement) {
     if (studentId === 'new' || !studentId) {
         student = storage.getStudentByName(name, school, grade);
         if (!student) {
-            student = new Student({ name, school, grade });
+            // 새 학생 생성 시 현재 사용자의 기관 정보 설정
+            const currentOrg = AuthService.getCurrentOrganization() || '국어농장';
+            student = new Student({ name, school, grade, organization: currentOrg });
             await storage.saveStudent(student);
             row.setAttribute('data-student-id', student.id);
         }

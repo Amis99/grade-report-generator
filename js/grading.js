@@ -47,7 +47,11 @@ class Grading {
      * 시험 선택 드롭다운 로드
      */
     loadExamSelect() {
-        const exams = storage.getAllExams();
+        let exams = storage.getAllExams();
+
+        // 권한에 따른 시험 필터링
+        exams = AuthService.filterExams(exams);
+
         const select = document.getElementById('gradingExamSelect');
 
         select.innerHTML = '<option value="">시험을 선택하세요</option>' +

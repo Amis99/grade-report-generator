@@ -15,11 +15,105 @@ class App {
             await this.waitForCache();
         }
 
+        // 초기 관리자 계정 확인 및 생성
+        await this.initializeFirstAdmin();
+
+        // 인증 체크
+        if (!this.checkAuth()) {
+            return;
+        }
+
+        // 헤더 UI 설정
+        this.setupHeaderUI();
+
         // 중복 답안 데이터 정리 (앱 시작 시 자동 실행)
         await this.cleanupData();
         this.setupTabNavigation();
         this.setupBackupRestore();
         this.initializeModules();
+    }
+
+    /**
+     * 초기 관리자 계정 생성
+     */
+    async initializeFirstAdmin() {
+        const users = storage.getAllUsers();
+
+        if (users.length === 0) {
+            console.log('🔐 초기 관리자 계정 생성 중...');
+
+            const salt = AuthUtils.generateSalt();
+            const passwordHash = await AuthUtils.hashPassword('admin123', salt);
+
+            const adminUser = new User({
+                username: 'admin',
+                passwordHash: passwordHash,
+                salt: salt,
+                name: '관리자',
+                email: 'admin@example.com',
+                organization: '국어농장',
+                role: 'admin',
+                isActive: true
+            });
+
+            await storage.saveUser(adminUser);
+            console.log('✅ 초기 관리자 계정 생성 완료');
+
+            alert('초기 관리자 계정이 생성되었습니다.\n\n아이디: admin\n비밀번호: admin123\n\n보안을 위해 로그인 후 비밀번호를 변경해주세요!');
+        }
+    }
+
+    /**
+     * 인증 체크
+     */
+    checkAuth() {
+        if (!SessionManager.isLoggedIn()) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 헤더 UI 설정
+     */
+    setupHeaderUI() {
+        const user = SessionManager.getCurrentUser();
+
+        if (user) {
+            // 사용자 정보 표시
+            document.getElementById('userInfoDisplay').style.display = 'flex';
+            document.getElementById('headerUserName').textContent = user.name;
+            document.getElementById('headerUserOrg').textContent = `(${user.organization})`;
+
+            // 로그아웃 버튼 표시
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                if (confirm('로그아웃 하시겠습니까?')) {
+                    AuthService.logout();
+                }
+            });
+
+            // 관리자 메뉴 (admin만)
+            if (user.role === 'admin') {
+                const adminBtn = document.getElementById('adminMenuBtn');
+                adminBtn.style.display = 'inline-block';
+
+                // 대기 중인 가입 신청 수 표시
+                const pendingCount = storage.getPendingRegistrations().length;
+                const badge = document.getElementById('pendingCount');
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                adminBtn.addEventListener('click', () => {
+                    adminPanel.open();
+                });
+            }
+        }
     }
 
     /**

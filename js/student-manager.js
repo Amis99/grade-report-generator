@@ -58,7 +58,10 @@ class StudentManager {
      * 전체 학생 목록 로드
      */
     loadStudentList() {
-        const students = storage.getAllStudents();
+        let students = storage.getAllStudents();
+
+        // 권한에 따른 학생 필터링
+        students = AuthService.filterStudents(students);
         const studentListDiv = document.getElementById('studentList');
 
         if (students.length === 0) {
