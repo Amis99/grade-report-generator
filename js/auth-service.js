@@ -37,16 +37,26 @@ class AuthService {
 
     /**
      * 현재 사용자가 학생에 접근할 수 있는지 확인 (시험 컨텍스트 없이)
+     * 기관의 시험을 친 학생은 기관의 학생으로 간주
      */
-    static canAccessStudent(student) {
+    static canAccessStudent(student, orgExamIds = null) {
         const user = SessionManager.getCurrentUser();
         if (!user) return false;
 
         // 전체 관리자는 모든 학생 접근 가능
         if (user.role === 'admin') return true;
 
-        // 기관 관리자는 본인 기관 학생만 접근
-        return student.organization === user.organization;
+        // 기관이 관리하는 시험 ID 목록 (캐시된 값 사용 가능)
+        if (!orgExamIds) {
+            const allExams = storage.getAllExams();
+            orgExamIds = allExams
+                .filter(exam => exam.organization === user.organization)
+                .map(exam => exam.id);
+        }
+
+        // 해당 학생이 기관의 시험에 답안을 제출한 적이 있는지 확인
+        const studentAnswers = storage.getAllAnswers().filter(a => a.studentId === student.id);
+        return studentAnswers.some(answer => orgExamIds.includes(answer.examId));
     }
 
     /**
@@ -67,10 +77,25 @@ class AuthService {
 
     /**
      * 학생 목록 필터링 (시험 컨텍스트 없이)
+     * 기관의 시험을 친 학생들만 표시
      */
     static filterStudents(students) {
         if (!students) return [];
-        return students.filter(student => this.canAccessStudent(student));
+
+        const user = SessionManager.getCurrentUser();
+        if (!user) return [];
+
+        // 전체 관리자는 모든 학생 접근 가능
+        if (user.role === 'admin') return students;
+
+        // 기관이 관리하는 시험 ID 목록 (성능 최적화를 위해 미리 계산)
+        const allExams = storage.getAllExams();
+        const orgExamIds = allExams
+            .filter(exam => exam.organization === user.organization)
+            .map(exam => exam.id);
+
+        // 기관 시험을 친 학생들만 필터링
+        return students.filter(student => this.canAccessStudent(student, orgExamIds));
     }
 
     /**
