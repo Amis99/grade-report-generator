@@ -32,6 +32,26 @@ class StudentManager {
         document.getElementById('studentSearchInput').addEventListener('input', (e) => {
             this.filterStudentList(e.target.value);
         });
+
+        // 학생 수정 모달 이벤트
+        document.getElementById('closeEditStudentModal').addEventListener('click', () => {
+            this.closeEditModal();
+        });
+
+        document.getElementById('cancelEditStudentBtn').addEventListener('click', () => {
+            this.closeEditModal();
+        });
+
+        document.getElementById('saveEditStudentBtn').addEventListener('click', async () => {
+            await this.saveStudentEdit();
+        });
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('editStudentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editStudentModal') {
+                this.closeEditModal();
+            }
+        });
     }
 
     /**
@@ -72,11 +92,21 @@ class StudentManager {
                         </div>
                     </div>
                     <div class="student-item-actions">
+                        <button class="btn btn-sm btn-secondary edit-student-btn" data-student-id="${student.id}">수정</button>
                         <button class="btn btn-sm btn-danger delete-student-btn" data-student-id="${student.id}">삭제</button>
                     </div>
                 </div>
             `;
         }).join('');
+
+        // 수정 버튼 이벤트
+        studentListDiv.querySelectorAll('.edit-student-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const studentId = btn.getAttribute('data-student-id');
+                this.openEditModal(studentId);
+            });
+        });
 
         // 삭제 버튼 이벤트
         studentListDiv.querySelectorAll('.delete-student-btn').forEach(btn => {
@@ -239,6 +269,71 @@ class StudentManager {
             this.detectDuplicates();
         } catch (error) {
             alert('삭제 중 오류가 발생했습니다: ' + error.message);
+            console.error(error);
+        }
+    }
+
+    /**
+     * 학생 수정 모달 열기
+     */
+    openEditModal(studentId) {
+        const student = storage.getStudent(studentId);
+        if (!student) {
+            alert('학생 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        document.getElementById('editStudentId').value = student.id;
+        document.getElementById('editStudentName').value = student.name || '';
+        document.getElementById('editStudentSchool').value = student.school || '';
+        document.getElementById('editStudentGrade').value = student.grade || '';
+
+        document.getElementById('editStudentModal').classList.add('active');
+    }
+
+    /**
+     * 학생 수정 모달 닫기
+     */
+    closeEditModal() {
+        document.getElementById('editStudentModal').classList.remove('active');
+        document.getElementById('editStudentId').value = '';
+        document.getElementById('editStudentName').value = '';
+        document.getElementById('editStudentSchool').value = '';
+        document.getElementById('editStudentGrade').value = '';
+    }
+
+    /**
+     * 학생 정보 저장
+     */
+    async saveStudentEdit() {
+        const studentId = document.getElementById('editStudentId').value;
+        const name = document.getElementById('editStudentName').value.trim();
+        const school = document.getElementById('editStudentSchool').value.trim();
+        const grade = document.getElementById('editStudentGrade').value.trim();
+
+        if (!name) {
+            alert('학생 이름을 입력해주세요.');
+            return;
+        }
+
+        const student = storage.getStudent(studentId);
+        if (!student) {
+            alert('학생 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        try {
+            student.name = name;
+            student.school = school;
+            student.grade = grade;
+
+            await storage.saveStudent(student);
+
+            alert('학생 정보가 수정되었습니다.');
+            this.closeEditModal();
+            this.loadStudentList();
+        } catch (error) {
+            alert('저장 중 오류가 발생했습니다: ' + error.message);
             console.error(error);
         }
     }
