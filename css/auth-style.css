@@ -391,7 +391,237 @@
     background-color: #138496;
 }
 
-/* 반응형 */
+/* =====================================================
+   새로운 로그인 페이지 디자인 (2열 레이아웃)
+   ===================================================== */
+
+/* 페이지 배경 */
+.auth-page-new {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: #BDD4EA;
+}
+
+/* 2열 레이아웃 */
+.auth-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* 왼쪽: 일러스트 영역 */
+.auth-illustration {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #BDD4EA;
+    padding: 2rem;
+}
+
+.illustration-image {
+    max-width: 80%;
+    max-height: 60vh;
+    object-fit: contain;
+}
+
+/* 오른쪽: 폼 영역 */
+.auth-form-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    padding: 2rem;
+}
+
+.auth-form-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+/* 로고 (새 디자인) */
+.auth-page-new .auth-logo {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.auth-page-new .auth-logo-image {
+    height: 80px;
+    width: auto;
+}
+
+/* 타이틀 (새 디자인) */
+.auth-title-new {
+    text-align: center;
+    color: #334155;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+}
+
+/* 폼 그룹 */
+.form-group-new {
+    margin-bottom: 1rem;
+}
+
+/* 입력 필드 (새 디자인) */
+.input-new {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: #e2e8f0;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    color: #334155;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.input-new::placeholder {
+    color: #94a3b8;
+}
+
+.input-new:focus {
+    outline: none;
+    background: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 로그인 버튼 (새 디자인) */
+.btn-login {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* 푸터 링크 (새 디자인) */
+.auth-footer-new {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.auth-footer-new a {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.auth-footer-new a:hover {
+    text-decoration: underline;
+}
+
+/* 승인 대기 (새 디자인) */
+.pending-notice-new {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.pending-icon-new {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.pending-notice-new h2 {
+    color: #334155;
+    margin-bottom: 1rem;
+}
+
+.pending-notice-new p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+.btn-secondary-new {
+    padding: 0.75rem 1.5rem;
+    background: #e2e8f0;
+    color: #334155;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-new:hover {
+    background: #cbd5e1;
+}
+
+/* 반응형: 모바일에서 1열 레이아웃 */
+@media (max-width: 900px) {
+    .auth-layout {
+        flex-direction: column;
+    }
+
+    .auth-illustration {
+        padding: 2rem 1rem;
+        min-height: 30vh;
+    }
+
+    .illustration-image {
+        max-height: 30vh;
+    }
+
+    .auth-form-area {
+        padding: 2rem 1rem;
+    }
+
+    .auth-form-container {
+        padding: 1rem;
+    }
+
+    .auth-title-new {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-illustration {
+        min-height: 25vh;
+    }
+
+    .illustration-image {
+        max-height: 20vh;
+    }
+
+    .auth-page-new .auth-logo-image {
+        height: 50px;
+    }
+
+    .auth-title-new {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-new {
+        padding: 0.875rem 1rem;
+    }
+
+    .btn-login {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* 기존 반응형 (이전 디자인 유지) */
 @media (max-width: 480px) {
     .auth-box {
         padding: 1.5rem;

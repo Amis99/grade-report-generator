@@ -7,81 +7,78 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth-style.css">
 </head>
-<body class="auth-page">
-    <div class="auth-container">
-        <div class="auth-box">
-            <div class="auth-logo">
-                <img src="images/logo.png" alt="국어농장" class="auth-logo-image">
-            </div>
-            <h1 class="auth-title">성적표 생성 프로그램</h1>
+<body class="auth-page-new">
+    <div class="auth-layout">
+        <!-- 왼쪽: 일러스트 영역 -->
+        <div class="auth-illustration">
+            <img src="images/login-illustration.png" alt="일러스트" class="illustration-image">
+        </div>
 
-            <!-- 로그인 폼 -->
-            <div id="loginSection" class="auth-section">
-                <h2>로그인</h2>
-                <form id="loginForm" class="auth-form">
-                    <div class="form-group">
-                        <label for="loginUsername">아이디</label>
-                        <input type="text" id="loginUsername" class="form-control" placeholder="아이디를 입력하세요" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword">비밀번호</label>
-                        <input type="password" id="loginPassword" class="form-control" placeholder="비밀번호를 입력하세요" required>
-                    </div>
-                    <div id="loginError" class="auth-error" style="display: none;"></div>
-                    <button type="submit" class="btn btn-primary btn-block">로그인</button>
-                </form>
-                <div class="auth-footer">
-                    <span>계정이 없으신가요?</span>
-                    <a href="#" id="showRegisterLink">회원가입</a>
+        <!-- 오른쪽: 로그인 폼 영역 -->
+        <div class="auth-form-area">
+            <div class="auth-form-container">
+                <!-- 로고 -->
+                <div class="auth-logo">
+                    <img src="images/logo.png" alt="국어농장" class="auth-logo-image">
                 </div>
-            </div>
 
-            <!-- 회원가입 폼 -->
-            <div id="registerSection" class="auth-section" style="display: none;">
-                <h2>회원가입</h2>
-                <form id="registerForm" class="auth-form">
-                    <div class="form-group">
-                        <label for="regUsername">아이디 <span class="required">*</span></label>
-                        <input type="text" id="regUsername" class="form-control" placeholder="영문, 숫자, 언더스코어 (3자 이상)" required>
+                <h1 class="auth-title-new">성적표 생성 프로그램</h1>
+
+                <!-- 로그인 폼 -->
+                <div id="loginSection" class="auth-section-new">
+                    <form id="loginForm" class="auth-form-new">
+                        <div class="form-group-new">
+                            <input type="text" id="loginUsername" class="input-new" placeholder="아이디" required>
+                        </div>
+                        <div class="form-group-new">
+                            <input type="password" id="loginPassword" class="input-new" placeholder="비밀번호" required>
+                        </div>
+                        <div id="loginError" class="auth-error" style="display: none;"></div>
+                        <button type="submit" class="btn-login">로그인</button>
+                    </form>
+                    <div class="auth-footer-new">
+                        <a href="#" id="showRegisterLink">회원가입</a>
                     </div>
-                    <div class="form-group">
-                        <label for="regPassword">비밀번호 <span class="required">*</span></label>
-                        <input type="password" id="regPassword" class="form-control" placeholder="4자 이상" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="regPasswordConfirm">비밀번호 확인 <span class="required">*</span></label>
-                        <input type="password" id="regPasswordConfirm" class="form-control" placeholder="비밀번호를 다시 입력하세요" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="regName">이름 <span class="required">*</span></label>
-                        <input type="text" id="regName" class="form-control" placeholder="실명을 입력하세요" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="regEmail">이메일 <span class="required">*</span></label>
-                        <input type="email" id="regEmail" class="form-control" placeholder="example@email.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="regOrganization">소속 기관 <span class="required">*</span></label>
-                        <input type="text" id="regOrganization" class="form-control" placeholder="기관명을 입력하세요" required>
-                    </div>
-                    <div id="registerError" class="auth-error" style="display: none;"></div>
-                    <div id="registerSuccess" class="auth-success" style="display: none;"></div>
-                    <button type="submit" class="btn btn-primary btn-block">가입 신청</button>
-                </form>
-                <div class="auth-footer">
-                    <span>이미 계정이 있으신가요?</span>
-                    <a href="#" id="showLoginLink">로그인</a>
                 </div>
-            </div>
 
-            <!-- 승인 대기 안내 -->
-            <div id="pendingSection" class="auth-section" style="display: none;">
-                <div class="pending-notice">
-                    <div class="pending-icon">&#128337;</div>
-                    <h2>가입 신청 완료</h2>
-                    <p>관리자 승인 후 로그인이 가능합니다.</p>
-                    <p class="pending-info">승인이 완료되면 등록하신 이메일로 안내 드립니다.</p>
-                    <button id="backToLoginBtn" class="btn btn-secondary">로그인 화면으로</button>
+                <!-- 회원가입 폼 -->
+                <div id="registerSection" class="auth-section-new" style="display: none;">
+                    <form id="registerForm" class="auth-form-new">
+                        <div class="form-group-new">
+                            <input type="text" id="regUsername" class="input-new" placeholder="아이디 (영문, 숫자, 3자 이상)" required>
+                        </div>
+                        <div class="form-group-new">
+                            <input type="password" id="regPassword" class="input-new" placeholder="비밀번호 (4자 이상)" required>
+                        </div>
+                        <div class="form-group-new">
+                            <input type="password" id="regPasswordConfirm" class="input-new" placeholder="비밀번호 확인" required>
+                        </div>
+                        <div class="form-group-new">
+                            <input type="text" id="regName" class="input-new" placeholder="이름" required>
+                        </div>
+                        <div class="form-group-new">
+                            <input type="email" id="regEmail" class="input-new" placeholder="이메일" required>
+                        </div>
+                        <div class="form-group-new">
+                            <input type="text" id="regOrganization" class="input-new" placeholder="소속 기관" required>
+                        </div>
+                        <div id="registerError" class="auth-error" style="display: none;"></div>
+                        <div id="registerSuccess" class="auth-success" style="display: none;"></div>
+                        <button type="submit" class="btn-login">가입 신청</button>
+                    </form>
+                    <div class="auth-footer-new">
+                        <a href="#" id="showLoginLink">로그인으로 돌아가기</a>
+                    </div>
+                </div>
+
+                <!-- 승인 대기 안내 -->
+                <div id="pendingSection" class="auth-section-new" style="display: none;">
+                    <div class="pending-notice-new">
+                        <div class="pending-icon-new">⏳</div>
+                        <h2>가입 신청 완료</h2>
+                        <p>관리자 승인 후 로그인이 가능합니다.</p>
+                        <button id="backToLoginBtn" class="btn-secondary-new">로그인 화면으로</button>
+                    </div>
                 </div>
             </div>
         </div>
