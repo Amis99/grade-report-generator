@@ -1,0 +1,628 @@
+service: test-report-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-northeast-2
+  stage: ${opt:stage, 'dev'}
+
+  environment:
+    STAGE: ${self:provider.stage}
+    EXAMS_TABLE: ${self:custom.examsTable}
+    QUESTIONS_TABLE: ${self:custom.questionsTable}
+    STUDENTS_TABLE: ${self:custom.studentsTable}
+    ANSWERS_TABLE: ${self:custom.answersTable}
+    USERS_TABLE: ${self:custom.usersTable}
+    REGISTRATIONS_TABLE: ${self:custom.registrationsTable}
+    PDF_BUCKET: ${self:custom.pdfBucket}
+    USER_POOL_ID: !Ref CognitoUserPool
+    USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:BatchWriteItem
+          Resource:
+            - !GetAtt ExamsTable.Arn
+            - !Join ['/', [!GetAtt ExamsTable.Arn, 'index/*']]
+            - !GetAtt QuestionsTable.Arn
+            - !Join ['/', [!GetAtt QuestionsTable.Arn, 'index/*']]
+            - !GetAtt StudentsTable.Arn
+            - !Join ['/', [!GetAtt StudentsTable.Arn, 'index/*']]
+            - !GetAtt AnswersTable.Arn
+            - !Join ['/', [!GetAtt AnswersTable.Arn, 'index/*']]
+            - !GetAtt UsersTable.Arn
+            - !Join ['/', [!GetAtt UsersTable.Arn, 'index/*']]
+            - !GetAtt RegistrationsTable.Arn
+            - !Join ['/', [!GetAtt RegistrationsTable.Arn, 'index/*']]
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - !Join ['/', [!GetAtt PdfBucket.Arn, '*']]
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminSetUserPassword
+            - cognito-idp:AdminInitiateAuth
+            - cognito-idp:AdminGetUser
+            - cognito-idp:AdminUpdateUserAttributes
+            - cognito-idp:AdminDisableUser
+            - cognito-idp:AdminEnableUser
+          Resource:
+            - !GetAtt CognitoUserPool.Arn
+
+custom:
+  examsTable: TestReportExams-${self:provider.stage}
+  questionsTable: TestReportQuestions-${self:provider.stage}
+  studentsTable: TestReportStudents-${self:provider.stage}
+  answersTable: TestReportAnswers-${self:provider.stage}
+  usersTable: TestReportUsers-${self:provider.stage}
+  registrationsTable: TestReportRegistrations-${self:provider.stage}
+  pdfBucket: test-report-pdfs-${self:provider.stage}-${aws:accountId}
+
+functions:
+  # Auth
+  login:
+    handler: src/handlers/auth/login.handler
+    events:
+      - http:
+          path: /api/v1/auth/login
+          method: post
+          cors: true
+
+  register:
+    handler: src/handlers/auth/register.handler
+    events:
+      - http:
+          path: /api/v1/auth/register
+          method: post
+          cors: true
+
+  changePassword:
+    handler: src/handlers/auth/changePassword.handler
+    events:
+      - http:
+          path: /api/v1/auth/change-password
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Exams
+  getExams:
+    handler: src/handlers/exams/getExams.handler
+    events:
+      - http:
+          path: /api/v1/exams
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getExam:
+    handler: src/handlers/exams/getExam.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  createExam:
+    handler: src/handlers/exams/createExam.handler
+    events:
+      - http:
+          path: /api/v1/exams
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  updateExam:
+    handler: src/handlers/exams/updateExam.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  deleteExam:
+    handler: src/handlers/exams/deleteExam.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  uploadPdf:
+    handler: src/handlers/exams/uploadPdf.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/pdf
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  downloadPdf:
+    handler: src/handlers/exams/downloadPdf.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/pdf
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Questions
+  getQuestions:
+    handler: src/handlers/questions/getQuestions.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/questions
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  saveQuestions:
+    handler: src/handlers/questions/saveQuestions.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/questions
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Students
+  getStudents:
+    handler: src/handlers/students/getStudents.handler
+    events:
+      - http:
+          path: /api/v1/students
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  createStudent:
+    handler: src/handlers/students/createStudent.handler
+    events:
+      - http:
+          path: /api/v1/students
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  deleteStudent:
+    handler: src/handlers/students/deleteStudent.handler
+    events:
+      - http:
+          path: /api/v1/students/{studentId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  findDuplicates:
+    handler: src/handlers/students/findDuplicates.handler
+    events:
+      - http:
+          path: /api/v1/students/duplicates
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  mergeStudents:
+    handler: src/handlers/students/mergeStudents.handler
+    events:
+      - http:
+          path: /api/v1/students/merge
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Answers
+  getAnswers:
+    handler: src/handlers/answers/getAnswers.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/answers
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  saveAnswers:
+    handler: src/handlers/answers/saveAnswers.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/students/{studentId}/answers
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Grading
+  getResults:
+    handler: src/handlers/grading/getResults.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/results
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getStudentResult:
+    handler: src/handlers/grading/getStudentResult.handler
+    events:
+      - http:
+          path: /api/v1/exams/{examId}/students/{studentId}/result
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Admin
+  getRegistrations:
+    handler: src/handlers/admin/getRegistrations.handler
+    events:
+      - http:
+          path: /api/v1/admin/registrations
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  approveRegistration:
+    handler: src/handlers/admin/approveRegistration.handler
+    events:
+      - http:
+          path: /api/v1/admin/registrations/{registrationId}/approve
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  rejectRegistration:
+    handler: src/handlers/admin/rejectRegistration.handler
+    events:
+      - http:
+          path: /api/v1/admin/registrations/{registrationId}/reject
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getUsers:
+    handler: src/handlers/admin/getUsers.handler
+    events:
+      - http:
+          path: /api/v1/admin/users
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  updateUser:
+    handler: src/handlers/admin/updateUser.handler
+    events:
+      - http:
+          path: /api/v1/admin/users/{userId}
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+resources:
+  Resources:
+    # API Gateway Authorizer
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: CognitoAuthorizer
+        Type: COGNITO_USER_POOLS
+        IdentitySource: method.request.header.Authorization
+        RestApiId: !Ref ApiGatewayRestApi
+        ProviderARNs:
+          - !GetAtt CognitoUserPool.Arn
+
+    # Cognito User Pool
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: TestReportUserPool-${self:provider.stage}
+        AutoVerifiedAttributes:
+          - email
+        UsernameAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireSymbols: false
+            RequireUppercase: false
+        Schema:
+          - Name: name
+            AttributeDataType: String
+            Mutable: true
+            Required: true
+          - Name: organization
+            AttributeDataType: String
+            Mutable: true
+          - Name: role
+            AttributeDataType: String
+            Mutable: true
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: TestReportClient-${self:provider.stage}
+        UserPoolId: !Ref CognitoUserPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+          - USER_PASSWORD_AUTH
+        GenerateSecret: false
+
+    # DynamoDB Tables
+    ExamsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.examsTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: organization
+            AttributeType: S
+          - AttributeName: updatedAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: organization-updatedAt-index
+            KeySchema:
+              - AttributeName: organization
+                KeyType: HASH
+              - AttributeName: updatedAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    QuestionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.questionsTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+
+    StudentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.studentsTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: organization
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+          - AttributeName: normalizedKey
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: organization-name-index
+            KeySchema:
+              - AttributeName: organization
+                KeyType: HASH
+              - AttributeName: name
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: normalizedKey-index
+            KeySchema:
+              - AttributeName: normalizedKey
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    AnswersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.answersTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: examId
+            AttributeType: S
+          - AttributeName: studentId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: examId-index
+            KeySchema:
+              - AttributeName: examId
+                KeyType: HASH
+              - AttributeName: studentId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: studentId-index
+            KeySchema:
+              - AttributeName: studentId
+                KeyType: HASH
+              - AttributeName: examId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.usersTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: cognitoSub
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: username-index
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: cognitoSub-index
+            KeySchema:
+              - AttributeName: cognitoSub
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    RegistrationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.registrationsTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: status-createdAt-index
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # S3 Bucket for PDFs
+    PdfBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.pdfBucket}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+              AllowedOrigins:
+                - '*'
+              MaxAge: 3000
+
+  Outputs:
+    UserPoolId:
+      Value: !Ref CognitoUserPool
+      Export:
+        Name: ${self:service}-${self:provider.stage}-UserPoolId
+
+    UserPoolClientId:
+      Value: !Ref CognitoUserPoolClient
+      Export:
+        Name: ${self:service}-${self:provider.stage}-UserPoolClientId
+
+    ApiEndpoint:
+      Value: !Sub 'https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}'
+      Export:
+        Name: ${self:service}-${self:provider.stage}-ApiEndpoint
