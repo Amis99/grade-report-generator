@@ -293,7 +293,7 @@
 /* 행 추가 버튼 */
 .add-row-section {
     padding: 1rem;
-    text-align: center;
+    text-align: left;
     border-top: 2px solid var(--border-color);
     background: var(--background-color);
 }
