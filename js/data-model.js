@@ -20,6 +20,8 @@ class Exam {
         this.grade = data.grade || '';
         this.date = data.date || new Date().toISOString().split('T')[0];
         this.series = data.series || ''; // 시리즈 (예: "1학기 중간", "2학기 기말")
+        this.pdfFileName = data.pdfFileName || ''; // PDF 파일명
+        this.pdfData = data.pdfData || ''; // PDF 파일 데이터 (base64)
         this.createdAt = data.createdAt || new Date().toISOString();
         this.updatedAt = data.updatedAt || new Date().toISOString();
     }
@@ -33,6 +35,8 @@ class Exam {
             grade: this.grade,
             date: this.date,
             series: this.series,
+            pdfFileName: this.pdfFileName,
+            pdfData: this.pdfData,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
         };

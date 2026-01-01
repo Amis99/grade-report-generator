@@ -53,6 +53,27 @@ ExamManager.prototype.renderFullSheet = function(questions) {
                         <label>시리즈</label>
                         <input type="text" class="form-control" id="sheetExamSeries" value="${this.currentExam.series}" placeholder="예: 1학기 중간고사">
                     </div>
+                    <div class="exam-info-item exam-pdf-item">
+                        <label>시험지 PDF</label>
+                        <div class="pdf-controls">
+                            ${this.currentExam.pdfFileName ? `
+                                <span class="pdf-filename" title="${this.currentExam.pdfFileName}">
+                                    📄 ${this.currentExam.pdfFileName}
+                                </span>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="examManager.downloadPdf()">
+                                    다운로드
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="examManager.deletePdf()">
+                                    삭제
+                                </button>
+                            ` : `
+                                <span class="pdf-filename no-file">파일 없음</span>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="examManager.uploadPdf()">
+                                    PDF 업로드
+                                </button>
+                            `}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -443,4 +464,115 @@ ExamManager.prototype.showQuestionModal = function(question = null) {
 
 ExamManager.prototype.editQuestionChoices = function(questionId) {
     // 더 이상 사용하지 않음
+};
+
+/**
+ * PDF 업로드
+ */
+ExamManager.prototype.uploadPdf = function() {
+    if (!this.currentExam) {
+        alert('먼저 시험을 선택해주세요.');
+        return;
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    fileInput.accept = '.pdf';
+    fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 파일 크기 체크 (10MB 제한)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            alert('파일 크기는 10MB를 초과할 수 없습니다.');
+            e.target.value = '';
+            return;
+        }
+
+        try {
+            // 파일을 base64로 변환
+            const base64Data = await this.fileToBase64(file);
+
+            // 시험 정보 업데이트
+            this.currentExam.pdfFileName = file.name;
+            this.currentExam.pdfData = base64Data;
+            await storage.saveExam(this.currentExam);
+
+            alert('PDF가 업로드되었습니다.');
+            this.loadQuestionList(); // UI 새로고침
+        } catch (error) {
+            console.error('PDF 업로드 실패:', error);
+            alert('PDF 업로드에 실패했습니다: ' + error.message);
+        }
+
+        e.target.value = '';
+    };
+
+    fileInput.click();
+};
+
+/**
+ * 파일을 base64로 변환
+ */
+ExamManager.prototype.fileToBase64 = function(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+    });
+};
+
+/**
+ * PDF 다운로드
+ */
+ExamManager.prototype.downloadPdf = function() {
+    if (!this.currentExam || !this.currentExam.pdfData) {
+        alert('다운로드할 PDF가 없습니다.');
+        return;
+    }
+
+    try {
+        // base64 데이터에서 Blob 생성
+        const base64Data = this.currentExam.pdfData;
+        const byteCharacters = atob(base64Data.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+        // 다운로드 링크 생성
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = this.currentExam.pdfFileName || `${this.currentExam.name}_시험지.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('PDF 다운로드 실패:', error);
+        alert('PDF 다운로드에 실패했습니다.');
+    }
+};
+
+/**
+ * PDF 삭제
+ */
+ExamManager.prototype.deletePdf = async function() {
+    if (!this.currentExam) return;
+
+    if (!confirm('업로드된 PDF를 삭제하시겠습니까?')) return;
+
+    try {
+        this.currentExam.pdfFileName = '';
+        this.currentExam.pdfData = '';
+        await storage.saveExam(this.currentExam);
+
+        alert('PDF가 삭제되었습니다.');
+        this.loadQuestionList(); // UI 새로고침
+    } catch (error) {
+        console.error('PDF 삭제 실패:', error);
+        alert('PDF 삭제에 실패했습니다.');
+    }
 };

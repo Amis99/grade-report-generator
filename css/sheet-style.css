@@ -435,3 +435,40 @@
         border: 1px solid #ddd;
     }
 }
+
+/* PDF 컨트롤 스타일 */
+.exam-pdf-item {
+    grid-column: span 2;
+}
+
+.pdf-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pdf-filename {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.8rem;
+    background: #e3f2fd;
+    color: #1565c0;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pdf-filename.no-file {
+    background: #f5f5f5;
+    color: #999;
+}
+
+.pdf-controls .btn-sm {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+}
