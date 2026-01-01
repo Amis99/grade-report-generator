@@ -369,6 +369,17 @@
     color: white;
 }
 
+/* 버튼 - 정보 */
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
 /* 반응형 */
 @media (max-width: 480px) {
     .auth-box {

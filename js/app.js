@@ -94,6 +94,13 @@ class App {
                 }
             });
 
+            // 비밀번호 변경 버튼
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            changePasswordBtn.style.display = 'inline-block';
+            changePasswordBtn.addEventListener('click', () => {
+                this.openChangePasswordModal();
+            });
+
             // 관리자 메뉴 (admin만)
             if (user.role === 'admin') {
                 const adminBtn = document.getElementById('adminMenuBtn');
@@ -113,6 +120,121 @@ class App {
                     adminPanel.open();
                 });
             }
+        }
+
+        // 비밀번호 변경 모달 이벤트 설정
+        this.setupChangePasswordModal();
+    }
+
+    /**
+     * 비밀번호 변경 모달 설정
+     */
+    setupChangePasswordModal() {
+        const modal = document.getElementById('changePasswordModal');
+        const closeBtn = document.getElementById('closeChangePasswordModal');
+        const cancelBtn = document.getElementById('cancelChangePasswordBtn');
+        const saveBtn = document.getElementById('saveChangePasswordBtn');
+
+        // 모달 닫기
+        const closeModal = () => {
+            modal.classList.remove('active');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // 비밀번호 변경 저장
+        saveBtn.addEventListener('click', async () => {
+            await this.changePassword();
+        });
+
+        // Enter 키로 저장
+        document.getElementById('confirmNewPassword').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                await this.changePassword();
+            }
+        });
+    }
+
+    /**
+     * 비밀번호 변경 모달 열기
+     */
+    openChangePasswordModal() {
+        document.getElementById('changePasswordModal').classList.add('active');
+        document.getElementById('currentPassword').focus();
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    async changePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+        // 유효성 검사
+        if (!currentPassword) {
+            alert('현재 비밀번호를 입력해주세요.');
+            return;
+        }
+
+        if (!newPassword) {
+            alert('새 비밀번호를 입력해주세요.');
+            return;
+        }
+
+        if (!AuthUtils.validatePassword(newPassword)) {
+            alert('새 비밀번호는 4자 이상이어야 합니다.');
+            return;
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            alert('새 비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        try {
+            const session = SessionManager.getSession();
+            const user = storage.getUser(session.userId);
+
+            if (!user) {
+                alert('사용자 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 현재 비밀번호 확인
+            const isValid = await AuthUtils.verifyPassword(currentPassword, user.passwordHash, user.salt);
+            if (!isValid) {
+                alert('현재 비밀번호가 올바르지 않습니다.');
+                return;
+            }
+
+            // 새 비밀번호 해시 생성
+            const newSalt = AuthUtils.generateSalt();
+            const newHash = await AuthUtils.hashPassword(newPassword, newSalt);
+
+            // 사용자 정보 업데이트
+            user.salt = newSalt;
+            user.passwordHash = newHash;
+            await storage.saveUser(user);
+
+            alert('비밀번호가 변경되었습니다.');
+
+            // 모달 닫기
+            document.getElementById('changePasswordModal').classList.remove('active');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+
+        } catch (error) {
+            console.error('비밀번호 변경 오류:', error);
+            alert('비밀번호 변경 중 오류가 발생했습니다.');
         }
     }
 

@@ -161,6 +161,9 @@ class AdminPanel {
                                     <button class="btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'} toggle-active-btn" data-id="${user.id}" data-active="${user.isActive}">
                                         ${user.isActive ? '비활성화' : '활성화'}
                                     </button>
+                                    <button class="btn btn-sm btn-info reset-password-btn" data-id="${user.id}" data-name="${user.name}">
+                                        비밀번호 초기화
+                                    </button>
                                 ` : '<span style="color: #888;">본인</span>'}
                             </td>
                         </tr>
@@ -210,6 +213,15 @@ class AdminPanel {
                 const userId = btn.getAttribute('data-id');
                 const isActive = btn.getAttribute('data-active') === 'true';
                 await this.toggleUserActive(userId, isActive);
+            });
+        });
+
+        // 비밀번호 초기화 버튼
+        document.querySelectorAll('.reset-password-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const userId = btn.getAttribute('data-id');
+                const userName = btn.getAttribute('data-name');
+                await this.resetUserPassword(userId, userName);
             });
         });
     }
@@ -288,6 +300,42 @@ class AdminPanel {
         } catch (error) {
             console.error('상태 변경 오류:', error);
             alert('상태 변경 중 오류가 발생했습니다.');
+        }
+    }
+
+    /**
+     * 사용자 비밀번호 초기화
+     */
+    async resetUserPassword(userId, userName) {
+        const newPassword = prompt(`${userName}님의 새 비밀번호를 입력하세요.\n(4자 이상)`);
+
+        if (!newPassword) return;
+
+        if (!AuthUtils.validatePassword(newPassword)) {
+            alert('비밀번호는 4자 이상이어야 합니다.');
+            return;
+        }
+
+        if (!confirm(`${userName}님의 비밀번호를 초기화하시겠습니까?`)) return;
+
+        try {
+            const user = storage.getUser(userId);
+            if (!user) {
+                alert('사용자를 찾을 수 없습니다.');
+                return;
+            }
+
+            const newSalt = AuthUtils.generateSalt();
+            const newHash = await AuthUtils.hashPassword(newPassword, newSalt);
+
+            user.salt = newSalt;
+            user.passwordHash = newHash;
+            await storage.saveUser(user);
+
+            alert(`${userName}님의 비밀번호가 초기화되었습니다.\n새 비밀번호: ${newPassword}`);
+        } catch (error) {
+            console.error('비밀번호 초기화 오류:', error);
+            alert('비밀번호 초기화 중 오류가 발생했습니다.');
         }
     }
 
