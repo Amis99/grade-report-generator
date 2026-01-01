@@ -1,39 +1,25 @@
 /**
  * 인증 UI 모듈
- * 로그인, 회원가입 처리
+ * Cognito 기반 로그인, 회원가입 처리
  */
 
 class AuthUI {
     constructor() {
+        this.pendingCognitoUser = null;
         this.init();
     }
 
     async init() {
-        // Firebase 초기화 대기
-        if (typeof initializeFirebase === 'function') {
-            await initializeFirebase();
-        }
-
-        // storage 캐시 로드 대기
-        await this.waitForStorageCache();
+        // Cognito 초기화
+        await cognitoAuth.init();
 
         // 이미 로그인되어 있으면 메인 페이지로 이동
-        if (SessionManager.isLoggedIn()) {
+        if (cognitoAuth.isLoggedIn()) {
             window.location.href = 'index.html';
             return;
         }
 
         this.setupEventListeners();
-    }
-
-    async waitForStorageCache() {
-        if (!storage.useFirebase) return;
-
-        let attempts = 0;
-        while (!storage.cacheLoaded && attempts < 50) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
-        }
     }
 
     setupEventListeners() {
@@ -63,12 +49,32 @@ class AuthUI {
             e.preventDefault();
             await this.handleRegister();
         });
+
+        // 비밀번호 변경 폼 (신규 사용자용)
+        const newPasswordForm = document.getElementById('newPasswordForm');
+        if (newPasswordForm) {
+            newPasswordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.handleNewPassword();
+            });
+        }
+
+        // 비밀번호 찾기 링크
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showForgotPassword();
+            });
+        }
     }
 
     showLogin() {
         document.getElementById('loginSection').style.display = 'block';
         document.getElementById('registerSection').style.display = 'none';
         document.getElementById('pendingSection').style.display = 'none';
+        const newPasswordSection = document.getElementById('newPasswordSection');
+        if (newPasswordSection) newPasswordSection.style.display = 'none';
         this.clearErrors();
     }
 
@@ -83,6 +89,14 @@ class AuthUI {
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('registerSection').style.display = 'none';
         document.getElementById('pendingSection').style.display = 'block';
+    }
+
+    showNewPassword() {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('registerSection').style.display = 'none';
+        document.getElementById('pendingSection').style.display = 'none';
+        const newPasswordSection = document.getElementById('newPasswordSection');
+        if (newPasswordSection) newPasswordSection.style.display = 'block';
     }
 
     clearErrors() {
@@ -112,72 +126,84 @@ class AuthUI {
     }
 
     async handleLogin() {
-        const username = document.getElementById('loginUsername').value.trim();
+        const email = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
 
         this.clearErrors();
 
-        if (!username || !password) {
-            this.showLoginError('아이디와 비밀번호를 입력해주세요.');
+        if (!email || !password) {
+            this.showLoginError('이메일과 비밀번호를 입력해주세요.');
             return;
         }
 
         try {
-            // 사용자 조회
-            const user = storage.getUserByUsername(username);
+            const result = await cognitoAuth.login(email, password);
 
-            if (!user) {
-                this.showLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
-                return;
+            if (result.success) {
+                // 로그인 성공
+                window.location.href = 'index.html';
             }
-
-            // 비밀번호 검증
-            const isValid = await AuthUtils.verifyPassword(password, user.passwordHash, user.salt);
-
-            if (!isValid) {
-                this.showLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
-                return;
-            }
-
-            // 활성화 여부 확인
-            if (!user.isActive) {
-                this.showLoginError('계정이 비활성화되어 있습니다. 관리자에게 문의하세요.');
-                return;
-            }
-
-            // 로그인 성공
-            user.lastLoginAt = new Date().toISOString();
-            await storage.saveUser(user);
-
-            SessionManager.setSession(user);
-            window.location.href = 'index.html';
-
         } catch (error) {
             console.error('로그인 오류:', error);
-            this.showLoginError('로그인 중 오류가 발생했습니다.');
+
+            if (error.code === 'NewPasswordRequired') {
+                // 새 비밀번호 설정 필요
+                this.pendingCognitoUser = error.cognitoUser;
+                this.showNewPassword();
+                return;
+            }
+
+            this.showLoginError(error.message || '로그인 중 오류가 발생했습니다.');
+        }
+    }
+
+    async handleNewPassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmNewPassword').value;
+
+        if (!newPassword || newPassword.length < 8) {
+            alert('비밀번호는 최소 8자 이상이어야 합니다.');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        try {
+            const result = await cognitoAuth.completeNewPasswordChallenge(
+                this.pendingCognitoUser,
+                newPassword,
+                {}
+            );
+
+            if (result.success) {
+                window.location.href = 'index.html';
+            }
+        } catch (error) {
+            console.error('비밀번호 변경 오류:', error);
+            alert(error.message || '비밀번호 변경에 실패했습니다.');
         }
     }
 
     async handleRegister() {
-        const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
         const password = document.getElementById('regPassword').value;
         const passwordConfirm = document.getElementById('regPasswordConfirm').value;
         const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
         const organization = document.getElementById('regOrganization').value.trim();
 
         this.clearErrors();
 
         // 유효성 검사
-        const usernameValidation = AuthUtils.validateUsername(username);
-        if (!usernameValidation.valid) {
-            this.showRegisterError(usernameValidation.message);
+        if (!email || !email.includes('@')) {
+            this.showRegisterError('올바른 이메일을 입력해주세요.');
             return;
         }
 
-        const passwordValidation = AuthUtils.validatePassword(password);
-        if (!passwordValidation.valid) {
-            this.showRegisterError(passwordValidation.message);
+        if (!password || password.length < 8) {
+            this.showRegisterError('비밀번호는 최소 8자 이상이어야 합니다.');
             return;
         }
 
@@ -191,46 +217,29 @@ class AuthUI {
             return;
         }
 
-        const emailValidation = AuthUtils.validateEmail(email);
-        if (!emailValidation.valid) {
-            this.showRegisterError(emailValidation.message);
-            return;
-        }
-
         if (!organization) {
             this.showRegisterError('소속 기관을 입력해주세요.');
             return;
         }
 
         try {
-            // 아이디 중복 확인
-            const existingUser = storage.getUserByUsername(username);
-            if (existingUser) {
-                this.showRegisterError('이미 사용 중인 아이디입니다.');
-                return;
-            }
-
-            const existingRegistration = storage.getRegistrationByUsername(username);
-            if (existingRegistration && existingRegistration.status === 'pending') {
-                this.showRegisterError('이미 가입 신청 중인 아이디입니다.');
-                return;
-            }
-
-            // 비밀번호 해시
-            const salt = AuthUtils.generateSalt();
-            const passwordHash = await AuthUtils.hashPassword(password, salt);
-
-            // 가입 신청 생성
-            const registration = new RegistrationRequest({
-                username,
-                passwordHash,
-                salt,
-                name,
-                email,
-                organization
+            // API를 통해 가입 신청
+            const response = await fetch(`${APP_CONFIG.API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    name,
+                    organization
+                })
             });
 
-            await storage.saveRegistration(registration);
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || '가입 신청에 실패했습니다.');
+            }
 
             // 폼 초기화
             document.getElementById('registerForm').reset();
@@ -240,8 +249,35 @@ class AuthUI {
 
         } catch (error) {
             console.error('회원가입 오류:', error);
-            this.showRegisterError('회원가입 중 오류가 발생했습니다.');
+            this.showRegisterError(error.message || '회원가입 중 오류가 발생했습니다.');
         }
+    }
+
+    showForgotPassword() {
+        const email = prompt('비밀번호를 재설정할 이메일을 입력하세요:');
+        if (!email) return;
+
+        cognitoAuth.forgotPassword(email)
+            .then(result => {
+                const code = prompt('이메일로 발송된 인증 코드를 입력하세요:');
+                if (!code) return;
+
+                const newPassword = prompt('새 비밀번호를 입력하세요 (8자 이상):');
+                if (!newPassword || newPassword.length < 8) {
+                    alert('비밀번호는 8자 이상이어야 합니다.');
+                    return;
+                }
+
+                return cognitoAuth.confirmForgotPassword(email, code, newPassword);
+            })
+            .then(result => {
+                if (result && result.success) {
+                    alert('비밀번호가 재설정되었습니다. 새 비밀번호로 로그인해주세요.');
+                }
+            })
+            .catch(error => {
+                alert(error.message || '비밀번호 재설정에 실패했습니다.');
+            });
     }
 }
 

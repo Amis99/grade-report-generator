@@ -131,8 +131,13 @@ class AuthService {
      * 로그아웃
      */
     static logout() {
-        SessionManager.clearSession();
-        window.location.href = 'login.html';
+        // Cognito 로그아웃
+        if (typeof cognitoAuth !== 'undefined') {
+            cognitoAuth.logout();
+        } else {
+            SessionManager.clearSession();
+            window.location.href = 'login.html';
+        }
     }
 
     /**

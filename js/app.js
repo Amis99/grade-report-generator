@@ -9,24 +9,28 @@ class App {
     }
 
     async init() {
-        // Firebase 캐시 로드 대기
-        if (storage.useFirebase && !storage.cacheLoaded) {
-            console.log('⏳ Firebase 데이터 로딩 중...');
-            await this.waitForCache();
-        }
-
-        // 초기 관리자 계정 확인 및 생성
-        await this.initializeFirstAdmin();
+        // Cognito 초기화
+        await cognitoAuth.init();
 
         // 인증 체크
         if (!this.checkAuth()) {
             return;
         }
 
+        try {
+            // API에서 데이터 로드
+            await this.loadDataFromAPI();
+        } catch (error) {
+            console.error('Failed to load data:', error);
+            alert('데이터를 불러오는 중 오류가 발생했습니다. 다시 로그인해주세요.');
+            cognitoAuth.logout();
+            return;
+        }
+
         // 헤더 UI 설정
         this.setupHeaderUI();
 
-        // 중복 답안 데이터 정리 (앱 시작 시 자동 실행)
+        // 데이터 정리
         await this.cleanupData();
         this.setupTabNavigation();
         this.setupBackupRestore();
@@ -34,32 +38,19 @@ class App {
     }
 
     /**
-     * 초기 관리자 계정 생성
+     * API에서 데이터 로드
      */
-    async initializeFirstAdmin() {
-        const users = storage.getAllUsers();
+    async loadDataFromAPI() {
+        console.log('Loading data from API...');
+        const startTime = Date.now();
 
-        if (users.length === 0) {
-            console.log('🔐 초기 관리자 계정 생성 중...');
+        await storage.loadAllDataToCache();
 
-            const salt = AuthUtils.generateSalt();
-            const passwordHash = await AuthUtils.hashPassword('admin123', salt);
+        const loadTime = Date.now() - startTime;
+        console.log(`Data loaded in ${loadTime}ms`);
 
-            const adminUser = new User({
-                username: 'admin',
-                passwordHash: passwordHash,
-                salt: salt,
-                name: '관리자',
-                email: 'admin@example.com',
-                organization: '국어농장',
-                role: 'admin',
-                isActive: true
-            });
-
-            await storage.saveUser(adminUser);
-            console.log('✅ 초기 관리자 계정 생성 완료');
-
-            alert('초기 관리자 계정이 생성되었습니다.\n\n아이디: admin\n비밀번호: admin123\n\n보안을 위해 로그인 후 비밀번호를 변경해주세요!');
+        if (loadTime > 500) {
+            this.showLoadingCompleteModal(storage.cache, loadTime);
         }
     }
 
@@ -67,7 +58,7 @@ class App {
      * 인증 체크
      */
     checkAuth() {
-        if (!SessionManager.isLoggedIn()) {
+        if (!cognitoAuth.isLoggedIn()) {
             window.location.href = 'login.html';
             return false;
         }
@@ -78,7 +69,7 @@ class App {
      * 헤더 UI 설정
      */
     setupHeaderUI() {
-        const user = SessionManager.getCurrentUser();
+        const user = cognitoAuth.getCurrentUser();
 
         if (user) {
             // 사용자 정보 표시
@@ -90,7 +81,7 @@ class App {
             document.getElementById('logoutBtn').style.display = 'inline-block';
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 if (confirm('로그아웃 하시겠습니까?')) {
-                    AuthService.logout();
+                    cognitoAuth.logout();
                 }
             });
 
@@ -106,15 +97,8 @@ class App {
                 const adminBtn = document.getElementById('adminMenuBtn');
                 adminBtn.style.display = 'inline-block';
 
-                // 대기 중인 가입 신청 수 표시
-                const pendingCount = storage.getPendingRegistrations().length;
-                const badge = document.getElementById('pendingCount');
-                if (pendingCount > 0) {
-                    badge.textContent = pendingCount;
-                    badge.style.display = 'inline';
-                } else {
-                    badge.style.display = 'none';
-                }
+                // 대기 중인 가입 신청 수 로드
+                this.loadPendingCount();
 
                 adminBtn.addEventListener('click', () => {
                     adminPanel.open();
@@ -124,6 +108,25 @@ class App {
 
         // 비밀번호 변경 모달 이벤트 설정
         this.setupChangePasswordModal();
+    }
+
+    /**
+     * 대기 중인 가입 신청 수 로드
+     */
+    async loadPendingCount() {
+        try {
+            await storage.loadRegistrations();
+            const pendingCount = storage.getPendingRegistrations().length;
+            const badge = document.getElementById('pendingCount');
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Failed to load pending count:', error);
+        }
     }
 
     /**
@@ -171,7 +174,7 @@ class App {
     }
 
     /**
-     * 비밀번호 변경
+     * 비밀번호 변경 (Cognito)
      */
     async changePassword() {
         const currentPassword = document.getElementById('currentPassword').value;
@@ -184,13 +187,8 @@ class App {
             return;
         }
 
-        if (!newPassword) {
-            alert('새 비밀번호를 입력해주세요.');
-            return;
-        }
-
-        if (!AuthUtils.validatePassword(newPassword)) {
-            alert('새 비밀번호는 4자 이상이어야 합니다.');
+        if (!newPassword || newPassword.length < 8) {
+            alert('새 비밀번호는 8자 이상이어야 합니다.');
             return;
         }
 
@@ -200,72 +198,20 @@ class App {
         }
 
         try {
-            const session = SessionManager.getSession();
-            const user = storage.getUser(session.userId);
+            const result = await cognitoAuth.changePassword(currentPassword, newPassword);
 
-            if (!user) {
-                alert('사용자 정보를 찾을 수 없습니다.');
-                return;
+            if (result.success) {
+                alert('비밀번호가 변경되었습니다.');
+
+                // 모달 닫기
+                document.getElementById('changePasswordModal').classList.remove('active');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
             }
-
-            // 현재 비밀번호 확인
-            const isValid = await AuthUtils.verifyPassword(currentPassword, user.passwordHash, user.salt);
-            if (!isValid) {
-                alert('현재 비밀번호가 올바르지 않습니다.');
-                return;
-            }
-
-            // 새 비밀번호 해시 생성
-            const newSalt = AuthUtils.generateSalt();
-            const newHash = await AuthUtils.hashPassword(newPassword, newSalt);
-
-            // 사용자 정보 업데이트
-            user.salt = newSalt;
-            user.passwordHash = newHash;
-            await storage.saveUser(user);
-
-            alert('비밀번호가 변경되었습니다.');
-
-            // 모달 닫기
-            document.getElementById('changePasswordModal').classList.remove('active');
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmNewPassword').value = '';
-
         } catch (error) {
             console.error('비밀번호 변경 오류:', error);
-            alert('비밀번호 변경 중 오류가 발생했습니다.');
-        }
-    }
-
-    /**
-     * Firebase 캐시 로드 대기
-     */
-    async waitForCache() {
-        const maxWait = 10000; // 최대 10초 대기
-        const startTime = Date.now();
-
-        while (!storage.cacheLoaded) {
-            if (Date.now() - startTime > maxWait) {
-                console.error('❌ Firebase 캐시 로드 시간 초과');
-                alert('데이터 로드에 시간이 걸리고 있습니다. 인터넷 연결을 확인해주세요.');
-                break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        const loadTime = Date.now() - startTime;
-        console.log(`✅ Firebase 데이터 로드 완료 (${loadTime}ms), UI 초기화 시작`);
-
-        // 로딩 시간이 500ms 이상이면 사용자에게 안내
-        if (loadTime > 500 && storage.cacheLoaded) {
-            const stats = storage.cache;
-            const totalItems = stats.exams.length + stats.questions.length +
-                             stats.students.length + stats.answers.length;
-
-            if (totalItems > 0) {
-                this.showLoadingCompleteModal(stats, loadTime);
-            }
+            alert(error.message || '비밀번호 변경 중 오류가 발생했습니다.');
         }
     }
 
@@ -278,27 +224,19 @@ class App {
         modal.innerHTML = `
             <div class="loading-complete-content">
                 <div class="loading-complete-header">
-                    <span class="loading-complete-icon">✅</span>
+                    <span class="loading-complete-icon">OK</span>
                     <h3>데이터 로딩 완료</h3>
                 </div>
                 <div class="loading-complete-body">
-                    <p>클라우드에서 데이터를 성공적으로 가져왔습니다.</p>
+                    <p>서버에서 데이터를 성공적으로 가져왔습니다.</p>
                     <div class="loading-stats">
                         <div class="loading-stat-item">
                             <span class="loading-stat-label">시험</span>
                             <span class="loading-stat-value">${stats.exams.length}개</span>
                         </div>
                         <div class="loading-stat-item">
-                            <span class="loading-stat-label">문제</span>
-                            <span class="loading-stat-value">${stats.questions.length}개</span>
-                        </div>
-                        <div class="loading-stat-item">
                             <span class="loading-stat-label">학생</span>
                             <span class="loading-stat-value">${stats.students.length}명</span>
-                        </div>
-                        <div class="loading-stat-item">
-                            <span class="loading-stat-label">답안</span>
-                            <span class="loading-stat-value">${stats.answers.length}개</span>
                         </div>
                     </div>
                     <p class="loading-time">로딩 시간: ${(loadTime / 1000).toFixed(2)}초</p>
@@ -327,109 +265,15 @@ class App {
         try {
             const removedCount = storage.removeDuplicateAnswers();
             if (removedCount > 0) {
-                console.log(`✅ 중복 답안 ${removedCount}개가 자동으로 정리되었습니다.`);
+                console.log(`Removed ${removedCount} duplicate answers.`);
             }
 
             const orphanedCount = storage.removeOrphanedAnswers();
             if (orphanedCount > 0) {
-                console.log(`✅ 고아 답안 ${orphanedCount}개가 자동으로 정리되었습니다.`);
-            }
-
-            // Firebase 사용 중이고 로컬 스토리지에 데이터가 있으면 마이그레이션 제안
-            if (storage.useFirebase) {
-                await this.checkLocalDataMigration();
+                console.log(`Removed ${orphanedCount} orphaned answers.`);
             }
         } catch (error) {
-            console.error('데이터 정리 중 오류:', error);
-        }
-    }
-
-    /**
-     * 로컬 스토리지 데이터를 Firebase로 마이그레이션
-     */
-    async checkLocalDataMigration() {
-        const localKeys = ['gradeapp_exams', 'gradeapp_questions', 'gradeapp_students', 'gradeapp_answers'];
-        const hasLocalData = localKeys.some(key => localStorage.getItem(key));
-
-        if (hasLocalData && storage.cacheLoaded) {
-            const hasFirebaseData = storage.cache.exams.length > 0 ||
-                                   storage.cache.questions.length > 0 ||
-                                   storage.cache.students.length > 0 ||
-                                   storage.cache.answers.length > 0;
-
-            if (!hasFirebaseData) {
-                const migrate = confirm(
-                    '🔥 로컬 브라우저에 저장된 데이터를 발견했습니다.\n\n' +
-                    '클라우드(Firebase)로 데이터를 이동하시겠습니까?\n' +
-                    '이동하면 모든 브라우저와 기기에서 동일한 데이터를 사용할 수 있습니다.\n\n' +
-                    '※ 로컬 데이터는 백업 후 삭제됩니다.'
-                );
-
-                if (migrate) {
-                    await this.migrateLocalToFirebase();
-                }
-            }
-        }
-    }
-
-    /**
-     * 로컬 데이터를 Firebase로 마이그레이션
-     */
-    async migrateLocalToFirebase() {
-        try {
-            console.log('🔄 로컬 데이터를 Firebase로 마이그레이션 중...');
-
-            // 로컬 스토리지에서 데이터 읽기
-            const localExams = JSON.parse(localStorage.getItem('gradeapp_exams') || '[]');
-            const localQuestions = JSON.parse(localStorage.getItem('gradeapp_questions') || '[]');
-            const localStudents = JSON.parse(localStorage.getItem('gradeapp_students') || '[]');
-            const localAnswers = JSON.parse(localStorage.getItem('gradeapp_answers') || '[]');
-
-            const totalItems = localExams.length + localQuestions.length +
-                             localStudents.length + localAnswers.length;
-
-            if (totalItems === 0) {
-                alert('마이그레이션할 데이터가 없습니다.');
-                return;
-            }
-
-            // Firebase에 업로드
-            const updates = {};
-
-            localExams.forEach(e => updates[`exams/${e.id}`] = e);
-            localQuestions.forEach(q => updates[`questions/${q.id}`] = q);
-            localStudents.forEach(s => updates[`students/${s.id}`] = s);
-            localAnswers.forEach(a => updates[`answers/${a.id}`] = a);
-
-            await firebaseDatabase.ref('/').update(updates);
-
-            // 캐시 업데이트
-            await storage.loadAllDataToCache();
-
-            console.log(`✅ 마이그레이션 완료: ${totalItems}개 항목`);
-
-            alert(
-                `✅ 데이터 마이그레이션 완료!\n\n` +
-                `시험: ${localExams.length}개\n` +
-                `문제: ${localQuestions.length}개\n` +
-                `학생: ${localStudents.length}명\n` +
-                `답안: ${localAnswers.length}개\n\n` +
-                `이제 모든 브라우저에서 동일한 데이터를 사용할 수 있습니다.`
-            );
-
-            // 로컬 스토리지 데이터 삭제 (백업은 유지)
-            const backup = confirm('로컬 브라우저 데이터를 삭제하시겠습니까?\n(클라우드에 이미 저장되었습니다)');
-            if (backup) {
-                localStorage.removeItem('gradeapp_exams');
-                localStorage.removeItem('gradeapp_questions');
-                localStorage.removeItem('gradeapp_students');
-                localStorage.removeItem('gradeapp_answers');
-                console.log('✅ 로컬 데이터 삭제 완료');
-            }
-
-        } catch (error) {
-            console.error('❌ 마이그레이션 실패:', error);
-            alert('데이터 마이그레이션에 실패했습니다. 인터넷 연결을 확인해주세요.');
+            console.error('Data cleanup error:', error);
         }
     }
 

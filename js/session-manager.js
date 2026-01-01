@@ -1,6 +1,7 @@
 /**
  * 세션 관리 모듈
- * 로그인 세션 저장, 조회, 삭제 기능 제공
+ * Cognito 인증과 연동하여 세션 관리
+ * (기존 코드와의 호환성을 위해 유지)
  */
 
 class SessionManager {
@@ -8,12 +9,12 @@ class SessionManager {
     static SESSION_DURATION = 24 * 60 * 60 * 1000; // 24시간
 
     /**
-     * 세션 저장
+     * 세션 저장 (cognitoAuth.saveLocalSession과 동일)
      */
     static setSession(user) {
         const session = {
-            userId: user.id,
-            username: user.username,
+            userId: user.id || user.sub,
+            username: user.username || user.email,
             name: user.name,
             organization: user.organization,
             role: user.role,
