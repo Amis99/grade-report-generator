@@ -113,6 +113,9 @@ AnswerInput.prototype.renderAnswerSheet = function(questions, students) {
                 <button class="add-row-btn" onclick="answerInput.addStudentRow()">
                     ➕ 학생 추가
                 </button>
+                <button class="add-row-btn complete-btn" onclick="answerInput.completeInputAndMerge()">
+                    ✅ 입력 완료
+                </button>
             </div>
         </div>
     `;
@@ -413,4 +416,86 @@ AnswerInput.prototype.renderMultipleChoiceInput = function() {
 
 AnswerInput.prototype.renderEssayInput = function() {
     // 더 이상 사용하지 않음
+};
+
+/**
+ * 입력 완료 - 중복 학생 자동 병합
+ */
+AnswerInput.prototype.completeInputAndMerge = async function() {
+    // 먼저 중복 학생 확인
+    const duplicateGroups = storage.findDuplicateStudents();
+
+    if (duplicateGroups.length === 0) {
+        alert('✅ 입력이 완료되었습니다.\n중복된 학생이 없습니다.');
+        return;
+    }
+
+    // 병합 계획 생성
+    const plan = duplicateGroups.map((group, index) => {
+        const answerCounts = group.map(student => {
+            const answers = storage.getAllAnswers().filter(a => a.studentId === student.id);
+            const examCount = new Set(answers.map(a => a.examId)).size;
+            return {
+                student,
+                answerCount: answers.length,
+                examCount
+            };
+        });
+
+        // 가장 많은 답안을 가진 학생을 타겟으로 선택
+        answerCounts.sort((a, b) => b.answerCount - a.answerCount);
+        const target = answerCounts[0];
+        const sources = answerCounts.slice(1);
+
+        return { target, sources };
+    });
+
+    const totalMerges = plan.reduce((sum, p) => sum + p.sources.length, 0);
+
+    const confirmed = confirm(
+        `⚠️ 중복 학생이 발견되었습니다!\n\n` +
+        `${duplicateGroups.length}개 그룹에서 ${totalMerges}명의 중복 학생을 자동 병합합니다.\n` +
+        `(각 그룹에서 가장 많은 답안을 가진 학생으로 통합)\n\n` +
+        `계속하시겠습니까?`
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    // 병합 실행
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const p of plan) {
+        for (const source of p.sources) {
+            try {
+                await storage.mergeStudents(p.target.student.id, source.student.id);
+                successCount++;
+            } catch (error) {
+                console.error('병합 실패:', error);
+                failCount++;
+            }
+        }
+    }
+
+    // 답안이 없는 학생 삭제
+    const deletedCount = await storage.removeStudentsWithNoAnswers();
+
+    // 결과 알림
+    let message = `✅ 입력 완료!\n\n`;
+    message += `중복 학생 병합: ${successCount}명\n`;
+    if (failCount > 0) {
+        message += `병합 실패: ${failCount}명\n`;
+    }
+    if (deletedCount > 0) {
+        message += `답안 없는 학생 삭제: ${deletedCount}명\n`;
+    }
+
+    alert(message);
+
+    // 학생 관리 탭 새로고침
+    if (window.studentManager) {
+        studentManager.loadStudentList();
+    }
 };

@@ -315,6 +315,15 @@
     transform: translateY(-1px);
 }
 
+.add-row-btn.complete-btn {
+    background: var(--primary-color);
+    margin-left: 0.5rem;
+}
+
+.add-row-btn.complete-btn:hover {
+    background: #1d4ed8;
+}
+
 /* 타입 배지 (읽기 전용 표시) */
 .type-badge {
     display: inline-block;
