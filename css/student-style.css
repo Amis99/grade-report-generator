@@ -835,8 +835,35 @@
 /* Responsive */
 @media (max-width: 768px) {
     .student-header {
-        flex-direction: column;
-        gap: 15px;
+        flex-direction: row;
+        padding: 10px 15px;
+        gap: 8px;
+    }
+
+    .header-left {
+        gap: 8px;
+    }
+
+    .header-logo {
+        height: 28px;
+    }
+
+    .header-left h1 {
+        font-size: 0.9rem;
+    }
+
+    .header-right {
+        gap: 8px;
+    }
+
+    .user-info {
+        font-size: 0.7rem;
+    }
+
+    .student-header .hamburger-btn {
+        width: 32px;
+        height: 32px;
+        padding: 6px;
     }
 
     .student-tabs {
