@@ -264,6 +264,7 @@ class WrongNote {
         const yAxisMax = 100;
 
         const ctx = canvas.getContext('2d');
+        const isMobile = this.isMobile();
         this.trendChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -273,18 +274,18 @@ class WrongNote {
                     data: scores,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 2 : 5,
+                    pointHoverRadius: isMobile ? 4 : 7,
                     yAxisID: 'y'
                 }, {
                     label: '정답률',
                     data: correctRates,
                     borderColor: '#16a34a',
                     backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 2 : 5,
+                    pointHoverRadius: isMobile ? 4 : 7,
                     yAxisID: 'y1'
                 }]
             },
@@ -307,6 +308,14 @@ class WrongNote {
                     },
                     tooltip: {
                         enabled: true,
+                        titleFont: {
+                            size: isMobile ? 9 : 14  // 모바일에서 1/3 축소
+                        },
+                        bodyFont: {
+                            size: isMobile ? 8 : 13  // 모바일에서 1/3 축소
+                        },
+                        padding: isMobile ? 4 : 10,
+                        boxPadding: isMobile ? 2 : 4,
                         callbacks: {
                             title: function(context) {
                                 return context[0].label;  // 시험명 표시

@@ -747,6 +747,7 @@ class ReportGenerator {
 
         // 새 차트 생성
         const ctx = canvas.getContext('2d');
+        const isMobile = this.isMobile();
         this.chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -756,7 +757,7 @@ class ReportGenerator {
                     data: maxScores,
                     borderColor: 'rgba(34, 197, 94, 0.3)',
                     backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    borderWidth: 1,
+                    borderWidth: isMobile ? 1 : 1,
                     borderDash: [3, 3],
                     pointRadius: 0,
                     pointHoverRadius: 0,
@@ -768,7 +769,7 @@ class ReportGenerator {
                     data: minScores,
                     borderColor: 'rgba(239, 68, 68, 0.3)',
                     backgroundColor: 'rgba(255, 255, 255, 0)',
-                    borderWidth: 1,
+                    borderWidth: isMobile ? 1 : 1,
                     borderDash: [3, 3],
                     pointRadius: 0,
                     pointHoverRadius: 0,
@@ -780,10 +781,10 @@ class ReportGenerator {
                     data: averages,
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                    borderWidth: 2,
+                    borderWidth: isMobile ? 1 : 2,
                     borderDash: [5, 5],
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: isMobile ? 2 : 4,
+                    pointHoverRadius: isMobile ? 3 : 6,
                     tension: 0.3,
                     order: 2
                 }, {
@@ -791,9 +792,9 @@ class ReportGenerator {
                     data: scores,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 2 : 5,
+                    pointHoverRadius: isMobile ? 4 : 7,
                     tension: 0.3,
                     order: 1
                 }]
@@ -822,6 +823,14 @@ class ReportGenerator {
                     },
                     tooltip: {
                         enabled: true,
+                        titleFont: {
+                            size: isMobile ? 9 : 14  // 모바일에서 1/3 축소
+                        },
+                        bodyFont: {
+                            size: isMobile ? 8 : 13  // 모바일에서 1/3 축소
+                        },
+                        padding: isMobile ? 4 : 10,
+                        boxPadding: isMobile ? 2 : 4,
                         callbacks: {
                             title: function(context) {
                                 // 시험명 표시

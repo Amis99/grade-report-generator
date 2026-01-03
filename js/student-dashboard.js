@@ -746,6 +746,7 @@ class StudentDashboard {
             this.charts['scoreTrend'].destroy();
         }
 
+        const isMobile = this.isMobile();
         this.charts['scoreTrend'] = new Chart(ctx, {
             type: 'line',
             data: {
@@ -756,7 +757,10 @@ class StudentDashboard {
                     borderColor: 'rgba(74, 124, 89, 1)',
                     backgroundColor: 'rgba(74, 124, 89, 0.1)',
                     tension: 0.3,
-                    fill: true
+                    fill: true,
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 2 : 5,
+                    pointHoverRadius: isMobile ? 4 : 7
                 }]
             },
             options: {
@@ -769,12 +773,12 @@ class StudentDashboard {
                         beginAtZero: true,
                         max: 100,
                         ticks: {
-                            font: { size: this.isMobile() ? 9 : 12 }
+                            font: { size: isMobile ? 9 : 12 }
                         }
                     },
                     x: {
                         ticks: {
-                            display: !this.isMobile(),  // 모바일에서 시험명 숨김
+                            display: !isMobile,  // 모바일에서 시험명 숨김
                             font: { size: 12 }
                         }
                     }
@@ -783,6 +787,14 @@ class StudentDashboard {
                     legend: { display: false },
                     tooltip: {
                         enabled: true,
+                        titleFont: {
+                            size: isMobile ? 9 : 14  // 모바일에서 1/3 축소
+                        },
+                        bodyFont: {
+                            size: isMobile ? 8 : 13  // 모바일에서 1/3 축소
+                        },
+                        padding: isMobile ? 4 : 10,
+                        boxPadding: isMobile ? 2 : 4,
                         callbacks: {
                             title: function(context) {
                                 return context[0].label;  // 시험명 표시
