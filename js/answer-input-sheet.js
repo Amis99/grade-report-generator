@@ -251,12 +251,27 @@ AnswerInput.prototype.attachAnswerSheetListeners = function() {
     const tbody = document.getElementById('answerSheetBody');
     if (!tbody) return;
 
-    // 학생 선택 버튼
+    const self = this;
+
+    // 학생 선택 버튼 - 터치/클릭 이벤트 통합 처리
     tbody.querySelectorAll('.select-student-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            this.showStudentSelectModal(row);
-        });
+        // 기존 이벤트 제거 (중복 방지)
+        btn.replaceWith(btn.cloneNode(true));
+    });
+
+    // 새로 추가된 버튼에 이벤트 연결
+    tbody.querySelectorAll('.select-student-btn').forEach(btn => {
+        const handleSelect = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const row = this.closest('tr');
+            if (row) {
+                self.showStudentSelectModal(row);
+            }
+        };
+
+        btn.addEventListener('click', handleSelect);
+        btn.addEventListener('touchend', handleSelect);
     });
 
     // 답안 자동 저장
@@ -416,25 +431,35 @@ AnswerInput.prototype.showStudentSelectModal = function(targetRow) {
         });
     });
 
-    // 학생 선택
+    // 학생 선택 - 터치/클릭 통합 처리
+    const self = this;
     document.querySelectorAll('.student-select-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const studentId = item.getAttribute('data-id');
-            const studentName = item.getAttribute('data-name');
-            const studentSchool = item.getAttribute('data-school');
-            const studentGrade = item.getAttribute('data-grade');
+        const handleItemSelect = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-            this.selectStudentForRow(targetRow, studentId, studentName, studentSchool, studentGrade);
+            const studentId = this.getAttribute('data-id');
+            const studentName = this.getAttribute('data-name');
+            const studentSchool = this.getAttribute('data-school');
+            const studentGrade = this.getAttribute('data-grade');
+
+            self.selectStudentForRow(targetRow, studentId, studentName, studentSchool, studentGrade);
             modal.remove();
-        });
+        };
+
+        item.addEventListener('click', handleItemSelect);
+        item.addEventListener('touchend', handleItemSelect);
     });
 
-    // 배경 클릭 시 닫기
-    modal.addEventListener('click', (e) => {
+    // 배경 클릭/터치 시 닫기
+    const handleBackgroundClose = (e) => {
         if (e.target === modal) {
+            e.preventDefault();
             modal.remove();
         }
-    });
+    };
+    modal.addEventListener('click', handleBackgroundClose);
+    modal.addEventListener('touchend', handleBackgroundClose);
 };
 
 /**

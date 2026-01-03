@@ -368,9 +368,108 @@ class ReportGenerator {
                     font-weight: 600;
                 }
 
+                /* 모바일 최적화 */
                 @media (max-width: 768px) {
+                    .report-container {
+                        padding: 0.5rem;
+                    }
+
+                    .report-header h2 {
+                        font-size: 1.3rem;
+                    }
+
+                    .student-info-line {
+                        flex-direction: column;
+                        gap: 0.5rem;
+                        font-size: 0.9rem;
+                    }
+
+                    .score-cards {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 0.75rem;
+                    }
+
+                    .score-card {
+                        padding: 1rem;
+                    }
+
+                    .score-value {
+                        font-size: 1.2rem;
+                    }
+
                     .domain-content {
                         grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
+
+                    .domain-chart {
+                        padding: 0.5rem;
+                    }
+
+                    #domainChart {
+                        max-width: 280px;
+                        max-height: 280px;
+                    }
+
+                    .domain-table {
+                        font-size: 0.85rem;
+                    }
+
+                    .domain-table th,
+                    .domain-table td {
+                        padding: 0.6rem 0.4rem;
+                    }
+
+                    .trend-chart {
+                        padding: 0.5rem;
+                        overflow-x: auto;
+                    }
+
+                    #trendChart {
+                        min-width: 300px;
+                    }
+
+                    .wrong-item {
+                        padding: 1rem;
+                    }
+
+                    .wrong-header {
+                        flex-wrap: wrap;
+                    }
+
+                    .wrong-meta {
+                        font-size: 0.85rem;
+                    }
+
+                    .wrong-feedback {
+                        font-size: 0.85rem;
+                        padding: 0.6rem;
+                    }
+
+                    h3 {
+                        font-size: 1.1rem;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .score-cards {
+                        grid-template-columns: 1fr 1fr;
+                    }
+
+                    .score-card {
+                        padding: 0.75rem;
+                    }
+
+                    .score-label {
+                        font-size: 0.8rem;
+                    }
+
+                    .score-value {
+                        font-size: 1rem;
+                    }
+
+                    .score-percent {
+                        font-size: 0.9rem;
                     }
                 }
 

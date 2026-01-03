@@ -927,18 +927,54 @@
 
 /* 학생 선택 모달 스타일 */
 .student-select-item {
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     border-bottom: 1px solid #eee;
     cursor: pointer;
     transition: background 0.2s;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    -webkit-tap-highlight-color: rgba(37, 99, 235, 0.1);
+    user-select: none;
 }
 
-.student-select-item:hover {
-    background: #f5f5f5;
+.student-select-item:hover,
+.student-select-item:active {
+    background: #f0f7ff;
 }
 
 .student-select-item:last-child {
     border-bottom: none;
+}
+
+/* 모바일 학생 선택 모달 최적화 */
+@media (max-width: 768px) {
+    .student-select-item {
+        padding: 1rem 1.25rem;
+        min-height: 56px;
+        font-size: 1rem;
+    }
+
+    #studentSelectModal .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 1rem;
+        max-height: 85vh;
+    }
+
+    #studentSelectModal .modal-body {
+        padding: 1rem;
+    }
+
+    #studentSelectSearch {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+    }
+
+    .student-select-list {
+        max-height: 50vh !important;
+    }
 }
 
 /* 학생 표시 스타일 */
