@@ -760,22 +760,35 @@ class StudentDashboard {
                 }]
             },
             options: {
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
                         max: 100,
                         ticks: {
-                            font: { size: this.isMobile() ? 8 : 12 }  // 모바일에서 1/3 축소
+                            font: { size: this.isMobile() ? 9 : 12 }
                         }
                     },
                     x: {
                         ticks: {
-                            font: { size: this.isMobile() ? 8 : 12 }  // 모바일에서 1/3 축소
+                            display: !this.isMobile(),  // 모바일에서 시험명 숨김
+                            font: { size: 12 }
                         }
                     }
                 },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;  // 시험명 표시
+                            }
+                        }
+                    }
                 }
             }
         });

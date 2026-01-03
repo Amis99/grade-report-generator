@@ -807,13 +807,13 @@ class ReportGenerator {
                 },
                 plugins: {
                     legend: {
-                        display: true,
+                        display: !this.isMobile(),  // 모바일에서 범례 숨김
                         position: 'top',
                         labels: {
                             usePointStyle: true,
-                            padding: this.isMobile() ? 5 : 15,
+                            padding: 15,
                             font: {
-                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                                size: 12
                             }
                         }
                     },
@@ -821,7 +821,12 @@ class ReportGenerator {
                         display: false
                     },
                     tooltip: {
+                        enabled: true,
                         callbacks: {
+                            title: function(context) {
+                                // 시험명 표시
+                                return context[0].label;
+                            },
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
@@ -842,10 +847,10 @@ class ReportGenerator {
                     y: {
                         beginAtZero: true,
                         title: {
-                            display: true,
+                            display: !this.isMobile(),  // 모바일에서 축 제목 숨김
                             text: '점수',
                             font: {
-                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                                size: 12
                             }
                         },
                         ticks: {
@@ -853,21 +858,18 @@ class ReportGenerator {
                                 return value + '점';
                             },
                             font: {
-                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                                size: this.isMobile() ? 9 : 12
                             }
                         }
                     },
                     x: {
                         title: {
-                            display: true,
-                            text: '시험',
-                            font: {
-                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
-                            }
+                            display: false  // 모바일/데스크톱 모두 숨김 (불필요)
                         },
                         ticks: {
+                            display: !this.isMobile(),  // 모바일에서 시험명 숨김
                             font: {
-                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                                size: 12
                             }
                         }
                     }
