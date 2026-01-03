@@ -28,6 +28,11 @@ class StudentDashboard {
         this.setupEventListeners();
     }
 
+    // 모바일 여부 확인
+    isMobile() {
+        return window.innerWidth <= 768;
+    }
+
     checkAuth() {
         const session = SessionManager.getSession();
         if (!session) {
@@ -462,7 +467,16 @@ class StudentDashboard {
                     r: {
                         beginAtZero: true,
                         max: 100,
-                        ticks: { stepSize: 20 }
+                        ticks: {
+                            stepSize: 20,
+                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                        },
+                        pointLabels: {
+                            font: {
+                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                weight: 'bold'
+                            }
+                        }
                     }
                 },
                 plugins: {
@@ -657,6 +671,13 @@ class StudentDashboard {
                             stepSize: 20,
                             callback: function(value) {
                                 return value + '%';
+                            },
+                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                        },
+                        pointLabels: {
+                            font: {
+                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                weight: 'bold'
                             }
                         }
                     }
@@ -742,7 +763,15 @@ class StudentDashboard {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100
+                        max: 100,
+                        ticks: {
+                            font: { size: this.isMobile() ? 8 : 12 }  // 모바일에서 1/3 축소
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: { size: this.isMobile() ? 8 : 12 }  // 모바일에서 1/3 축소
+                        }
                     }
                 },
                 plugins: {
@@ -796,7 +825,16 @@ class StudentDashboard {
                     r: {
                         beginAtZero: true,
                         max: 100,
-                        ticks: { stepSize: 20 }
+                        ticks: {
+                            stepSize: 20,
+                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                        },
+                        pointLabels: {
+                            font: {
+                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                weight: 'bold'
+                            }
+                        }
                     }
                 },
                 plugins: {

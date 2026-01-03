@@ -23,6 +23,11 @@ class ReportGenerator {
         return (Math.round(score * 10) / 10).toFixed(1);
     }
 
+    // 모바일 여부 확인
+    isMobile() {
+        return window.innerWidth <= 768;
+    }
+
     setupEventListeners() {
         // 시험 선택
         document.getElementById('reportExamSelect').addEventListener('change', (e) => {
@@ -663,15 +668,15 @@ class ReportGenerator {
                                 return value + '%';
                             },
                             font: {
-                                size: 10
+                                size: this.isMobile() ? 5 : 10  // 모바일에서 절반
                             }
                         },
                         pointLabels: {
                             font: {
-                                size: 11,
+                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
                                 weight: 'bold'
                             },
-                            padding: 5
+                            padding: this.isMobile() ? 2 : 5
                         }
                     }
                 }
@@ -806,9 +811,9 @@ class ReportGenerator {
                         position: 'top',
                         labels: {
                             usePointStyle: true,
-                            padding: 15,
+                            padding: this.isMobile() ? 5 : 15,
                             font: {
-                                size: 12
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
                             }
                         }
                     },
@@ -838,18 +843,32 @@ class ReportGenerator {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '점수'
+                            text: '점수',
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
                         },
                         ticks: {
                             callback: function(value) {
                                 return value + '점';
+                            },
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
                             }
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: '시험'
+                            text: '시험',
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
                         }
                     }
                 }

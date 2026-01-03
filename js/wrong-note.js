@@ -16,6 +16,11 @@ class WrongNote {
         this.loadStudentSelect();
     }
 
+    // 모바일 여부 확인
+    isMobile() {
+        return window.innerWidth <= 768;
+    }
+
     setupEventListeners() {
         // 학생 선택
         document.getElementById('wrongNoteStudentSelect').addEventListener('change', (e) => {
@@ -293,7 +298,12 @@ class WrongNote {
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -303,7 +313,15 @@ class WrongNote {
                         position: 'left',
                         title: {
                             display: true,
-                            text: '점수'
+                            text: '점수',
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
                         },
                         min: yAxisMin,
                         max: yAxisMax
@@ -314,13 +332,28 @@ class WrongNote {
                         position: 'right',
                         title: {
                             display: true,
-                            text: '정답률 (%)'
+                            text: '정답률 (%)',
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
                         },
                         grid: {
                             drawOnChartArea: false
                         },
                         min: 0,
                         max: 100
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: this.isMobile() ? 8 : 12  // 모바일에서 1/3 축소
+                            }
+                        }
                     }
                 }
             }
@@ -396,8 +429,8 @@ class WrongNote {
                         position: 'top',
                         labels: {
                             usePointStyle: true,
-                            padding: 8,
-                            font: { size: 11 }
+                            padding: this.isMobile() ? 4 : 8,
+                            font: { size: this.isMobile() ? 6 : 11 }  // 모바일에서 절반
                         }
                     }
                 },
@@ -410,14 +443,14 @@ class WrongNote {
                             callback: function(value) {
                                 return value + '%';
                             },
-                            font: { size: 10 }
+                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
                         },
                         pointLabels: {
                             font: {
-                                size: 11,
+                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
                                 weight: 'bold'
                             },
-                            padding: 5
+                            padding: this.isMobile() ? 2 : 5
                         }
                     }
                 }

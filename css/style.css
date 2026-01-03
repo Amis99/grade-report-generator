@@ -1043,6 +1043,16 @@ body {
     .summary-cards {
         grid-template-columns: 1fr;
     }
+
+    /* 헤더 드롭다운 메뉴 폰트 크기 증가 */
+    .dropdown-item {
+        font-size: 1.1rem;
+        padding: 14px 18px;
+    }
+
+    .dropdown-icon {
+        font-size: 1.15rem;
+    }
 }
 
 /* 인쇄 스타일 */
