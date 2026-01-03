@@ -22,8 +22,7 @@ class App {
             await this.loadDataFromAPI();
         } catch (error) {
             console.error('Failed to load data:', error);
-            alert('데이터를 불러오는 중 오류가 발생했습니다. 다시 로그인해주세요.');
-            cognitoAuth.logout();
+            this.handleInitError(error);
             return;
         }
 
@@ -51,6 +50,37 @@ class App {
 
         if (loadTime > 500) {
             this.showLoadingCompleteModal(storage.cache, loadTime);
+        }
+    }
+
+    /**
+     * 초기화 오류 처리
+     */
+    handleInitError(error) {
+        const errorMessage = error.message || '알 수 없는 오류';
+
+        // 에러 유형별 사용자 친화적 메시지
+        let userMessage = '';
+        let shouldLogout = false;
+
+        if (errorMessage.includes('인증') || errorMessage.includes('토큰') || errorMessage.includes('401')) {
+            userMessage = '로그인 세션이 만료되었습니다.\n다시 로그인해주세요.';
+            shouldLogout = true;
+        } else if (errorMessage.includes('네트워크') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+            userMessage = '서버에 연결할 수 없습니다.\n\n인터넷 연결을 확인하고 다시 시도해주세요.';
+        } else if (errorMessage.includes('500') || errorMessage.includes('서버')) {
+            userMessage = '서버에 일시적인 문제가 발생했습니다.\n\n잠시 후 다시 시도해주세요.';
+        } else if (errorMessage.includes('권한') || errorMessage.includes('403')) {
+            userMessage = '접근 권한이 없습니다.\n\n관리자에게 문의해주세요.';
+            shouldLogout = true;
+        } else {
+            userMessage = `데이터를 불러오는 중 오류가 발생했습니다.\n\n${errorMessage}\n\n문제가 계속되면 관리자에게 문의해주세요.`;
+        }
+
+        alert(userMessage);
+
+        if (shouldLogout) {
+            cognitoAuth.logout();
         }
     }
 

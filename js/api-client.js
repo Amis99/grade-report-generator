@@ -24,41 +24,86 @@ class ApiClient {
 
     async getAuthHeader() {
         const token = await cognitoAuth.getIdToken();
-        if (!token) {
+
+        // 토큰 유효성 검증
+        if (!token || typeof token !== 'string' || token.trim() === '') {
             throw new Error('인증이 필요합니다.');
         }
+
+        // JWT 기본 형식 검증 (header.payload.signature)
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            console.warn('토큰 형식이 올바르지 않습니다. 재로그인이 필요할 수 있습니다.');
+            throw new Error('인증 토큰이 유효하지 않습니다.');
+        }
+
         return {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         };
     }
 
-    async request(method, endpoint, data = null) {
-        try {
-            const headers = await this.getAuthHeader();
-            const options = {
-                method,
-                headers
-            };
+    async request(method, endpoint, data = null, maxRetries = 3) {
+        let lastError;
 
-            if (data && (method === 'POST' || method === 'PUT')) {
-                options.body = JSON.stringify(data);
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const headers = await this.getAuthHeader();
+                const options = {
+                    method,
+                    headers
+                };
+
+                if (data && (method === 'POST' || method === 'PUT')) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${this.baseUrl}${endpoint}`, options);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    const errorMsg = result.error?.message || result.error || `HTTP ${response.status}`;
+
+                    // 인증 오류는 재시도하지 않음
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error(errorMsg);
+                    }
+
+                    // 서버 오류(5xx)는 재시도
+                    if (response.status >= 500 && attempt < maxRetries) {
+                        throw { retryable: true, message: errorMsg };
+                    }
+
+                    throw new Error(errorMsg);
+                }
+
+                // API 응답에서 data 필드 추출 (success: true, data: [...] 형식)
+                return result.data !== undefined ? result.data : result;
+            } catch (error) {
+                lastError = error;
+
+                // 재시도 가능한 오류인 경우
+                if (error.retryable && attempt < maxRetries) {
+                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 지수 백오프 (최대 5초)
+                    console.warn(`API 요청 실패 (${attempt}/${maxRetries}), ${delay}ms 후 재시도:`, error.message);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+
+                // 네트워크 오류도 재시도
+                if (error.name === 'TypeError' && error.message.includes('fetch') && attempt < maxRetries) {
+                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                    console.warn(`네트워크 오류 (${attempt}/${maxRetries}), ${delay}ms 후 재시도`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+
+                console.error(`API Error [${method} ${endpoint}]:`, error.message || error);
+                throw error instanceof Error ? error : new Error(error.message || '알 수 없는 오류');
             }
-
-            const response = await fetch(`${this.baseUrl}${endpoint}`, options);
-            const result = await response.json();
-
-            if (!response.ok) {
-                const errorMsg = result.error?.message || result.error || `HTTP ${response.status}`;
-                throw new Error(errorMsg);
-            }
-
-            // API 응답에서 data 필드 추출 (success: true, data: [...] 형식)
-            return result.data !== undefined ? result.data : result;
-        } catch (error) {
-            console.error(`API Error [${method} ${endpoint}]:`, error);
-            throw error;
         }
+
+        throw lastError;
     }
 
     // === 초기 데이터 로드 ===
