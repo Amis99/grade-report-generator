@@ -1,9 +1,13 @@
 /**
- * Get Student Result Handler
- * GET /api/v1/exams/{examId}/students/{studentId}/result
+ * Get My Result Handler
+ * GET /api/v1/student/exams/{examId}/result
+ *
+ * Returns the current student's result for a specific exam.
+ * Includes score, rank, and wrong questions.
+ * Only accessible by users with student role.
  */
 const { getItem, queryByPK, queryByIndex, Tables } = require('../../utils/dynamoClient');
-const { success, error, notFound, forbidden, getUserFromEvent, getPathParam } = require('../../utils/response');
+const { success, error, forbidden, notFound, getUserFromEvent, getPathParam } = require('../../utils/response');
 
 exports.handler = async (event) => {
     try {
@@ -12,25 +16,25 @@ exports.handler = async (event) => {
             return error('Unauthorized', 401);
         }
 
-        const examId = getPathParam(event, 'examId');
-        const studentId = getPathParam(event, 'studentId');
+        // Only student role can access this endpoint
+        if (user.role !== 'student') {
+            return forbidden('This endpoint is only for students');
+        }
 
+        const studentId = user.studentId;
+        if (!studentId) {
+            return error('Student ID not found in your account', 400);
+        }
+
+        const examId = getPathParam(event, 'examId');
         if (!examId) {
             return error('Exam ID is required', 400);
-        }
-        if (!studentId) {
-            return error('Student ID is required', 400);
         }
 
         // Get exam
         const exam = await getItem(Tables.EXAMS, `EXAM#${examId}`, 'METADATA');
         if (!exam) {
             return notFound('Exam not found');
-        }
-
-        // Check authorization (국어농장 exams are accessible to all)
-        if (user.role !== 'admin' && exam.organization !== user.organization && exam.organization !== '국어농장') {
-            return forbidden('You do not have access to this exam');
         }
 
         // Get student
@@ -44,6 +48,10 @@ exports.handler = async (event) => {
 
         // Get student's answers
         const answers = await queryByPK(Tables.ANSWERS, `EXAM#${examId}#STUDENT#${studentId}`);
+
+        if (answers.length === 0) {
+            return notFound('No answers found for this exam');
+        }
 
         // Calculate result
         const result = calculateStudentResult(exam, student, questions, answers);
@@ -104,8 +112,8 @@ exports.handler = async (event) => {
 
         return success(result);
     } catch (err) {
-        console.error('Get student result error:', err);
-        return error('Failed to get student result', 500);
+        console.error('Get my result error:', err);
+        return error('Failed to get result', 500);
     }
 };
 

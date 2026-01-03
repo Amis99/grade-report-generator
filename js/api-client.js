@@ -3,6 +3,7 @@
  * Firebase storage.js를 대체하는 AWS API Gateway 클라이언트
  * 기존 storage 인터페이스와 호환성 유지
  */
+console.log('📦 api-client.js 버전 2025-01-03 로드됨 (답안 저장 수정)');
 
 class ApiClient {
     constructor() {
@@ -48,10 +49,12 @@ class ApiClient {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.error || `HTTP ${response.status}`);
+                const errorMsg = result.error?.message || result.error || `HTTP ${response.status}`;
+                throw new Error(errorMsg);
             }
 
-            return result;
+            // API 응답에서 data 필드 추출 (success: true, data: [...] 형식)
+            return result.data !== undefined ? result.data : result;
         } catch (error) {
             console.error(`API Error [${method} ${endpoint}]:`, error);
             throw error;
@@ -64,7 +67,7 @@ class ApiClient {
         try {
             console.log('Loading data from API...');
 
-            // 병렬로 모든 데이터 로드
+            // 병렬로 시험과 학생 로드
             const [exams, students] = await Promise.all([
                 this.request('GET', '/exams'),
                 this.request('GET', '/students')
@@ -73,14 +76,43 @@ class ApiClient {
             this.cache.exams = exams.map(e => new Exam(e));
             this.cache.students = students.map(s => new Student(s));
 
-            // 문제와 답안은 시험별로 지연 로드
+            // 모든 시험의 문제와 답안 로드
             this.cache.questions = [];
             this.cache.answers = [];
+
+            // 시험별로 문제와 답안 로드 (병렬)
+            const loadPromises = this.cache.exams.map(async (exam) => {
+                try {
+                    const [questions, answers] = await Promise.all([
+                        this.request('GET', `/exams/${exam.id}/questions`),
+                        this.request('GET', `/exams/${exam.id}/answers`)
+                    ]);
+
+                    const questionArray = Array.isArray(questions) ? questions : [];
+                    const answerArray = Array.isArray(answers) ? answers : [];
+
+                    return {
+                        questions: questionArray.map(q => new Question(q)),
+                        answers: answerArray.map(a => new Answer(a))
+                    };
+                } catch (err) {
+                    console.error(`Failed to load data for exam ${exam.id}:`, err);
+                    return { questions: [], answers: [] };
+                }
+            });
+
+            const results = await Promise.all(loadPromises);
+            results.forEach(result => {
+                this.cache.questions.push(...result.questions);
+                this.cache.answers.push(...result.answers);
+            });
 
             this.cacheLoaded = true;
             console.log('Data loaded:', {
                 exams: this.cache.exams.length,
-                students: this.cache.students.length
+                students: this.cache.students.length,
+                questions: this.cache.questions.length,
+                answers: this.cache.answers.length
             });
         } catch (error) {
             console.error('Failed to load data:', error);
@@ -164,7 +196,8 @@ class ApiClient {
 
     async loadQuestionsByExamId(examId) {
         try {
-            const questions = await this.request('GET', `/exams/${examId}/questions`);
+            const result = await this.request('GET', `/exams/${examId}/questions`);
+            const questions = Array.isArray(result) ? result : (result || []);
             const questionObjs = questions.map(q => new Question(q));
 
             // 캐시 업데이트 (기존 문제 제거 후 추가)
@@ -179,12 +212,24 @@ class ApiClient {
     }
 
     async saveQuestion(question) {
-        // 단일 문제 저장은 saveQuestions를 통해 처리
-        await this.saveQuestions([question]);
+        // 단일 문제 저장: 기존 문제들을 유지하면서 새 문제 추가/수정
+        const examId = question.examId;
+        const existingQuestions = this.cache.questions.filter(q => q.examId === examId);
+
+        // 동일 ID 문제가 있으면 수정, 없으면 추가
+        const questionIndex = existingQuestions.findIndex(q => q.id === question.id);
+        if (questionIndex >= 0) {
+            existingQuestions[questionIndex] = question;
+        } else {
+            existingQuestions.push(question);
+        }
+
+        // 모든 문제를 함께 저장
+        await this.saveQuestions(existingQuestions, true);
         return question;
     }
 
-    async saveQuestions(questionsArray) {
+    async saveQuestions(questionsArray, isFullReplace = false) {
         if (questionsArray.length === 0) return;
 
         const examId = questionsArray[0].examId;
@@ -289,13 +334,27 @@ class ApiClient {
             // 캐시 업데이트
             this.cache.students = this.cache.students.filter(s => s.id !== sourceId);
 
-            // 답안 캐시 업데이트
-            this.cache.answers = this.cache.answers.map(a => {
+            // 답안 캐시 업데이트 (충돌 처리 포함)
+            const targetAnswers = this.cache.answers.filter(a => a.studentId === targetId);
+            const targetAnswerKeys = new Set(
+                targetAnswers.map(a => `${a.examId}_${a.questionId}`)
+            );
+
+            // 충돌이 없는 답안만 이전, 충돌 시 target 유지
+            const updatedAnswers = [];
+            for (const a of this.cache.answers) {
                 if (a.studentId === sourceId) {
-                    return { ...a, studentId: targetId };
+                    const key = `${a.examId}_${a.questionId}`;
+                    if (!targetAnswerKeys.has(key)) {
+                        // 충돌 없음: targetId로 이전
+                        updatedAnswers.push({ ...a, studentId: targetId });
+                    }
+                    // 충돌 시: source 답안 삭제 (target 유지)
+                } else {
+                    updatedAnswers.push(a);
                 }
-                return a;
-            });
+            }
+            this.cache.answers = updatedAnswers;
 
             return this.getStudent(targetId);
         } catch (error) {
@@ -312,6 +371,14 @@ class ApiClient {
             } else {
                 result = await this.request('POST', '/students', student);
                 student.id = result.id;
+
+                // 기존 학생이 반환된 경우, 해당 학생 정보로 업데이트
+                if (result.isExisting) {
+                    student.isExisting = true;
+                    // 서버 응답에서 hasAccount 정보 사용
+                    student.hasAccount = result.hasAccount || false;
+                    student.username = result.username || null;
+                }
             }
 
             const index = this.cache.students.findIndex(s => s.id === student.id);
@@ -358,10 +425,25 @@ class ApiClient {
         return this.cache.answers.filter(a => a.examId === examId);
     }
 
+    /**
+     * API에서 시험의 모든 답안 가져오기 (기관 필터링 없이)
+     */
+    async fetchAnswersByExamId(examId) {
+        try {
+            const result = await this.request('GET', `/exams/${examId}/answers`);
+            const answers = Array.isArray(result) ? result : (result.answers || result || []);
+            return answers.map(a => new Answer(a));
+        } catch (error) {
+            console.error('Failed to fetch answers:', error);
+            throw error;
+        }
+    }
+
     async loadAnswersByExamId(examId) {
         try {
             const result = await this.request('GET', `/exams/${examId}/answers`);
-            const answers = result.answers || [];
+            // API가 배열을 직접 반환하거나 {answers: [...]} 형태로 반환할 수 있음
+            const answers = Array.isArray(result) ? result : (result.answers || result || []);
             const answerObjs = answers.map(a => new Answer(a));
 
             // 캐시 업데이트
@@ -376,6 +458,7 @@ class ApiClient {
     }
 
     async saveAnswer(answer) {
+        console.log('💾 saveAnswer 호출됨:', { examId: answer.examId, studentId: answer.studentId, questionId: answer.questionId });
         answer.updatedAt = new Date().toISOString();
 
         // 중복 방지
@@ -398,6 +481,18 @@ class ApiClient {
             this.cache.answers.push(new Answer(answer));
         }
 
+        // API 호출하여 백엔드에 저장
+        try {
+            console.log('📡 API 호출 시작...');
+            await this.request('PUT', `/exams/${answer.examId}/students/${answer.studentId}/answers`, {
+                answers: [answer]
+            });
+            console.log('✅ 답안 저장 성공');
+        } catch (error) {
+            console.error('❌ Failed to save answer to backend:', error);
+            throw error;
+        }
+
         return answer;
     }
 
@@ -412,9 +507,17 @@ class ApiClient {
                 answers: answersArray
             });
 
-            // 캐시 업데이트
+            // 캐시만 업데이트 (API 중복 호출 방지)
             for (const answer of answersArray) {
-                await this.saveAnswer(answer);
+                if (!answer.id) {
+                    answer.id = `answer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                }
+                const index = this.cache.answers.findIndex(a => a.id === answer.id);
+                if (index >= 0) {
+                    this.cache.answers[index] = new Answer(answer);
+                } else {
+                    this.cache.answers.push(new Answer(answer));
+                }
             }
         } catch (error) {
             console.error('Failed to save answers:', error);
@@ -581,6 +684,33 @@ class ApiClient {
         });
 
         return results;
+    }
+
+    /**
+     * API에서 시험 결과 가져오기 (모든 응시 학생 포함)
+     * 채점 및 분석에서 사용 - 캐시된 학생에 의존하지 않음
+     */
+    async fetchExamResults(examId) {
+        try {
+            console.log(`📊 fetchExamResults 호출: examId=${examId}`);
+            const results = await this.request('GET', `/exams/${examId}/results`);
+            console.log(`📊 API 결과: ${results.length}명의 학생 데이터 수신`);
+            return results.map(r => ({
+                student: r.student,
+                totalScore: r.totalScore,
+                maxScore: r.maxScore,
+                percentage: r.percentage,
+                multipleChoiceScore: r.multipleChoiceScore,
+                essayScore: r.essayScore,
+                domainScores: r.domainScores,
+                wrongQuestions: r.wrongQuestions,
+                rank: r.rank,
+                totalStudents: r.totalStudents
+            }));
+        } catch (error) {
+            console.error('Failed to fetch exam results:', error);
+            return [];
+        }
     }
 
     // === 사용자(User) 관리 ===
@@ -762,6 +892,71 @@ class ApiClient {
 
     async importAllData(data) {
         console.log('Import not supported in API mode. Use migration script.');
+    }
+
+    // === 학생 전용 API ===
+
+    /**
+     * 학생 본인 프로필 조회
+     */
+    async getMyProfile() {
+        return await this.request('GET', '/student/me');
+    }
+
+    /**
+     * 학생 본인 시험 목록 조회
+     */
+    async getMyExams() {
+        return await this.request('GET', '/student/exams');
+    }
+
+    /**
+     * 학생 본인 시험 결과 조회
+     */
+    async getMyResult(examId) {
+        return await this.request('GET', `/student/exams/${examId}/result`);
+    }
+
+    /**
+     * 학생 본인 오답 노트 조회
+     */
+    async getMyWrongNotes(examIds = []) {
+        const params = examIds.length > 0 ? `?examIds=${examIds.join(',')}` : '';
+        return await this.request('GET', `/student/wrong-notes${params}`);
+    }
+
+    // === 학생 계정 관리 API (기관 관리자용) ===
+
+    /**
+     * 학생 검색
+     */
+    async searchStudents(query, hasAccountOnly = null) {
+        let params = `?q=${encodeURIComponent(query)}`;
+        if (hasAccountOnly !== null) {
+            params += `&hasAccount=${hasAccountOnly}`;
+        }
+        return await this.request('GET', `/students/search${params}`);
+    }
+
+    /**
+     * 계정이 있는 학생 목록 조회
+     */
+    async getRegisteredStudents() {
+        return await this.request('GET', '/students/registered');
+    }
+
+    /**
+     * 학생 계정 생성
+     */
+    async createStudentAccount(studentId, accountData) {
+        return await this.request('POST', `/students/${studentId}/account`, accountData);
+    }
+
+    /**
+     * 학생 계정 삭제
+     */
+    async deleteStudentAccount(studentId) {
+        return await this.request('DELETE', `/students/${studentId}/account`);
     }
 }
 

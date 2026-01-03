@@ -22,7 +22,7 @@ AnswerInput.prototype.loadExamSelect = function() {
 /**
  * 답안 입력 폼을 시트 형식으로 표시
  */
-AnswerInput.prototype.showAnswerForm = function() {
+AnswerInput.prototype.showAnswerForm = async function() {
     const examId = document.getElementById('answerExamSelect').value;
     if (!examId) {
         alert('먼저 시험을 선택해주세요.');
@@ -37,15 +37,34 @@ AnswerInput.prototype.showAnswerForm = function() {
         return;
     }
 
-    // 기존 답안 데이터 로드
-    const allAnswers = storage.getAnswersByExamId(examId);
+    // API에서 모든 답안 데이터 로드 (기관 필터링 없이)
+    let allAnswers;
+    try {
+        allAnswers = await storage.fetchAnswersByExamId(examId);
+    } catch (error) {
+        console.error('답안 로드 실패:', error);
+        // 실패 시 캐시된 답안 사용
+        allAnswers = storage.getAnswersByExamId(examId);
+    }
+
     const studentIds = [...new Set(allAnswers.map(a => a.studentId))];
 
-    const students = studentIds.map(id => {
-        const student = storage.getStudent(id);
-        const answers = allAnswers.filter(a => a.studentId === id);
-        return { student, answers };
-    }).filter(s => s.student !== null); // null 학생 제외
+    // 학생 정보도 API에서 가져올 수 있도록 처리
+    const students = [];
+    for (const id of studentIds) {
+        let student = storage.getStudent(id);
+        // 캐시에 없는 학생은 답안에서 정보 추출 시도
+        if (!student) {
+            const studentAnswers = allAnswers.filter(a => a.studentId === id);
+            if (studentAnswers.length > 0 && studentAnswers[0].studentInfo) {
+                student = studentAnswers[0].studentInfo;
+            }
+        }
+        if (student) {
+            const answers = allAnswers.filter(a => a.studentId === id);
+            students.push({ student, answers });
+        }
+    }
 
     this.currentExam = exam;
     this.renderAnswerSheet(questions, students);
@@ -75,7 +94,7 @@ AnswerInput.prototype.renderAnswerSheet = function(questions, students) {
                 </div>
             </div>
 
-            <div class="question-sheet-container">
+            <div class="answer-sheet-scroll-container">
                 <table class="question-sheet answer-sheet">
                     <thead>
                         <tr>
@@ -138,7 +157,7 @@ AnswerInput.prototype.renderEmptyRow = function(questionCount) {
 };
 
 /**
- * 학생 행 렌더링
+ * 학생 행 렌더링 (등록된 학생만 선택 가능)
  */
 AnswerInput.prototype.renderStudentRow = function(questions, student, answers = []) {
     // 답안 맵 생성
@@ -147,28 +166,23 @@ AnswerInput.prototype.renderStudentRow = function(questions, student, answers = 
         answerMap[answer.questionId] = answer;
     });
 
+    // 학생이 없으면 "선택 필요" 상태로 렌더링
+    const hasStudent = student && student.id;
+    const studentDisplay = hasStudent
+        ? `<span class="student-display">${student.name}</span>`
+        : `<button class="btn btn-sm btn-secondary select-student-btn">학생 선택</button>`;
+
     return `
-        <tr data-student-id="${student ? student.id : 'new'}">
+        <tr data-student-id="${hasStudent ? student.id : 'pending'}">
             <td class="col-student-name">
-                <input type="text"
-                       class="sheet-cell-input student-name"
-                       value="${student ? student.name : ''}"
-                       placeholder="이름"
-                       data-field="name">
+                ${studentDisplay}
+                <input type="hidden" class="student-id" value="${hasStudent ? student.id : ''}">
             </td>
             <td class="col-student-info">
-                <input type="text"
-                       class="sheet-cell-input student-school"
-                       value="${student ? student.school : ''}"
-                       placeholder="학교"
-                       data-field="school">
+                <span class="student-school-display">${hasStudent ? student.school : '-'}</span>
             </td>
             <td class="col-student-info">
-                <input type="text"
-                       class="sheet-cell-input student-grade"
-                       value="${student ? student.grade : ''}"
-                       placeholder="학년"
-                       data-field="grade">
+                <span class="student-grade-display">${hasStudent ? student.grade : '-'}</span>
             </td>
             ${questions.map(q => {
                 const answer = answerMap[q.id];
@@ -182,12 +196,16 @@ AnswerInput.prototype.renderStudentRow = function(questions, student, answers = 
                     }
                 }
 
+                // 학생이 선택되지 않은 경우 답안 입력 비활성화
+                const disabled = !hasStudent ? 'disabled' : '';
+
                 if (q.type === '객관식') {
                     return `
                         <td class="col-answer-cell">
                             <select class="sheet-cell-select answer-value"
                                     data-question-id="${q.id}"
-                                    data-question-type="${q.type}">
+                                    data-question-type="${q.type}"
+                                    ${disabled}>
                                 <option value=""></option>
                                 ${[1, 2, 3, 4, 5].map(num => `
                                     <option value="${num}" ${value == num ? 'selected' : ''}>${num}</option>
@@ -207,7 +225,8 @@ AnswerInput.prototype.renderStudentRow = function(questions, student, answers = 
                                    min="0"
                                    max="${q.points}"
                                    step="0.5"
-                                   placeholder="득점">
+                                   placeholder="득점"
+                                   ${disabled}>
                         </td>
                     `;
                 }
@@ -232,67 +251,60 @@ AnswerInput.prototype.attachAnswerSheetListeners = function() {
     const tbody = document.getElementById('answerSheetBody');
     if (!tbody) return;
 
-    // 학생 정보 및 답안 자동 저장
-    tbody.querySelectorAll('.sheet-cell-input, .sheet-cell-select').forEach(input => {
+    // 학생 선택 버튼
+    tbody.querySelectorAll('.select-student-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const row = e.target.closest('tr');
+            this.showStudentSelectModal(row);
+        });
+    });
+
+    // 답안 자동 저장
+    tbody.querySelectorAll('.sheet-cell-input.answer-value, .sheet-cell-select.answer-value').forEach(input => {
         input.addEventListener('change', async (e) => {
-            await this.autoSaveRow(e.target);
+            await this.autoSaveAnswer(e.target);
         });
 
         if (input.classList.contains('sheet-cell-input')) {
             input.addEventListener('blur', async (e) => {
-                await this.autoSaveRow(e.target);
+                await this.autoSaveAnswer(e.target);
             });
         }
     });
 };
 
 /**
- * 행 자동 저장
+ * 답안 자동 저장 (학생이 선택된 행에서만)
+ * 동시성 제어: 저장 중일 때 중복 요청 방지
  */
-AnswerInput.prototype.autoSaveRow = async function(inputElement) {
+AnswerInput.prototype.autoSaveAnswer = async function(inputElement) {
     const row = inputElement.closest('tr');
     const studentId = row.getAttribute('data-student-id');
 
-    // 학생 정보 수집
-    const nameInput = row.querySelector('.student-name');
-    const schoolInput = row.querySelector('.student-school');
-    const gradeInput = row.querySelector('.student-grade');
-
-    const name = nameInput.value.trim();
-    const school = schoolInput.value.trim();
-    const grade = gradeInput.value.trim();
-
-    if (!name) return; // 이름이 없으면 저장하지 않음
-
-    // 학생 찾기 또는 생성
-    let student;
-    if (studentId === 'new' || !studentId) {
-        student = storage.getStudentByName(name, school, grade);
-        if (!student) {
-            // 새 학생 생성 시 현재 사용자의 기관 정보 설정
-            const currentOrg = AuthService.getCurrentOrganization() || '국어농장';
-            student = new Student({ name, school, grade, organization: currentOrg });
-            await storage.saveStudent(student);
-            row.setAttribute('data-student-id', student.id);
-        }
-    } else {
-        student = storage.getStudent(studentId);
-        if (student) {
-            student.name = name;
-            student.school = school;
-            student.grade = grade;
-            await storage.saveStudent(student);
-        }
+    // 학생이 선택되지 않은 경우 저장하지 않음
+    if (!studentId || studentId === 'pending') {
+        return;
     }
 
-    if (!student) return;
+    // 동시성 제어: 이미 저장 중이면 건너뜀
+    if (inputElement.dataset.saving === 'true') {
+        console.log('⏳ 이미 저장 중, 건너뜀');
+        return;
+    }
 
-    // 변경된 답안만 저장 (답안 입력 필드인 경우에만)
-    if (inputElement.classList.contains('answer-value')) {
-        const questionId = inputElement.getAttribute('data-question-id');
-        const questionType = inputElement.getAttribute('data-question-type');
-        const value = inputElement.value;
+    const student = storage.getStudent(studentId);
+    if (!student) {
+        return;
+    }
 
+    const questionId = inputElement.getAttribute('data-question-id');
+    const questionType = inputElement.getAttribute('data-question-type');
+    const value = inputElement.value;
+
+    // 저장 시작 플래그
+    inputElement.dataset.saving = 'true';
+
+    try {
         // 기존 답안 찾기
         const existingAnswers = storage.getAnswersByExamAndStudent(this.currentExam.id, student.id);
         let answer = existingAnswers.find(a => a.questionId === questionId);
@@ -322,17 +334,134 @@ AnswerInput.prototype.autoSaveRow = async function(inputElement) {
                 await storage.deleteAnswer(answer.id);
             }
         }
-    }
 
-    // 시각적 피드백
-    inputElement.classList.add('success');
-    setTimeout(() => {
-        inputElement.classList.remove('success');
-    }, 500);
+        // 성공 피드백
+        inputElement.classList.add('success');
+        setTimeout(() => {
+            inputElement.classList.remove('success');
+        }, 500);
+    } catch (error) {
+        console.error('답안 저장 실패:', error);
+        inputElement.classList.add('error');
+        setTimeout(() => {
+            inputElement.classList.remove('error');
+        }, 1000);
+    } finally {
+        // 저장 완료 플래그
+        inputElement.dataset.saving = 'false';
+    }
 };
 
 /**
- * 학생 행 추가
+ * 학생 선택 모달 표시
+ */
+AnswerInput.prototype.showStudentSelectModal = function(targetRow) {
+    // 기존 모달 제거
+    const existingModal = document.getElementById('studentSelectModal');
+    if (existingModal) existingModal.remove();
+
+    // 이미 답안이 입력된 학생들 제외
+    const existingStudentIds = new Set();
+    document.querySelectorAll('#answerSheetBody tr').forEach(row => {
+        const sid = row.getAttribute('data-student-id');
+        if (sid && sid !== 'pending') {
+            existingStudentIds.add(sid);
+        }
+    });
+
+    // 선택 가능한 학생 목록 (권한에 따라 필터링)
+    let students = storage.getAllStudents();
+    students = AuthService.filterStudents(students);
+    students = students.filter(s => !existingStudentIds.has(s.id));
+    students.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+    const modal = document.createElement('div');
+    modal.id = 'studentSelectModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>학생 선택</h3>
+                <button class="modal-close" onclick="document.getElementById('studentSelectModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="studentSelectSearch" class="form-control"
+                           placeholder="이름, 학교로 검색..." autocomplete="off">
+                </div>
+                <div class="student-select-list" id="studentSelectList" style="max-height: 300px; overflow-y: auto;">
+                    ${students.length > 0
+                        ? students.map(s => `
+                            <div class="student-select-item" data-id="${s.id}" data-name="${s.name}" data-school="${s.school}" data-grade="${s.grade}">
+                                <strong>${s.name}</strong>
+                                <span style="color: #666; margin-left: 8px;">${s.school} ${s.grade}</span>
+                            </div>
+                        `).join('')
+                        : '<div class="empty-state-small">선택 가능한 학생이 없습니다.</div>'
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 검색 기능
+    document.getElementById('studentSelectSearch').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.student-select-item').forEach(item => {
+            const name = item.getAttribute('data-name').toLowerCase();
+            const school = item.getAttribute('data-school').toLowerCase();
+            item.style.display = (name.includes(query) || school.includes(query)) ? 'block' : 'none';
+        });
+    });
+
+    // 학생 선택
+    document.querySelectorAll('.student-select-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const studentId = item.getAttribute('data-id');
+            const studentName = item.getAttribute('data-name');
+            const studentSchool = item.getAttribute('data-school');
+            const studentGrade = item.getAttribute('data-grade');
+
+            this.selectStudentForRow(targetRow, studentId, studentName, studentSchool, studentGrade);
+            modal.remove();
+        });
+    });
+
+    // 배경 클릭 시 닫기
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+};
+
+/**
+ * 행에 학생 선택 적용
+ */
+AnswerInput.prototype.selectStudentForRow = function(row, studentId, studentName, studentSchool, studentGrade) {
+    // 학생 ID 및 정보 업데이트
+    row.setAttribute('data-student-id', studentId);
+    row.querySelector('.student-id').value = studentId;
+    row.querySelector('.col-student-name').innerHTML = `
+        <span class="student-display">${studentName}</span>
+        <input type="hidden" class="student-id" value="${studentId}">
+    `;
+    row.querySelector('.student-school-display').textContent = studentSchool;
+    row.querySelector('.student-grade-display').textContent = studentGrade;
+
+    // 답안 입력 필드 활성화
+    row.querySelectorAll('.answer-value').forEach(input => {
+        input.disabled = false;
+    });
+
+    // 이벤트 리스너 재연결
+    this.attachAnswerSheetListeners();
+};
+
+/**
+ * 학생 행 추가 (학생 선택 모달 표시)
  */
 AnswerInput.prototype.addStudentRow = function() {
     if (!this.currentExam) {
@@ -351,19 +480,16 @@ AnswerInput.prototype.addStudentRow = function() {
         emptyRow.remove();
     }
 
-    // 새 행 추가
+    // 새 행 추가 (학생 미선택 상태)
     const newRow = this.renderStudentRow(questions, null, []);
     tbody.insertAdjacentHTML('beforeend', newRow);
 
     // 이벤트 리스너 재연결
     this.attachAnswerSheetListeners();
 
-    // 첫 번째 입력 필드에 포커스
+    // 학생 선택 모달 자동 표시
     const newRowElement = tbody.lastElementChild;
-    const firstInput = newRowElement.querySelector('.student-name');
-    if (firstInput) {
-        firstInput.focus();
-    }
+    this.showStudentSelectModal(newRowElement);
 };
 
 /**

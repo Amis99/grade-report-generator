@@ -90,6 +90,9 @@ class Student {
         this.school = data.school || '';
         this.grade = data.grade || '';
         this.organization = data.organization || '국어농장'; // 소속 기관
+        this.hasAccount = data.hasAccount || false; // 계정 생성 여부
+        this.username = data.username || null; // 계정 아이디
+        this.userId = data.userId || null; // Users 테이블 연결
         this.createdAt = data.createdAt || new Date().toISOString();
     }
 
@@ -100,6 +103,9 @@ class Student {
             school: this.school,
             grade: this.grade,
             organization: this.organization,
+            hasAccount: this.hasAccount,
+            username: this.username,
+            userId: this.userId,
             createdAt: this.createdAt
         };
     }

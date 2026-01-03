@@ -11,13 +11,24 @@ class AdminPanel {
     /**
      * 관리자 패널 열기
      */
-    open() {
+    async open() {
         if (!AuthService.isAdmin()) {
             alert('관리자 권한이 필요합니다.');
             return;
         }
 
         this.isOpen = true;
+
+        // 관리자 데이터 로드 (사용자, 가입 신청)
+        try {
+            await Promise.all([
+                storage.loadUsers(),
+                storage.loadRegistrations()
+            ]);
+        } catch (error) {
+            console.error('관리자 데이터 로드 실패:', error);
+        }
+
         this.render();
     }
 
@@ -133,7 +144,7 @@ class AdminPanel {
                     <tr>
                         <th>이름</th>
                         <th>아이디</th>
-                        <th>소속 기관</th>
+                        <th>기관</th>
                         <th>역할</th>
                         <th>상태</th>
                         <th>작업</th>
@@ -147,22 +158,22 @@ class AdminPanel {
                             <td>${user.organization}</td>
                             <td>
                                 <span class="role-badge ${user.role}">
-                                    ${user.role === 'admin' ? '전체 관리자' : '기관 관리자'}
+                                    ${user.role === 'admin' ? '전체' : '기관'}
                                 </span>
                             </td>
                             <td class="${user.isActive ? 'status-active' : 'status-inactive'}">
-                                ${user.isActive ? '활성' : '비활성'}
+                                ${user.isActive ? 'ON' : 'OFF'}
                             </td>
                             <td>
                                 ${user.id !== currentUser.userId ? `
-                                    <button class="btn btn-sm btn-secondary toggle-role-btn" data-id="${user.id}" data-role="${user.role}">
-                                        ${user.role === 'admin' ? '기관 관리자로' : '전체 관리자로'}
+                                    <button class="btn btn-sm btn-secondary toggle-role-btn" data-id="${user.id}" data-role="${user.role}" title="${user.role === 'admin' ? '기관 관리자로 변경' : '전체 관리자로 변경'}">
+                                        ${user.role === 'admin' ? '→기관' : '→전체'}
                                     </button>
-                                    <button class="btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'} toggle-active-btn" data-id="${user.id}" data-active="${user.isActive}">
-                                        ${user.isActive ? '비활성화' : '활성화'}
+                                    <button class="btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'} toggle-active-btn" data-id="${user.id}" data-active="${user.isActive}" title="${user.isActive ? '비활성화' : '활성화'}">
+                                        ${user.isActive ? 'OFF' : 'ON'}
                                     </button>
-                                    <button class="btn btn-sm btn-info reset-password-btn" data-id="${user.id}" data-name="${user.name}">
-                                        비밀번호 초기화
+                                    <button class="btn btn-sm btn-info reset-password-btn" data-id="${user.id}" data-name="${user.name}" title="비밀번호 초기화">
+                                        PW
                                     </button>
                                 ` : '<span style="color: #888;">본인</span>'}
                             </td>

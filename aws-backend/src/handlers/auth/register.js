@@ -8,11 +8,19 @@ const { success, error, validationError, parseBody } = require('../../utils/resp
 exports.handler = async (event) => {
     try {
         const body = parseBody(event);
-        const { email, password, name, organization } = body;
+        const { username, email, password, name, organization } = body;
 
         // Validation
-        if (!email || !password || !name || !organization) {
-            return validationError('All fields are required: email, password, name, organization');
+        if (!username || !email || !password || !name || !organization) {
+            return validationError('All fields are required: username, email, password, name, organization');
+        }
+
+        // Username validation (alphanumeric, 3+ chars)
+        if (username.length < 3) {
+            return validationError('Username must be at least 3 characters');
+        }
+        if (!/^[a-zA-Z0-9]+$/.test(username)) {
+            return validationError('Username must contain only letters and numbers');
         }
 
         // Email format validation
@@ -34,11 +42,11 @@ exports.handler = async (event) => {
             Tables.USERS,
             'username-index',
             'username = :username',
-            { ':username': email }
+            { ':username': username }
         );
 
         if (existingUsers.length > 0) {
-            return error('Email already registered', 409);
+            return error('Username already registered', 409);
         }
 
         // Check if registration request already exists
@@ -50,7 +58,7 @@ exports.handler = async (event) => {
             { ExpressionAttributeNames: { '#status': 'status' } }
         );
 
-        const duplicateReg = existingRegs.find(r => r.username === email);
+        const duplicateReg = existingRegs.find(r => r.username === username);
         if (duplicateReg) {
             return error('Registration request already pending', 409);
         }
@@ -63,7 +71,7 @@ exports.handler = async (event) => {
             PK: `REG#${registrationId}`,
             SK: 'METADATA',
             registrationId,
-            username: email,
+            username,
             email,
             name,
             organization,

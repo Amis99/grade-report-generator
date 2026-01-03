@@ -14,17 +14,33 @@ exports.handler = async (event) => {
 
         let exams;
 
-        // Admin can see all exams, org_admin can only see their organization's exams
+        // Admin can see all exams, org_admin can see their organization's exams + 국어농장 exams
         if (user.role === 'admin') {
             exams = await scanTable(Tables.EXAMS, 'SK = :sk', { ':sk': 'METADATA' });
         } else {
             // Get exams for user's organization
-            exams = await queryByIndex(
+            const orgExams = await queryByIndex(
                 Tables.EXAMS,
                 'organization-updatedAt-index',
                 'organization = :org',
                 { ':org': user.organization }
             );
+
+            // Also get 국어농장 exams (visible to all org_admins)
+            let gookeoExams = [];
+            if (user.organization !== '국어농장') {
+                gookeoExams = await queryByIndex(
+                    Tables.EXAMS,
+                    'organization-updatedAt-index',
+                    'organization = :org',
+                    { ':org': '국어농장' }
+                );
+            }
+
+            // Combine and deduplicate
+            const examMap = new Map();
+            [...orgExams, ...gookeoExams].forEach(e => examMap.set(e.examId, e));
+            exams = Array.from(examMap.values());
         }
 
         // Transform DynamoDB items to exam objects

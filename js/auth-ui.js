@@ -13,13 +13,23 @@ class AuthUI {
         // Cognito 초기화
         await cognitoAuth.init();
 
-        // 이미 로그인되어 있으면 메인 페이지로 이동
+        // 이미 로그인되어 있으면 역할에 따라 페이지 이동
         if (cognitoAuth.isLoggedIn()) {
-            window.location.href = 'index.html';
+            this.redirectByRole();
             return;
         }
 
         this.setupEventListeners();
+    }
+
+    // 사용자 역할에 따라 적절한 페이지로 이동
+    redirectByRole() {
+        const user = cognitoAuth.getCurrentUser();
+        if (user && user.role === 'student') {
+            window.location.href = 'student.html';
+        } else {
+            window.location.href = 'index.html';
+        }
     }
 
     setupEventListeners() {
@@ -140,8 +150,8 @@ class AuthUI {
             const result = await cognitoAuth.login(email, password);
 
             if (result.success) {
-                // 로그인 성공
-                window.location.href = 'index.html';
+                // 로그인 성공 - 역할에 따라 페이지 이동
+                this.redirectByRole();
             }
         } catch (error) {
             console.error('로그인 오류:', error);
@@ -179,7 +189,8 @@ class AuthUI {
             );
 
             if (result.success) {
-                window.location.href = 'index.html';
+                // 역할에 따라 페이지 이동
+                this.redirectByRole();
             }
         } catch (error) {
             console.error('비밀번호 변경 오류:', error);
@@ -188,6 +199,7 @@ class AuthUI {
     }
 
     async handleRegister() {
+        const username = document.getElementById('regUsername').value.trim();
         const email = document.getElementById('regEmail').value.trim();
         const password = document.getElementById('regPassword').value;
         const passwordConfirm = document.getElementById('regPasswordConfirm').value;
@@ -197,6 +209,16 @@ class AuthUI {
         this.clearErrors();
 
         // 유효성 검사
+        if (!username || username.length < 3) {
+            this.showRegisterError('아이디는 3자 이상이어야 합니다.');
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9]+$/.test(username)) {
+            this.showRegisterError('아이디는 영문과 숫자만 사용 가능합니다.');
+            return;
+        }
+
         if (!email || !email.includes('@')) {
             this.showRegisterError('올바른 이메일을 입력해주세요.');
             return;
@@ -228,6 +250,7 @@ class AuthUI {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    username,
                     email,
                     password,
                     name,

@@ -103,7 +103,11 @@ async function migrateExams(exams) {
     console.log('\n=== Migrating Exams ===');
     const items = [];
 
-    for (const [id, exam] of Object.entries(exams)) {
+    // 배열 형식과 객체 형식 모두 지원
+    const examList = Array.isArray(exams) ? exams : Object.entries(exams).map(([id, exam]) => ({ id, ...exam }));
+
+    for (const exam of examList) {
+        const id = exam.id;
         // Upload PDF to S3 if exists
         let pdfS3Key = null;
         if (exam.pdfData) {
@@ -135,11 +139,27 @@ async function migrateExams(exams) {
 async function migrateQuestions(questions) {
     console.log('\n=== Migrating Questions ===');
     const items = [];
+    const seenKeys = new Set();
 
-    for (const [id, question] of Object.entries(questions)) {
+    // 배열 형식과 객체 형식 모두 지원
+    const questionList = Array.isArray(questions) ? questions : Object.entries(questions).map(([id, q]) => ({ id, ...q }));
+
+    for (const question of questionList) {
+        const id = question.id;
+        const pk = `EXAM#${question.examId}`;
+        const sk = `QUESTION#${String(question.number).padStart(3, '0')}`;
+        const key = `${pk}#${sk}`;
+
+        // 중복 건너뛰기
+        if (seenKeys.has(key)) {
+            console.log(`  Skipping duplicate: ${key}`);
+            continue;
+        }
+        seenKeys.add(key);
+
         items.push({
-            PK: `EXAM#${question.examId}`,
-            SK: `QUESTION#${String(question.number).padStart(3, '0')}`,
+            PK: pk,
+            SK: sk,
             questionId: id,
             examId: question.examId,
             number: question.number,
@@ -164,7 +184,11 @@ async function migrateStudents(students) {
     console.log('\n=== Migrating Students ===');
     const items = [];
 
-    for (const [id, student] of Object.entries(students)) {
+    // 배열 형식과 객체 형식 모두 지원
+    const studentList = Array.isArray(students) ? students : Object.entries(students).map(([id, s]) => ({ id, ...s }));
+
+    for (const student of studentList) {
+        const id = student.id;
         const normalizedKey = getNormalizedKey(
             student.name || '',
             student.school || '',
@@ -192,11 +216,26 @@ async function migrateStudents(students) {
 async function migrateAnswers(answers) {
     console.log('\n=== Migrating Answers ===');
     const items = [];
+    const seenKeys = new Set();
 
-    for (const [id, answer] of Object.entries(answers)) {
+    // 배열 형식과 객체 형식 모두 지원
+    const answerList = Array.isArray(answers) ? answers : Object.entries(answers).map(([id, a]) => ({ id, ...a }));
+
+    for (const answer of answerList) {
+        const id = answer.id;
+        const pk = `EXAM#${answer.examId}#STUDENT#${answer.studentId}`;
+        const sk = `QUESTION#${answer.questionId}`;
+        const key = `${pk}#${sk}`;
+
+        // 중복 건너뛰기
+        if (seenKeys.has(key)) {
+            continue;
+        }
+        seenKeys.add(key);
+
         items.push({
-            PK: `EXAM#${answer.examId}#STUDENT#${answer.studentId}`,
-            SK: `QUESTION#${answer.questionId}`,
+            PK: pk,
+            SK: sk,
             answerId: id,
             examId: answer.examId,
             studentId: answer.studentId,
@@ -221,14 +260,18 @@ async function migrateUsers(users) {
 
     const items = [];
 
-    for (const [id, user] of Object.entries(users)) {
+    // 배열 형식과 객체 형식 모두 지원
+    const userList = Array.isArray(users) ? users : Object.entries(users).map(([id, u]) => ({ id, ...u }));
+
+    for (const user of userList) {
+        const id = user.id;
         items.push({
             PK: `USER#${id}`,
             SK: 'METADATA',
             userId: id,
             username: user.username,
             email: user.email || user.username,
-            cognitoSub: '', // Will be set when user logs in via Cognito
+            cognitoSub: 'pending', // Will be set when user logs in via Cognito
             name: user.name || '',
             organization: user.organization || '',
             role: user.role || 'org_admin',
@@ -247,7 +290,11 @@ async function migrateRegistrations(registrations) {
     console.log('\n=== Migrating Registrations ===');
     const items = [];
 
-    for (const [id, reg] of Object.entries(registrations)) {
+    // 배열 형식과 객체 형식 모두 지원
+    const regList = Array.isArray(registrations) ? registrations : Object.entries(registrations).map(([id, r]) => ({ id, ...r }));
+
+    for (const reg of regList) {
+        const id = reg.id;
         items.push({
             PK: `REG#${id}`,
             SK: 'METADATA',

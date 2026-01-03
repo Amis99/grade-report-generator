@@ -17,6 +17,12 @@ class ReportGenerator {
         this.loadExamSelect();
     }
 
+    // 점수 포맷팅 (항상 소수점 1자리)
+    formatScore(score) {
+        if (score === null || score === undefined) return '0.0';
+        return (Math.round(score * 10) / 10).toFixed(1);
+    }
+
     setupEventListeners() {
         // 시험 선택
         document.getElementById('reportExamSelect').addEventListener('change', (e) => {
@@ -151,8 +157,8 @@ class ReportGenerator {
                     <div class="score-cards">
                         <div class="score-card primary">
                             <div class="score-label">총점</div>
-                            <div class="score-value">${this.currentResult.totalScore.toFixed(1)} / ${this.currentResult.maxScore.toFixed(1)}</div>
-                            <div class="score-percent">${((this.currentResult.totalScore / this.currentResult.maxScore) * 100).toFixed(1)}%</div>
+                            <div class="score-value">${this.formatScore(this.currentResult.totalScore)} / ${this.formatScore(this.currentResult.maxScore)}</div>
+                            <div class="score-percent">${Math.round((this.currentResult.totalScore / this.currentResult.maxScore) * 100)}%</div>
                         </div>
                         <div class="score-card">
                             <div class="score-label">등수</div>
@@ -160,11 +166,11 @@ class ReportGenerator {
                         </div>
                         <div class="score-card">
                             <div class="score-label">객관식</div>
-                            <div class="score-value">${this.currentResult.multipleChoiceScore.toFixed(1)}</div>
+                            <div class="score-value">${this.formatScore(this.currentResult.multipleChoiceScore)}</div>
                         </div>
                         <div class="score-card">
                             <div class="score-label">서술형</div>
-                            <div class="score-value">${this.currentResult.essayScore.toFixed(1)}</div>
+                            <div class="score-value">${this.formatScore(this.currentResult.essayScore)}</div>
                         </div>
                     </div>
                 </div>
@@ -188,13 +194,13 @@ class ReportGenerator {
                                 <tbody>
                                     ${Object.keys(this.currentResult.domainScores).map(domain => {
                                         const ds = this.currentResult.domainScores[domain];
-                                        const rate = ds.total > 0 ? (ds.correct / ds.total * 100) : 0;
+                                        const rate = ds.total > 0 ? Math.round(ds.correct / ds.total * 100) : 0;
                                         return `
                                             <tr>
                                                 <td>${domain}</td>
-                                                <td>${ds.score.toFixed(1)}</td>
-                                                <td>${ds.maxScore.toFixed(1)}</td>
-                                                <td>${rate.toFixed(1)}% (${ds.correct}/${ds.total})</td>
+                                                <td>${this.formatScore(ds.score)}</td>
+                                                <td>${this.formatScore(ds.maxScore)}</td>
+                                                <td>${rate}% (${ds.correct}/${ds.total})</td>
                                             </tr>
                                         `;
                                     }).join('')}

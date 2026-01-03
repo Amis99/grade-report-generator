@@ -26,12 +26,12 @@
 
                 <!-- 로그인 폼 -->
                 <div id="loginSection" class="auth-section-new">
-                    <form id="loginForm" class="auth-form-new">
+                    <form id="loginForm" class="auth-form-new" autocomplete="off">
                         <div class="form-group-new">
-                            <input type="text" id="loginUsername" class="input-new" placeholder="아이디" required>
+                            <input type="text" id="loginUsername" name="login-id-field" class="input-new" placeholder="아이디" required autocomplete="off">
                         </div>
                         <div class="form-group-new">
-                            <input type="password" id="loginPassword" class="input-new" placeholder="비밀번호" required>
+                            <input type="password" id="loginPassword" name="login-pw-field" class="input-new" placeholder="비밀번호" required autocomplete="new-password">
                         </div>
                         <div id="loginError" class="auth-error" style="display: none;"></div>
                         <button type="submit" class="btn-login">로그인</button>

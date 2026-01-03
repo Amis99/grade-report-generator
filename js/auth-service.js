@@ -14,8 +14,8 @@ class AuthService {
         // 전체 관리자는 모든 시험 접근 가능
         if (user.role === 'admin') return true;
 
-        // 기관 관리자는 본인 기관 시험만 접근
-        return exam.organization === user.organization;
+        // 기관 관리자는 본인 기관 시험 + 국어농장 시험 접근 가능
+        return exam.organization === user.organization || exam.organization === '국어농장';
     }
 
     /**
@@ -37,7 +37,7 @@ class AuthService {
 
     /**
      * 현재 사용자가 학생에 접근할 수 있는지 확인 (시험 컨텍스트 없이)
-     * 기관의 시험을 친 학생은 기관의 학생으로 간주
+     * 기관 소속 학생이거나, 기관의 시험을 친 학생은 접근 가능
      */
     static canAccessStudent(student, orgExamIds = null) {
         const user = SessionManager.getCurrentUser();
@@ -45,6 +45,9 @@ class AuthService {
 
         // 전체 관리자는 모든 학생 접근 가능
         if (user.role === 'admin') return true;
+
+        // 학생의 소속 기관이 현재 사용자의 기관과 같으면 접근 가능
+        if (student.organization === user.organization) return true;
 
         // 기관이 관리하는 시험 ID 목록 (캐시된 값 사용 가능)
         if (!orgExamIds) {
@@ -107,6 +110,22 @@ class AuthService {
     }
 
     /**
+     * 기관 관리자 권한 확인
+     */
+    static isOrgAdmin() {
+        const user = SessionManager.getCurrentUser();
+        return user && user.role === 'org_admin';
+    }
+
+    /**
+     * 학생 역할 확인
+     */
+    static isStudent() {
+        const user = SessionManager.getCurrentUser();
+        return user && user.role === 'student';
+    }
+
+    /**
      * 로그인 여부 확인
      */
     static isLoggedIn() {
@@ -161,6 +180,38 @@ class AuthService {
         }
         if (!this.isAdmin()) {
             alert('관리자 권한이 필요합니다.');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 학생 권한 체크
+     */
+    static requireStudent() {
+        if (!this.isLoggedIn()) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        if (!this.isStudent()) {
+            alert('학생 전용 페이지입니다.');
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 관리 권한 체크 (admin 또는 org_admin)
+     */
+    static requireManager() {
+        if (!this.isLoggedIn()) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        if (this.isStudent()) {
+            alert('관리 권한이 필요합니다.');
+            window.location.href = 'student.html';
             return false;
         }
         return true;

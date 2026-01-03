@@ -40,6 +40,7 @@ exports.handler = async (event) => {
         let cognitoUser;
         try {
             cognitoUser = await createUser({
+                username: registration.username,
                 email: registration.email,
                 password: registration.password,
                 name: registration.name,
@@ -62,7 +63,7 @@ exports.handler = async (event) => {
             PK: `USER#${userId}`,
             SK: 'METADATA',
             userId,
-            username: registration.email,
+            username: registration.username,
             email: registration.email,
             cognitoSub: cognitoUser.sub,
             name: registration.name,

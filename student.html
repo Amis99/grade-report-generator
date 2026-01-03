@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 성적 - 성적표 생성 프로그램</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/student-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="student-container">
+        <!-- 헤더 -->
+        <header class="student-header">
+            <div class="header-left">
+                <img src="images/logo.png" alt="국어농장" class="header-logo">
+                <h1>내 성적</h1>
+            </div>
+            <div class="header-right">
+                <span id="studentInfo" class="student-info"></span>
+                <button id="hamburgerBtn" class="hamburger-btn" aria-label="메뉴">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <div id="headerMenu" class="header-dropdown">
+                    <button id="changePasswordBtn" class="dropdown-item">
+                        <span class="dropdown-icon">🔑</span> 비밀번호 변경
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button id="logoutBtn" class="dropdown-item dropdown-item-danger">
+                        <span class="dropdown-icon">🚪</span> 로그아웃
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 탭 네비게이션 -->
+        <nav class="student-tabs">
+            <button class="tab-btn active" data-tab="my-reports">내 성적표</button>
+            <button class="tab-btn" data-tab="wrong-notes">오답 노트</button>
+            <button class="tab-btn" data-tab="trend">성적 추이</button>
+        </nav>
+
+        <!-- 내 성적표 탭 -->
+        <section id="my-reports" class="tab-content active">
+            <div class="section-header">
+                <h2>내 성적표</h2>
+            </div>
+            <div class="exam-cards" id="examCards">
+                <!-- 시험 카드가 동적으로 추가됨 -->
+            </div>
+            <div id="reportContainer" class="report-container" style="display: none;">
+                <!-- 성적표가 여기에 표시됨 -->
+            </div>
+        </section>
+
+        <!-- 오답 노트 탭 -->
+        <section id="wrong-notes" class="tab-content">
+            <div class="section-header">
+                <h2>오답 노트</h2>
+            </div>
+            <div class="exam-select-area">
+                <div class="exam-select-header">
+                    <span>시험 선택</span>
+                    <button id="selectAllExamsBtn" class="btn btn-sm btn-secondary">모두 선택</button>
+                </div>
+                <div id="examCheckboxes" class="exam-checkboxes">
+                    <!-- 시험 체크박스가 동적으로 추가됨 -->
+                </div>
+                <button id="generateWrongNoteBtn" class="btn btn-primary">오답 노트 생성</button>
+            </div>
+            <div id="wrongNoteContainer" class="wrong-note-container" style="display: none;">
+                <!-- 오답 노트가 여기에 표시됨 -->
+            </div>
+        </section>
+
+        <!-- 성적 추이 탭 -->
+        <section id="trend" class="tab-content">
+            <div class="section-header">
+                <h2>성적 추이</h2>
+            </div>
+            <div class="trend-charts">
+                <div class="chart-container">
+                    <h3>점수 추이</h3>
+                    <canvas id="scoreTrendChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>영역별 정답률</h3>
+                    <canvas id="domainChart"></canvas>
+                </div>
+            </div>
+            <div id="trendSummary" class="trend-summary">
+                <!-- 추이 요약 정보 -->
+            </div>
+        </section>
+    </div>
+
+    <!-- AWS Cognito SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
+
+    <!-- 애플리케이션 스크립트 -->
+    <script src="js/config.js"></script>
+    <script src="js/data-model.js"></script>
+    <script src="js/cognito-auth.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/auth-service.js"></script>
+    <script src="js/student-dashboard.js"></script>
+</body>
+</html>

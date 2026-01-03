@@ -17,7 +17,7 @@ provider:
     USERS_TABLE: ${self:custom.usersTable}
     REGISTRATIONS_TABLE: ${self:custom.registrationsTable}
     PDF_BUCKET: ${self:custom.pdfBucket}
-    USER_POOL_ID: !Ref CognitoUserPool
+    USER_POOL_ID: !Ref CognitoUserPoolV2
     USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
 
   iam:
@@ -62,7 +62,7 @@ provider:
             - cognito-idp:AdminDisableUser
             - cognito-idp:AdminEnableUser
           Resource:
-            - !GetAtt CognitoUserPool.Arn
+            - !GetAtt CognitoUserPoolV2.Arn
 
 custom:
   examsTable: TestReportExams-${self:provider.stage}
@@ -361,6 +361,96 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: !Ref ApiGatewayAuthorizer
 
+  # Student Account Management (for org_admin)
+  createStudentAccount:
+    handler: src/handlers/students/createStudentAccount.handler
+    events:
+      - http:
+          path: /api/v1/students/{studentId}/account
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  deleteStudentAccount:
+    handler: src/handlers/students/deleteStudentAccount.handler
+    events:
+      - http:
+          path: /api/v1/students/{studentId}/account
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getRegisteredStudents:
+    handler: src/handlers/students/getRegisteredStudents.handler
+    events:
+      - http:
+          path: /api/v1/students/registered
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  searchStudents:
+    handler: src/handlers/students/searchStudents.handler
+    events:
+      - http:
+          path: /api/v1/students/search
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Student Portal APIs (for student role)
+  getMyProfile:
+    handler: src/handlers/student/getMyProfile.handler
+    events:
+      - http:
+          path: /api/v1/student/me
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getMyExams:
+    handler: src/handlers/student/getMyExams.handler
+    events:
+      - http:
+          path: /api/v1/student/exams
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getMyResult:
+    handler: src/handlers/student/getMyResult.handler
+    events:
+      - http:
+          path: /api/v1/student/exams/{examId}/result
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getMyWrongNotes:
+    handler: src/handlers/student/getMyWrongNotes.handler
+    events:
+      - http:
+          path: /api/v1/student/wrong-notes
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
 resources:
   Resources:
     # API Gateway Authorizer
@@ -372,17 +462,17 @@ resources:
         IdentitySource: method.request.header.Authorization
         RestApiId: !Ref ApiGatewayRestApi
         ProviderARNs:
-          - !GetAtt CognitoUserPool.Arn
+          - !GetAtt CognitoUserPoolV2.Arn
 
-    # Cognito User Pool
-    CognitoUserPool:
+    # Cognito User Pool V2 (Username 기반)
+    CognitoUserPoolV2:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: TestReportUserPool-${self:provider.stage}
+        UserPoolName: TestReportUserPool-v2-${self:provider.stage}
         AutoVerifiedAttributes:
           - email
-        UsernameAttributes:
-          - email
+        UsernameConfiguration:
+          CaseSensitive: false
         Policies:
           PasswordPolicy:
             MinimumLength: 8
@@ -391,14 +481,21 @@ resources:
             RequireSymbols: false
             RequireUppercase: false
         Schema:
-          - Name: name
+          - Name: email
             AttributeDataType: String
             Mutable: true
             Required: true
+          - Name: name
+            AttributeDataType: String
+            Mutable: true
+            Required: false
           - Name: organization
             AttributeDataType: String
             Mutable: true
           - Name: role
+            AttributeDataType: String
+            Mutable: true
+          - Name: studentId
             AttributeDataType: String
             Mutable: true
 
@@ -406,10 +503,12 @@ resources:
       Type: AWS::Cognito::UserPoolClient
       Properties:
         ClientName: TestReportClient-${self:provider.stage}
-        UserPoolId: !Ref CognitoUserPool
+        UserPoolId: !Ref CognitoUserPoolV2
         ExplicitAuthFlows:
-          - ADMIN_NO_SRP_AUTH
-          - USER_PASSWORD_AUTH
+          - ALLOW_ADMIN_USER_PASSWORD_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_USER_SRP_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
         GenerateSecret: false
 
     # DynamoDB Tables
@@ -474,6 +573,8 @@ resources:
             AttributeType: S
           - AttributeName: normalizedKey
             AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
         KeySchema:
           - AttributeName: PK
             KeyType: HASH
@@ -491,6 +592,12 @@ resources:
           - IndexName: normalizedKey-index
             KeySchema:
               - AttributeName: normalizedKey
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
@@ -611,9 +718,46 @@ resources:
                 - '*'
               MaxAge: 3000
 
+    # Gateway Responses for CORS on 4xx errors
+    GatewayResponseUnauthorized:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ResponseType: UNAUTHORIZED
+        StatusCode: '401'
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        ResponseTemplates:
+          application/json: '{"success": false, "error": {"message": "Unauthorized"}}'
+
+    GatewayResponseAccessDenied:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ResponseType: ACCESS_DENIED
+        StatusCode: '403'
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        ResponseTemplates:
+          application/json: '{"success": false, "error": {"message": "Access denied"}}'
+
+    GatewayResponseDefault4xx:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ResponseType: DEFAULT_4XX
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+
   Outputs:
     UserPoolId:
-      Value: !Ref CognitoUserPool
+      Value: !Ref CognitoUserPoolV2
       Export:
         Name: ${self:service}-${self:provider.stage}-UserPoolId
 

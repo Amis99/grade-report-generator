@@ -186,6 +186,16 @@ class CognitoAuth {
      */
     async getIdToken() {
         try {
+            // 현재 유저가 없으면 userPool에서 가져오기
+            if (!this.currentUser && this.userPool) {
+                this.currentUser = this.userPool.getCurrentUser();
+            }
+
+            if (!this.currentUser) {
+                console.error('No current user for getIdToken');
+                return null;
+            }
+
             const session = await this.getSession();
             return session.getIdToken().getJwtToken();
         } catch (error) {

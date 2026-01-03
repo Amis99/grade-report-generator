@@ -51,6 +51,12 @@ class ExamManager {
      * 시험 목록 로드
      */
     loadExamList() {
+        // 검색 입력값 초기화 (브라우저 자동완성 방지)
+        const searchInput = document.getElementById('examSearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
         let exams = storage.getAllExams();
 
         // 권한에 따른 시험 필터링

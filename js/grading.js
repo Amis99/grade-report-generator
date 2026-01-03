@@ -16,11 +16,11 @@ class Grading {
 
     setupEventListeners() {
         // 시험 선택
-        document.getElementById('gradingExamSelect').addEventListener('change', (e) => {
+        document.getElementById('gradingExamSelect').addEventListener('change', async (e) => {
             const examId = e.target.value;
             if (examId) {
                 this.currentExam = storage.getExam(examId);
-                this.loadGradingResults();
+                await this.loadGradingResults();
             } else {
                 this.currentExam = null;
                 document.getElementById('gradingResultsSection').style.display = 'none';
@@ -56,25 +56,24 @@ class Grading {
 
         select.innerHTML = '<option value="">시험을 선택하세요</option>' +
             exams.map(exam => {
-                const answers = storage.getAnswersByExamId(exam.id);
-                const studentCount = new Set(answers.map(a => a.studentId)).size;
                 return `<option value="${exam.id}"
                                data-name="${exam.name}"
                                data-organization="${exam.organization || ''}"
                                data-school="${exam.school}"
                                data-grade="${exam.grade}">
-                    ${exam.name} (${exam.organization || '국어농장'} | ${studentCount}명 응시)
+                    ${exam.name} (${exam.organization || '국어농장'})
                 </option>`;
             }).join('');
     }
 
     /**
-     * 채점 결과 로드
+     * 채점 결과 로드 (API에서 모든 응시 학생 데이터 가져옴)
      */
-    loadGradingResults() {
+    async loadGradingResults() {
         if (!this.currentExam) return;
 
-        const results = storage.getAllExamResults(this.currentExam.id);
+        // API에서 결과 가져오기 (모든 응시 학생 포함)
+        const results = await storage.fetchExamResults(this.currentExam.id);
 
         if (results.length === 0) {
             document.getElementById('gradingResultsSection').style.display = 'none';
@@ -216,8 +215,8 @@ class Grading {
         }).join('');
 
         // 점수 저장 이벤트
-        listDiv.querySelectorAll('.save-score-btn').forEach((btn, index) => {
-            btn.addEventListener('click', () => {
+        listDiv.querySelectorAll('.save-score-btn').forEach((btn) => {
+            btn.addEventListener('click', async () => {
                 const item = btn.closest('.essay-grading-item');
                 const answerId = item.getAttribute('data-answer-id');
                 const scoreInput = item.querySelector('.score-input');
@@ -228,7 +227,13 @@ class Grading {
                     return;
                 }
 
-                const answer = ungradedAnswers[index];
+                // answerId로 정확히 찾기 (인덱스 불일치 방지)
+                const answer = ungradedAnswers.find(a => a.id === answerId);
+                if (!answer) {
+                    alert('답안을 찾을 수 없습니다.');
+                    return;
+                }
+
                 const question = questions.find(q => q.id === answer.questionId);
 
                 if (score < 0 || score > question.points) {
@@ -238,10 +243,10 @@ class Grading {
 
                 // 점수 저장
                 answer.scoreReceived = score;
-                storage.saveAnswer(answer);
+                await storage.saveAnswer(answer);
 
                 // UI 새로고침
-                this.loadGradingResults();
+                await this.loadGradingResults();
 
                 alert('채점이 저장되었습니다.');
             });
@@ -290,7 +295,7 @@ class Grading {
                                 const ds = result.domainScores[d] || { score: 0, maxScore: 0 };
                                 return `<td>${ds.score.toFixed(1)} / ${ds.maxScore.toFixed(1)}</td>`;
                             }).join('')}
-                            <td>${result.wrongQuestions.map(wq => wq.question.number).join(', ')}</td>
+                            <td>${result.wrongQuestions.map(wq => wq.questionNumber || wq.question?.number).join(', ')}</td>
                         </tr>
                     `).join('')}
                 </tbody>

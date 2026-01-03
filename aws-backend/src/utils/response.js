@@ -114,7 +114,8 @@ function getUserFromEvent(event) {
         email: claims.email,
         name: claims.name || claims['custom:name'],
         organization: claims['custom:organization'],
-        role: claims['custom:role']
+        role: claims['custom:role'],
+        studentId: claims['custom:studentId'] || null
     };
 }
 

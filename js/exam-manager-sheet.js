@@ -35,7 +35,7 @@ ExamManager.prototype.renderFullSheet = function(questions) {
                     </div>
                     <div class="exam-info-item">
                         <label>시행 기관</label>
-                        <input type="text" class="form-control" id="sheetExamOrganization" value="${this.currentExam.organization}">
+                        <input type="text" class="form-control" id="sheetExamOrganization" value="${this.currentExam.organization}" ${AuthService.isAdmin() ? '' : 'readonly style="background-color: #e9ecef; cursor: not-allowed;"'}>
                     </div>
                     <div class="exam-info-item">
                         <label>학교</label>

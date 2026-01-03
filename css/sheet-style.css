@@ -203,6 +203,36 @@
     font-size: 0.85rem;
 }
 
+/* 답안 시트 스크롤 컨테이너 - 헤더 고정, 본문 스크롤 */
+.answer-sheet-scroll-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: white;
+}
+
+.answer-sheet-scroll-container .question-sheet {
+    margin: 0;
+}
+
+.answer-sheet-scroll-container thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--background-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.answer-sheet-scroll-container thead th {
+    background: var(--background-color);
+}
+
+.answer-sheet-scroll-container .question-info-row th {
+    background: #f0f4f8;
+}
+
 .answer-sheet .sheet-cell-input,
 .answer-sheet .sheet-cell-select {
     padding: 0.4rem;

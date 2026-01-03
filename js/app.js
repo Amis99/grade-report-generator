@@ -71,6 +71,9 @@ class App {
     setupHeaderUI() {
         const user = cognitoAuth.getCurrentUser();
 
+        // 햄버거 메뉴 토글 설정
+        this.setupHamburgerMenu();
+
         if (user) {
             // 사용자 정보 표시
             document.getElementById('userInfoDisplay').style.display = 'flex';
@@ -78,7 +81,7 @@ class App {
             document.getElementById('headerUserOrg').textContent = `(${user.organization})`;
 
             // 로그아웃 버튼 표시
-            document.getElementById('logoutBtn').style.display = 'inline-block';
+            document.getElementById('logoutBtn').style.display = 'flex';
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 if (confirm('로그아웃 하시겠습니까?')) {
                     cognitoAuth.logout();
@@ -87,20 +90,34 @@ class App {
 
             // 비밀번호 변경 버튼
             const changePasswordBtn = document.getElementById('changePasswordBtn');
-            changePasswordBtn.style.display = 'inline-block';
+            changePasswordBtn.style.display = 'flex';
             changePasswordBtn.addEventListener('click', () => {
+                this.closeHeaderMenu();
                 this.openChangePasswordModal();
             });
+
+            // 학생 계정 관리 버튼 (admin, org_admin 모두)
+            if (user.role === 'admin' || user.role === 'org_admin') {
+                const studentAccountBtn = document.getElementById('studentAccountBtn');
+                studentAccountBtn.style.display = 'flex';
+                document.getElementById('menuDivider1').style.display = 'block';
+                studentAccountBtn.addEventListener('click', () => {
+                    this.closeHeaderMenu();
+                    studentAccountManager.open();
+                });
+            }
 
             // 관리자 메뉴 (admin만)
             if (user.role === 'admin') {
                 const adminBtn = document.getElementById('adminMenuBtn');
-                adminBtn.style.display = 'inline-block';
+                adminBtn.style.display = 'flex';
+                document.getElementById('menuDivider1').style.display = 'block';
 
                 // 대기 중인 가입 신청 수 로드
                 this.loadPendingCount();
 
                 adminBtn.addEventListener('click', () => {
+                    this.closeHeaderMenu();
                     adminPanel.open();
                 });
             }
@@ -108,6 +125,56 @@ class App {
 
         // 비밀번호 변경 모달 이벤트 설정
         this.setupChangePasswordModal();
+    }
+
+    /**
+     * 햄버거 메뉴 설정
+     */
+    setupHamburgerMenu() {
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const headerMenu = document.getElementById('headerMenu');
+
+        if (!hamburgerBtn || !headerMenu) return;
+
+        // 햄버거 버튼 클릭
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hamburgerBtn.classList.toggle('active');
+            headerMenu.classList.toggle('open');
+        });
+
+        // 외부 클릭 시 메뉴 닫기
+        document.addEventListener('click', (e) => {
+            if (!headerMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                this.closeHeaderMenu();
+            }
+        });
+
+        // ESC 키로 메뉴 닫기
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeHeaderMenu();
+            }
+        });
+
+        // 백업/복원 버튼 이벤트
+        document.getElementById('exportDataBtn').addEventListener('click', () => {
+            this.closeHeaderMenu();
+        });
+
+        document.getElementById('importDataBtn').addEventListener('click', () => {
+            this.closeHeaderMenu();
+        });
+    }
+
+    /**
+     * 헤더 메뉴 닫기
+     */
+    closeHeaderMenu() {
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const headerMenu = document.getElementById('headerMenu');
+        if (hamburgerBtn) hamburgerBtn.classList.remove('active');
+        if (headerMenu) headerMenu.classList.remove('open');
     }
 
     /**

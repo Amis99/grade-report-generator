@@ -9,8 +9,8 @@ const APP_CONFIG = {
     // AWS Cognito 설정
     COGNITO: {
         REGION: 'ap-northeast-2',
-        USER_POOL_ID: 'ap-northeast-2_YmPcJGjEo',
-        CLIENT_ID: 'm5fisbffr5c50a18pf8jn05mv'
+        USER_POOL_ID: 'ap-northeast-2_wFjVERBWq',
+        CLIENT_ID: '1f0r3cm5ifc44vdd4gr99prt1e'
     },
 
     // 앱 설정

@@ -56,6 +56,8 @@ exports.handler = async (event) => {
                 school: existing.school,
                 grade: existing.grade,
                 organization: existing.organization,
+                hasAccount: existing.hasAccount || false,
+                username: existing.username || null,
                 createdAt: existing.createdAt,
                 isExisting: true
             });

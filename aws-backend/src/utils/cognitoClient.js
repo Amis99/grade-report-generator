@@ -52,19 +52,27 @@ async function authenticateUser(email, password) {
  * @returns {Object} Created user info
  */
 async function createUser(userData) {
-    const { email, password, name, organization, role } = userData;
+    const { username, email, password, name, organization, role, studentId } = userData;
 
-    // Create user
+    // Build user attributes
+    const userAttributes = [
+        { Name: 'email', Value: email },
+        { Name: 'email_verified', Value: 'true' },
+        { Name: 'name', Value: name },
+        { Name: 'custom:organization', Value: organization || '' },
+        { Name: 'custom:role', Value: role || 'org_admin' }
+    ];
+
+    // Add studentId if provided (for student role)
+    if (studentId) {
+        userAttributes.push({ Name: 'custom:studentId', Value: studentId });
+    }
+
+    // Create user with username (not email)
     const createParams = {
         UserPoolId: USER_POOL_ID,
-        Username: email,
-        UserAttributes: [
-            { Name: 'email', Value: email },
-            { Name: 'email_verified', Value: 'true' },
-            { Name: 'name', Value: name },
-            { Name: 'custom:organization', Value: organization || '' },
-            { Name: 'custom:role', Value: role || 'org_admin' }
-        ],
+        Username: username,
+        UserAttributes: userAttributes,
         MessageAction: 'SUPPRESS' // Don't send welcome email
     };
 
@@ -73,7 +81,7 @@ async function createUser(userData) {
     // Set permanent password
     const passwordParams = {
         UserPoolId: USER_POOL_ID,
-        Username: email,
+        Username: username,
         Password: password,
         Permanent: true
     };
@@ -82,6 +90,7 @@ async function createUser(userData) {
 
     return {
         sub: createResult.User.Username,
+        username,
         email,
         name,
         organization,

@@ -24,8 +24,8 @@ exports.handler = async (event) => {
             return notFound('Exam not found');
         }
 
-        // Check authorization
-        if (user.role !== 'admin' && exam.organization !== user.organization) {
+        // Check authorization (국어농장 exams are accessible to all)
+        if (user.role !== 'admin' && exam.organization !== user.organization && exam.organization !== '국어농장') {
             return forbidden('You do not have access to this exam');
         }
 

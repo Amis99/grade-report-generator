@@ -215,28 +215,47 @@ class WrongNote {
         const canvas = document.getElementById('wrongNoteTrendChart');
         if (!canvas) return;
 
-        const labels = this.selectedExams.map(e => e.name);
-        const scores = this.selectedExams.map(exam => {
-            const result = storage.getExamResult(exam.id, this.currentStudent.id);
-            return result ? result.totalScore : null;
-        });
+        // 유효한 결과가 있는 시험만 필터링
+        const validExamData = this.selectedExams
+            .map(exam => {
+                const result = storage.getExamResult(exam.id, this.currentStudent.id);
+                if (!result) return null;
 
-        const correctRates = this.selectedExams.map(exam => {
-            const result = storage.getExamResult(exam.id, this.currentStudent.id);
-            if (!result) return null;
-            const questions = storage.getQuestionsByExamId(exam.id);
-            const correctCount = questions.length - result.wrongQuestions.length;
-            return (correctCount / questions.length * 100);
-        });
+                const questions = storage.getQuestionsByExamId(exam.id);
+                const wrongCount = result.wrongQuestions?.length || 0;
+                const correctCount = questions.length - wrongCount;
+                const correctRate = questions.length > 0
+                    ? (correctCount / questions.length * 100)
+                    : 0;
+
+                return {
+                    name: exam.name,
+                    score: result.totalScore || 0,
+                    correctRate: correctRate
+                };
+            })
+            .filter(data => data !== null);
+
+        // 유효한 데이터가 없으면 차트 숨김
+        if (validExamData.length === 0) {
+            canvas.style.display = 'none';
+            return;
+        }
+        canvas.style.display = 'block';
+
+        const labels = validExamData.map(d => d.name);
+        const scores = validExamData.map(d => d.score);
+        const correctRates = validExamData.map(d => d.correctRate);
 
         // 기존 차트 제거
         if (this.trendChart) {
             this.trendChart.destroy();
         }
 
-        // 점수 축 범위 계산
-        const minScore = Math.min(...scores);
-        const yAxisMin = Math.max(0, Math.floor(minScore / 10) * 10 - 10); // 최저점에서 10점 아래, 최소 0
+        // 점수 축 범위 계산 (유효한 값만 사용)
+        const validScores = scores.filter(s => s > 0);
+        const minScore = validScores.length > 0 ? Math.min(...validScores) : 0;
+        const yAxisMin = Math.max(0, Math.floor(minScore / 10) * 10 - 10);
         const yAxisMax = 100;
 
         const ctx = canvas.getContext('2d');
