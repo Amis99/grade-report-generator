@@ -785,6 +785,7 @@ class ReportGenerator {
                     borderDash: [5, 5],
                     pointRadius: isMobile ? 2 : 4,
                     pointHoverRadius: isMobile ? 3 : 6,
+                    pointHitRadius: isMobile ? 20 : 10,  // 모바일 터치 영역 확대
                     tension: 0.3,
                     order: 2
                 }, {
@@ -795,6 +796,7 @@ class ReportGenerator {
                     borderWidth: isMobile ? 2 : 3,
                     pointRadius: isMobile ? 2 : 5,
                     pointHoverRadius: isMobile ? 4 : 7,
+                    pointHitRadius: isMobile ? 20 : 10,  // 모바일 터치 영역 확대
                     tension: 0.3,
                     order: 1
                 }]
@@ -803,8 +805,9 @@ class ReportGenerator {
                 responsive: true,
                 maintainAspectRatio: true,
                 interaction: {
-                    mode: 'index',
-                    intersect: false
+                    mode: isMobile ? 'nearest' : 'index',  // 모바일에서 가장 가까운 점 감지
+                    intersect: false,
+                    axis: 'x'
                 },
                 plugins: {
                     legend: {

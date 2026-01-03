@@ -277,6 +277,7 @@ class WrongNote {
                     borderWidth: isMobile ? 2 : 3,
                     pointRadius: isMobile ? 2 : 5,
                     pointHoverRadius: isMobile ? 4 : 7,
+                    pointHitRadius: isMobile ? 20 : 10,  // 모바일 터치 영역 확대
                     yAxisID: 'y'
                 }, {
                     label: '정답률',
@@ -286,6 +287,7 @@ class WrongNote {
                     borderWidth: isMobile ? 2 : 3,
                     pointRadius: isMobile ? 2 : 5,
                     pointHoverRadius: isMobile ? 4 : 7,
+                    pointHitRadius: isMobile ? 20 : 10,  // 모바일 터치 영역 확대
                     yAxisID: 'y1'
                 }]
             },
@@ -293,8 +295,9 @@ class WrongNote {
                 responsive: true,
                 maintainAspectRatio: true,
                 interaction: {
-                    mode: 'index',
-                    intersect: false
+                    mode: isMobile ? 'nearest' : 'index',  // 모바일에서 가장 가까운 점 감지
+                    intersect: false,
+                    axis: 'x'
                 },
                 plugins: {
                     legend: {
