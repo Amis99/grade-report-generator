@@ -58,6 +58,7 @@
         <nav class="tab-navigation">
             <button class="tab-btn active" data-tab="exam-management">시험 관리</button>
             <button class="tab-btn" data-tab="student-management">학생 관리</button>
+            <button class="tab-btn" data-tab="class-management">수강반 관리</button>
             <button class="tab-btn" data-tab="answer-input">답안 입력</button>
             <button class="tab-btn" data-tab="grading">채점 및 분석</button>
             <button class="tab-btn" data-tab="report">성적표 생성</button>
@@ -130,10 +131,132 @@
                     <div class="all-students-section">
                         <h3>전체 학생 목록</h3>
                         <div class="student-list-filter">
-                            <input type="text" id="studentSearchInput" class="form-control" placeholder="학생 이름, 학교, 학년으로 검색...">
+                            <div class="filter-row">
+                                <label class="select-all-checkbox">
+                                    <input type="checkbox" id="selectAllStudents" onchange="studentManager.toggleSelectAll(this.checked)">
+                                    <span>전체 선택</span>
+                                </label>
+                                <input type="text" id="studentSearchInput" class="form-control" placeholder="학생 이름, 학교, 학년으로 검색...">
+                                <select id="studentClassFilter" class="form-control">
+                                    <option value="">모든 수강반</option>
+                                </select>
+                            </div>
                         </div>
                         <div id="studentList" class="student-list">
                             <!-- 학생 목록이 동적으로 추가됨 -->
+                        </div>
+                    </div>
+
+                    <!-- 선택된 학생 액션 바 -->
+                    <div id="studentSelectionBar" class="selection-action-bar" style="display: none;">
+                        <span id="selectedStudentCount">0명 선택됨</span>
+                        <div class="selection-actions">
+                            <button class="btn btn-primary" onclick="studentManager.showAddToClassModal()">
+                                수강반에 등록
+                            </button>
+                            <button class="btn btn-secondary" onclick="studentManager.clearSelection()">
+                                선택 해제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 수강반 등록 모달 -->
+                <div id="addToClassModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>수강반에 학생 등록</h3>
+                            <button class="modal-close" onclick="studentManager.closeAddToClassModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="addToClassInfo" style="margin-bottom: 1rem; color: var(--text-secondary);">
+                                선택된 학생 0명을 등록할 수강반을 선택하세요.
+                            </p>
+                            <div class="form-group">
+                                <label for="targetClassSelect">수강반 선택</label>
+                                <select id="targetClassSelect" class="form-control">
+                                    <option value="">수강반을 선택하세요</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="studentManager.closeAddToClassModal()">
+                                취소
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="studentManager.addSelectedToClass()">
+                                등록
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 수강반 관리 탭 -->
+            <section id="class-management" class="tab-content">
+                <div class="section-header">
+                    <h2>수강반 관리</h2>
+                    <button id="createClassBtn" class="btn btn-primary" onclick="classManager.showCreateClassModal()">새 수강반 만들기</button>
+                </div>
+
+                <!-- 필터 영역 -->
+                <div class="class-filter-bar">
+                    <div class="filter-group" id="orgFilterGroup" style="display: none;">
+                        <label>기관</label>
+                        <select id="classOrgFilter" class="form-control" onchange="classManager.onOrgFilterChange()">
+                            <option value="">전체 기관</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="classSearchInput" class="form-control"
+                               placeholder="수강반 이름으로 검색..."
+                               oninput="classManager.onSearchChange(this.value)">
+                    </div>
+                </div>
+
+                <!-- 좌우 분할 레이아웃 -->
+                <div class="class-management-layout">
+                    <!-- 좌측: 수강반 리스트 -->
+                    <div class="class-list-panel">
+                        <div class="panel-header">
+                            <span>수강반 목록</span>
+                            <span id="classListCount" class="count-badge">0개</span>
+                        </div>
+                        <div id="classList" class="class-list-items">
+                            <!-- 수강반 리스트가 동적으로 추가됨 -->
+                        </div>
+                        <div id="classPagination" class="pagination">
+                            <!-- 페이지네이션 -->
+                        </div>
+                    </div>
+
+                    <!-- 우측: 수강반 상세 및 학생 목록 -->
+                    <div class="class-detail-panel" id="classDetailPanel">
+                        <div class="panel-placeholder" id="classDetailPlaceholder">
+                            <p>좌측에서 수강반을 선택하세요</p>
+                        </div>
+                        <div id="classDetailContent" style="display: none;">
+                            <div class="detail-header">
+                                <div class="detail-title-row">
+                                    <h3 id="classDetailTitle">수강반명</h3>
+                                    <div class="detail-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="classManager.showEditClassModal()">수정</button>
+                                        <button class="btn btn-sm btn-danger" onclick="classManager.deleteSelectedClass()">삭제</button>
+                                    </div>
+                                </div>
+                                <p id="classDetailInfo" class="detail-info"></p>
+                            </div>
+                            <div class="class-students-section">
+                                <div class="students-header">
+                                    <h4>소속 학생 (<span id="classStudentCount">0</span>명)</h4>
+                                    <button class="btn btn-secondary btn-sm" onclick="classManager.showAddStudentModal()">
+                                        학생 추가
+                                    </button>
+                                </div>
+                                <div id="classStudentList" class="class-student-list">
+                                    <!-- 학생 목록이 동적으로 추가됨 -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -501,6 +624,7 @@
     <script src="js/wrong-note.js?v=20250103b"></script>
     <script src="js/student-manager.js?v=20250103b"></script>
     <script src="js/auto-merge-students.js?v=20250103b"></script>
+    <script src="js/class-manager.js?v=20250103b"></script>
     <script src="js/app.js?v=20250103b"></script>
 </body>
 </html>

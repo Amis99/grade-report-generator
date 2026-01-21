@@ -833,6 +833,517 @@
 }
 
 /* Responsive */
+/* ========================================
+   학생 과제 스타일
+   ======================================== */
+
+/* 과제 목록 */
+.assignment-list-student {
+    margin-top: 1rem;
+}
+
+.assignment-section {
+    margin-bottom: 2rem;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* 과제 카드 그리드 */
+.assignment-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+/* 과제 카드 */
+.assignment-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.assignment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.assignment-card.overdue {
+    opacity: 0.7;
+}
+
+.assignment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.assignment-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
+/* 상태 뱃지 */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge-info {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-warning {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* 과제 카드 본문 */
+.assignment-card-body {
+    padding: 1rem;
+}
+
+.assignment-info {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.info-label {
+    color: #666;
+    margin-right: 0.5rem;
+}
+
+.info-value {
+    color: #333;
+    font-weight: 500;
+}
+
+.overdue-text {
+    color: #dc2626;
+}
+
+/* 과제 카드 푸터 */
+.assignment-card-footer {
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    text-align: right;
+}
+
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-lg {
+    max-width: 700px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* 도움말 텍스트 */
+.help-text {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* 폼 */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+/* 이미지 미리보기 */
+.image-preview {
+    margin: 1rem 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 업로드 상태 */
+.upload-status {
+    margin-top: 1rem;
+}
+
+.status-processing {
+    padding: 1rem;
+    background: #e0f2fe;
+    border-radius: 8px;
+    color: #0369a1;
+    text-align: center;
+    font-weight: 500;
+}
+
+.status-success {
+    padding: 1rem;
+    background: #dcfce7;
+    border-radius: 8px;
+    color: #16a34a;
+    text-align: center;
+}
+
+.status-success .score-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.status-success .score {
+    color: #16a34a;
+}
+
+.status-success .max-score {
+    color: #666;
+}
+
+.status-success .percentage {
+    font-size: 1rem;
+    color: #666;
+}
+
+.status-warning {
+    padding: 1rem;
+    background: #fef9c3;
+    border-radius: 8px;
+    color: #ca8a04;
+    text-align: center;
+}
+
+.status-error {
+    padding: 1rem;
+    background: #fee2e2;
+    border-radius: 8px;
+    color: #dc2626;
+    text-align: center;
+}
+
+/* 폼 액션 */
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+/* 버튼 */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: #4a7c59;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #3d6b4a;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #333;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #d1d5db;
+}
+
+/* 결과 표시 */
+.result-summary {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.score-box {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.score-box.high {
+    border: 2px solid #16a34a;
+}
+
+.score-box.medium {
+    border: 2px solid #f59e0b;
+}
+
+.score-box.low {
+    border: 2px solid #ef4444;
+}
+
+.score-box .score-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.score-box.high .score-value {
+    color: #16a34a;
+}
+
+.score-box.medium .score-value {
+    color: #f59e0b;
+}
+
+.score-box.low .score-value {
+    color: #ef4444;
+}
+
+.score-box .score-max {
+    font-size: 1rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.score-stats {
+    flex: 1;
+}
+
+.score-stats p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+/* 오답 섹션 */
+.wrong-answers-section {
+    margin-top: 1.5rem;
+}
+
+.wrong-answers-section h4 {
+    margin-bottom: 1rem;
+    color: #dc2626;
+}
+
+.wrong-answers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.wrong-answer-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    border-radius: 6px;
+    border-left: 3px solid #ef4444;
+}
+
+.wrong-answer-item .question-number {
+    font-weight: bold;
+    color: #333;
+    min-width: 40px;
+}
+
+.answer-comparison {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+}
+
+.student-answer {
+    color: #dc2626;
+}
+
+.correct-answer {
+    color: #16a34a;
+    font-weight: 500;
+}
+
+.question-domain {
+    font-size: 0.8rem;
+    color: #666;
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* 전체 답안 테이블 */
+.all-answers-section {
+    margin-top: 1.5rem;
+}
+
+.all-answers-section h4 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.answers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.answers-table th,
+.answers-table td {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.answers-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.answers-table tr.correct {
+    background: #f0fdf4;
+}
+
+.answers-table tr.wrong {
+    background: #fef2f2;
+}
+
+/* 에러/빈 상태 */
+.error-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-state p {
+    color: #dc2626;
+    margin-bottom: 1rem;
+}
+
+.result-not-submitted,
+.result-pending {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* 반응형 */
 @media (max-width: 768px) {
     .student-header {
         flex-direction: row;
@@ -903,5 +1414,38 @@
 
     .summary-cards {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* 과제 관련 반응형 */
+    .assignment-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .result-summary {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .answer-comparison {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .wrong-answer-item {
+        flex-wrap: wrap;
+    }
+
+    .answers-table {
+        font-size: 0.8rem;
+    }
+
+    .answers-table th,
+    .answers-table td {
+        padding: 0.5rem;
     }
 }

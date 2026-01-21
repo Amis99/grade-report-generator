@@ -26,6 +26,10 @@ class StudentDashboard {
 
         // Setup event listeners
         this.setupEventListeners();
+
+        if (typeof onStudentDashboardReady === 'function') {
+            onStudentDashboardReady();
+        }
     }
 
     // 모바일 여부 확인
@@ -223,7 +227,7 @@ class StudentDashboard {
             content.classList.toggle('active', content.id === tabId);
         });
 
-        // Refresh charts if needed
+        // Refresh content based on tab
         if (tabId === 'trend') {
             this.renderTrendCharts();
         }

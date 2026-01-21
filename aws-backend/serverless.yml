@@ -16,6 +16,8 @@ provider:
     ANSWERS_TABLE: ${self:custom.answersTable}
     USERS_TABLE: ${self:custom.usersTable}
     REGISTRATIONS_TABLE: ${self:custom.registrationsTable}
+    CLASSES_TABLE: ${self:custom.classesTable}
+    STUDENT_CLASSES_TABLE: ${self:custom.studentClassesTable}
     PDF_BUCKET: ${self:custom.pdfBucket}
     USER_POOL_ID: !Ref CognitoUserPoolV2
     USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
@@ -45,6 +47,10 @@ provider:
             - !Join ['/', [!GetAtt UsersTable.Arn, 'index/*']]
             - !GetAtt RegistrationsTable.Arn
             - !Join ['/', [!GetAtt RegistrationsTable.Arn, 'index/*']]
+            - !GetAtt ClassesTable.Arn
+            - !Join ['/', [!GetAtt ClassesTable.Arn, 'index/*']]
+            - !GetAtt StudentClassesTable.Arn
+            - !Join ['/', [!GetAtt StudentClassesTable.Arn, 'index/*']]
         - Effect: Allow
           Action:
             - s3:PutObject
@@ -71,6 +77,8 @@ custom:
   answersTable: TestReportAnswers-${self:provider.stage}
   usersTable: TestReportUsers-${self:provider.stage}
   registrationsTable: TestReportRegistrations-${self:provider.stage}
+  classesTable: TestReportClasses-${self:provider.stage}
+  studentClassesTable: TestReportStudentClasses-${self:provider.stage}
   pdfBucket: test-report-pdfs-${self:provider.stage}-${aws:accountId}
 
 functions:
@@ -232,6 +240,17 @@ functions:
       - http:
           path: /api/v1/students/{studentId}
           method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  updateStudent:
+    handler: src/handlers/students/updateStudent.handler
+    events:
+      - http:
+          path: /api/v1/students/{studentId}
+          method: put
           cors: true
           authorizer:
             type: COGNITO_USER_POOLS
@@ -445,6 +464,106 @@ functions:
     events:
       - http:
           path: /api/v1/student/wrong-notes
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  # Classes (수강반)
+  getClasses:
+    handler: src/handlers/classes/getClasses.handler
+    events:
+      - http:
+          path: /api/v1/classes
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getClass:
+    handler: src/handlers/classes/getClass.handler
+    events:
+      - http:
+          path: /api/v1/classes/{classId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  createClass:
+    handler: src/handlers/classes/createClass.handler
+    events:
+      - http:
+          path: /api/v1/classes
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  updateClass:
+    handler: src/handlers/classes/updateClass.handler
+    events:
+      - http:
+          path: /api/v1/classes/{classId}
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  deleteClass:
+    handler: src/handlers/classes/deleteClass.handler
+    events:
+      - http:
+          path: /api/v1/classes/{classId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getClassStudents:
+    handler: src/handlers/classes/getClassStudents.handler
+    events:
+      - http:
+          path: /api/v1/classes/{classId}/students
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  addStudentToClass:
+    handler: src/handlers/classes/addStudentToClass.handler
+    events:
+      - http:
+          path: /api/v1/classes/{classId}/students
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  removeStudentFromClass:
+    handler: src/handlers/classes/removeStudentFromClass.handler
+    events:
+      - http:
+          path: /api/v1/classes/{classId}/students/{studentId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+  getStudentClasses:
+    handler: src/handlers/classes/getStudentClasses.handler
+    events:
+      - http:
+          path: /api/v1/students/{studentId}/classes
           method: get
           cors: true
           authorizer:
@@ -697,6 +816,66 @@ resources:
               - AttributeName: status
                 KeyType: HASH
               - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # Classes Table (수강반)
+    ClassesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.classesTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: organization
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: organization-name-index
+            KeySchema:
+              - AttributeName: organization
+                KeyType: HASH
+              - AttributeName: name
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # Student-Classes Junction Table (학생-수강반 N:N)
+    StudentClassesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.studentClassesTable}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: classId
+            AttributeType: S
+          - AttributeName: studentId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: classId-index
+            KeySchema:
+              - AttributeName: classId
+                KeyType: HASH
+              - AttributeName: studentId
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL

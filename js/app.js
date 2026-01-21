@@ -416,6 +416,11 @@ class App {
                     studentManager.loadStudentList();
                 }
                 break;
+            case 'class-management':
+                if (window.classManager) {
+                    classManager.init();
+                }
+                break;
             case 'answer-input':
                 if (window.answerInput) {
                     answerInput.loadExamSelect();

@@ -14,7 +14,8 @@ class ApiClient {
             students: [],
             answers: [],
             users: [],
-            registrations: []
+            registrations: [],
+            classes: []
         };
         this.cacheLoaded = false;
         this.useFirebase = false; // 호환성용 플래그
@@ -920,7 +921,8 @@ class ApiClient {
                 students: [],
                 answers: [],
                 users: [],
-                registrations: []
+                registrations: [],
+                classes: []
             };
         }
     }
@@ -1003,7 +1005,86 @@ class ApiClient {
     async deleteStudentAccount(studentId) {
         return await this.request('DELETE', `/students/${studentId}/account`);
     }
+
+    // === 수강반(Class) 관리 API ===
+
+    /**
+     * 수강반 목록 조회
+     * @param {Object} params - 필터 파라미터 (organization 등)
+     */
+    async getClasses(params = {}) {
+        let endpoint = '/classes';
+        const queryParams = [];
+
+        if (params.organization) {
+            queryParams.push(`organization=${encodeURIComponent(params.organization)}`);
+        }
+
+        if (queryParams.length > 0) {
+            endpoint += '?' + queryParams.join('&');
+        }
+
+        return await this.request('GET', endpoint);
+    }
+
+    /**
+     * 수강반 상세 조회
+     */
+    async getClass(classId) {
+        return await this.request('GET', `/classes/${classId}`);
+    }
+
+    /**
+     * 수강반 생성
+     */
+    async createClass(classData) {
+        return await this.request('POST', '/classes', classData);
+    }
+
+    /**
+     * 수강반 수정
+     */
+    async updateClass(classId, classData) {
+        return await this.request('PUT', `/classes/${classId}`, classData);
+    }
+
+    /**
+     * 수강반 삭제
+     */
+    async deleteClass(classId) {
+        return await this.request('DELETE', `/classes/${classId}`);
+    }
+
+    /**
+     * 수강반 학생 목록 조회
+     */
+    async getClassStudents(classId) {
+        return await this.request('GET', `/classes/${classId}/students`);
+    }
+
+    /**
+     * 수강반에 학생 추가
+     */
+    async addStudentsToClass(classId, studentIds) {
+        return await this.request('POST', `/classes/${classId}/students`, { studentIds });
+    }
+
+    /**
+     * 수강반에서 학생 제거
+     */
+    async removeStudentFromClass(classId, studentId) {
+        return await this.request('DELETE', `/classes/${classId}/students/${studentId}`);
+    }
+
+    /**
+     * 학생의 수강반 목록 조회
+     */
+    async getStudentClasses(studentId) {
+        return await this.request('GET', `/students/${studentId}/classes`);
+    }
 }
 
 // 싱글톤 인스턴스 (기존 storage 변수명 유지)
 const storage = new ApiClient();
+// 학생 페이지에서 사용하는 별칭
+const apiClient = storage;
