@@ -3,128 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>내 성적 - 성적표 생성 프로그램</title>
+    <link rel="stylesheet" href="css/portal.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/student-style.css">
+</head>
+<body class="portal-layout">
+    <!-- 사이드바 오버레이 (모바일) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="portal-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-logo">
+                    <div class="sidebar-logo-icon">
+                        <img src="images/logo.png" alt="로고" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <span class="sidebar-logo-text">국어<span>농장</span></span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">메인</div>
+                    <a class="nav-item active" data-page="dashboard">
+                        <span class="nav-item-icon">🏠</span>
+                        <span class="nav-item-text">대시보드</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">학습</div>
+                    <a class="nav-item" data-page="my-reports">
+                        <span class="nav-item-icon">📄</span>
+                        <span class="nav-item-text">내 성적표</span>
+                    </a>
+                    <a class="nav-item" data-page="my-assignments">
+                        <span class="nav-item-icon">📋</span>
+                        <span class="nav-item-text">내 과제</span>
+                    </a>
+                    <a class="nav-item" data-page="wrong-notes">
+                        <span class="nav-item-icon">📓</span>
+                        <span class="nav-item-text">오답 노트</span>
+                    </a>
+                    <a class="nav-item" data-page="trend">
+                        <span class="nav-item-icon">📈</span>
+                        <span class="nav-item-text">성적 추이</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">설정</div>
+                    <a class="nav-item" data-page="settings">
+                        <span class="nav-item-icon">⚙️</span>
+                        <span class="nav-item-text">설정</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user" id="sidebarUser">
+                    <div class="sidebar-user-avatar" id="sidebarUserAvatar">학</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebarUserName">학생</div>
+                        <div class="sidebar-user-role" id="sidebarUserOrg"></div>
+                    </div>
+                </div>
+                <button class="logout-btn" id="sidebarLogoutBtn">
+                    <span>🚪</span>
+                    <span>로그아웃</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 헤더 -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴 열기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12h18M3 6h18M3 18h18"/>
+                        </svg>
+                    </button>
+                    <h1 class="page-title" id="pageTitle">대시보드</h1>
+                </div>
+                <div class="header-right">
+                    <div class="header-user" id="headerUserBtn">
+                        <div class="header-user-avatar" id="headerUserAvatar">학</div>
+                        <span class="header-user-name" id="headerUserName">학생</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 콘텐츠 영역 -->
+            <div class="content-area">
+                <!-- 대시보드 페이지 -->
+                <div id="dashboard" class="page active">
+                    <div class="dashboard">
+                        <!-- 환영 섹션 -->
+                        <div class="dashboard-welcome">
+                            <div class="welcome-greeting">
+                                안녕하세요, <span class="user-name" id="dashboardUserName">학생</span>님!
+                            </div>
+                            <div class="welcome-message">오늘도 열심히 공부해봐요!</div>
+                            <div class="welcome-date" id="dashboardDate">
+                                <span>📅</span>
+                                <span id="currentDate">2025년 1월 21일 화요일</span>
+                            </div>
+                        </div>
+
+                        <!-- 해야 할 것 -->
+                        <div class="feed-section">
+                            <div class="feed-header">
+                                <div class="feed-title">
+                                    <span class="feed-title-icon">📌</span>
+                                    해야 할 것
+                                </div>
+                                <a href="#" class="feed-link" data-page="my-assignments">
+                                    모두 보기 →
+                                </a>
+                            </div>
+                            <div class="feed-list" id="studentTodoList">
+                                <!-- 동적으로 추가됨 -->
+                            </div>
+                        </div>
+
+                        <!-- 최근 성적 -->
+                        <div class="feed-section">
+                            <div class="feed-header">
+                                <div class="feed-title">
+                                    <span class="feed-title-icon">📊</span>
+                                    최근 성적
+                                </div>
+                                <a href="#" class="feed-link" data-page="my-reports">
+                                    모두 보기 →
+                                </a>
+                            </div>
+                            <div id="recentScoreCard">
+                                <!-- 동적으로 추가됨 -->
+                            </div>
+                        </div>
+
+                        <!-- 선생님 코멘트 -->
+                        <div class="feed-section" id="teacherCommentSection" style="display: none;">
+                            <div class="feed-header">
+                                <div class="feed-title">
+                                    <span class="feed-title-icon">💬</span>
+                                    선생님 코멘트
+                                </div>
+                            </div>
+                            <div id="teacherComment">
+                                <!-- 동적으로 추가됨 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 내 성적표 페이지 -->
+                <div id="my-reports" class="page">
+                    <div class="section-header">
+                        <h2>내 성적표</h2>
+                    </div>
+                    <div class="exam-cards" id="examCards">
+                        <!-- 시험 카드가 동적으로 추가됨 -->
+                    </div>
+                    <div id="reportContainer" class="report-container" style="display: none;">
+                        <!-- 성적표가 여기에 표시됨 -->
+                    </div>
+                </div>
+
+                <!-- 내 과제 페이지 -->
+                <div id="my-assignments" class="page">
+                    <div class="section-header">
+                        <h2>내 과제</h2>
+                    </div>
+                    <div id="assignmentCardsContainer" class="assignment-cards">
+                        <!-- 과제 카드가 동적으로 추가됨 -->
+                    </div>
+                    <div id="assignmentDetailContainer" class="assignment-detail-container" style="display: none;">
+                        <!-- 과제 상세 및 제출 화면 -->
+                    </div>
+                </div>
+
+                <!-- 오답 노트 페이지 -->
+                <div id="wrong-notes" class="page">
+                    <div class="section-header">
+                        <h2>오답 노트</h2>
+                    </div>
+                    <div class="exam-select-area">
+                        <div class="exam-select-header">
+                            <span>시험 선택</span>
+                            <button id="selectAllExamsBtn" class="btn btn-sm btn-secondary">모두 선택</button>
+                        </div>
+                        <div id="examCheckboxes" class="exam-checkboxes">
+                            <!-- 시험 체크박스가 동적으로 추가됨 -->
+                        </div>
+                        <button id="generateWrongNoteBtn" class="btn btn-primary">오답 노트 생성</button>
+                    </div>
+                    <div id="wrongNoteContainer" class="wrong-note-container" style="display: none;">
+                        <!-- 오답 노트가 여기에 표시됨 -->
+                    </div>
+                </div>
+
+                <!-- 성적 추이 페이지 -->
+                <div id="trend" class="page">
+                    <div class="section-header">
+                        <h2>성적 추이</h2>
+                    </div>
+                    <div class="trend-charts">
+                        <div class="chart-container">
+                            <h3>점수 추이</h3>
+                            <canvas id="scoreTrendChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>영역별 정답률</h3>
+                            <canvas id="domainChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="trendSummary" class="trend-summary">
+                        <!-- 추이 요약 정보 -->
+                    </div>
+                </div>
+
+                <!-- 설정 페이지 -->
+                <div id="settings" class="page">
+                    <div class="section-header">
+                        <h2>설정</h2>
+                    </div>
+
+                    <div class="settings-content">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">계정 관리</h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <button id="changePasswordBtn" class="btn btn-secondary">
+                                        🔑 비밀번호 변경
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비밀번호 변경 모달 -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>비밀번호 변경</h3>
+                <button class="modal-close" id="closeChangePasswordModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>현재 비밀번호</label>
+                    <input type="password" id="currentPassword" class="form-control" placeholder="현재 비밀번호 입력">
+                </div>
+                <div class="form-group">
+                    <label>새 비밀번호</label>
+                    <input type="password" id="newPassword" class="form-control" placeholder="새 비밀번호 (4자 이상)">
+                </div>
+                <div class="form-group">
+                    <label>새 비밀번호 확인</label>
+                    <input type="password" id="confirmNewPassword" class="form-control" placeholder="새 비밀번호 다시 입력">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelChangePasswordBtn">취소</button>
+                <button class="btn btn-primary" id="saveChangePasswordBtn">변경</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 외부 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <!-- PDF.js for processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-</head>
-<body>
-    <div class="student-container">
-        <!-- 헤더 -->
-        <header class="student-header">
-            <div class="header-left">
-                <img src="images/logo.png" alt="국어농장" class="header-logo">
-                <h1>내 성적</h1>
-            </div>
-            <div class="header-right">
-                <span id="studentInfo" class="student-info"></span>
-                <button id="hamburgerBtn" class="hamburger-btn" aria-label="메뉴">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                </button>
-                <div id="headerMenu" class="header-dropdown">
-                    <button id="changePasswordBtn" class="dropdown-item">
-                        <span class="dropdown-icon">🔑</span> 비밀번호 변경
-                    </button>
-                    <div class="dropdown-divider"></div>
-                    <button id="logoutBtn" class="dropdown-item dropdown-item-danger">
-                        <span class="dropdown-icon">🚪</span> 로그아웃
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- 탭 네비게이션 -->
-        <nav class="student-tabs">
-            <button class="tab-btn active" data-tab="my-reports">내 성적표</button>
-            <button class="tab-btn" data-tab="my-assignments">내 과제</button>
-            <button class="tab-btn" data-tab="wrong-notes">오답 노트</button>
-            <button class="tab-btn" data-tab="trend">성적 추이</button>
-        </nav>
-
-        <!-- 내 성적표 탭 -->
-        <section id="my-reports" class="tab-content active">
-            <div class="section-header">
-                <h2>내 성적표</h2>
-            </div>
-            <div class="exam-cards" id="examCards">
-                <!-- 시험 카드가 동적으로 추가됨 -->
-            </div>
-            <div id="reportContainer" class="report-container" style="display: none;">
-                <!-- 성적표가 여기에 표시됨 -->
-            </div>
-        </section>
-
-        <!-- 내 과제 탭 -->
-        <section id="my-assignments" class="tab-content">
-            <div class="section-header">
-                <h2>내 과제</h2>
-            </div>
-            <div id="assignmentCardsContainer" class="assignment-cards">
-                <!-- 과제 카드가 동적으로 추가됨 -->
-            </div>
-            <div id="assignmentDetailContainer" class="assignment-detail-container" style="display: none;">
-                <!-- 과제 상세 및 제출 화면 -->
-            </div>
-        </section>
-
-        <!-- 오답 노트 탭 -->
-        <section id="wrong-notes" class="tab-content">
-            <div class="section-header">
-                <h2>오답 노트</h2>
-            </div>
-            <div class="exam-select-area">
-                <div class="exam-select-header">
-                    <span>시험 선택</span>
-                    <button id="selectAllExamsBtn" class="btn btn-sm btn-secondary">모두 선택</button>
-                </div>
-                <div id="examCheckboxes" class="exam-checkboxes">
-                    <!-- 시험 체크박스가 동적으로 추가됨 -->
-                </div>
-                <button id="generateWrongNoteBtn" class="btn btn-primary">오답 노트 생성</button>
-            </div>
-            <div id="wrongNoteContainer" class="wrong-note-container" style="display: none;">
-                <!-- 오답 노트가 여기에 표시됨 -->
-            </div>
-        </section>
-
-        <!-- 성적 추이 탭 -->
-        <section id="trend" class="tab-content">
-            <div class="section-header">
-                <h2>성적 추이</h2>
-            </div>
-            <div class="trend-charts">
-                <div class="chart-container">
-                    <h3>점수 추이</h3>
-                    <canvas id="scoreTrendChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>영역별 정답률</h3>
-                    <canvas id="domainChart"></canvas>
-                </div>
-            </div>
-            <div id="trendSummary" class="trend-summary">
-                <!-- 추이 요약 정보 -->
-            </div>
-        </section>
-    </div>
 
     <!-- AWS Cognito SDK -->
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
 
     <!-- 애플리케이션 스크립트 -->
-    <script src="js/config.js"></script>
-    <script src="js/data-model.js"></script>
-    <script src="js/cognito-auth.js"></script>
-    <script src="js/api-client.js"></script>
-    <script src="js/session-manager.js"></script>
-    <script src="js/auth-service.js"></script>
-    <script src="js/student-dashboard.js"></script>
-    <script src="js/student-assignments.js?v=20250121"></script>
+    <script src="js/config.js?v=20250121c"></script>
+    <script src="js/data-model.js?v=20250121c"></script>
+    <script src="js/cognito-auth.js?v=20250121c"></script>
+    <script src="js/api-client.js?v=20250121c"></script>
+    <script src="js/session-manager.js?v=20250121c"></script>
+    <script src="js/auth-service.js?v=20250121c"></script>
+    <script src="js/student-portal.js?v=20250121c"></script>
+    <script src="js/student-dashboard.js?v=20250121c"></script>
+    <script src="js/student-assignments.js?v=20250121c"></script>
 </body>
 </html>

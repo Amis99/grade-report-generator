@@ -351,15 +351,23 @@ class AssignmentManager {
                                 <td>${s.lastSubmittedAt ? new Date(s.lastSubmittedAt).toLocaleDateString('ko-KR') : '-'}</td>
                                 <td>
                                     <div class="btn-group">
-                                        ${hasSubmissions ? `
-                                            <button class="btn btn-sm btn-primary"
-                                                    onclick="assignmentManager.showStudentSubmissionModal('${s.student.id}')">
-                                                이미지 확인
-                                            </button>
-                                        ` : ''}
-                                        <button class="btn btn-sm btn-secondary"
-                                                onclick="assignmentManager.showCommentModal('${s.student.id}', '${this.escapeHtml(s.student.name)}', '${this.escapeHtml(s.teacherComment || '')}')">
-                                            ${s.teacherComment ? '코멘트 수정' : '코멘트'}
+                                        <button class="btn-icon ${hasSubmissions ? '' : 'disabled'}"
+                                                onclick="${hasSubmissions ? `assignmentManager.showStudentSubmissionModal('${s.student.id}')` : ''}"
+                                                title="${hasSubmissions ? '이미지 확인' : '제출된 이미지 없음'}"
+                                                ${hasSubmissions ? '' : 'disabled'}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                <polyline points="21 15 16 10 5 21"></polyline>
+                                            </svg>
+                                        </button>
+                                        <button class="btn-icon ${s.teacherComment ? 'has-comment' : ''}"
+                                                onclick="assignmentManager.showCommentModal('${s.student.id}', '${this.escapeHtml(s.student.name)}', '${this.escapeHtml(s.teacherComment || '')}')"
+                                                title="${s.teacherComment ? '코멘트 수정' : '코멘트 작성'}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                                ${s.teacherComment ? '<line x1="9" y1="10" x2="15" y2="10"></line><line x1="12" y1="7" x2="12" y2="13"></line>' : ''}
+                                            </svg>
                                         </button>
                                     </div>
                                 </td>

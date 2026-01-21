@@ -27,9 +27,298 @@ class StudentDashboard {
         // Setup event listeners
         this.setupEventListeners();
 
+        // Load dashboard data for new portal layout
+        await this.loadDashboardData();
+
+        // 포털 컨트롤러의 pendingPage 처리 (인증 전에 해시가 있었던 경우)
+        if (typeof studentPortalController !== 'undefined' && studentPortalController.pendingPage) {
+            studentPortalController.navigateTo(studentPortalController.pendingPage);
+            studentPortalController.pendingPage = null;
+        }
+
         if (typeof onStudentDashboardReady === 'function') {
             onStudentDashboardReady();
         }
+    }
+
+    /**
+     * 영역의 정렬 우선순위 반환 (화법 → 작문 → 매체 → 문법 → 문학 → 비문학)
+     */
+    getDomainSortOrder(domain) {
+        if (/^화법/.test(domain)) return 0;
+        if (/^작문/.test(domain)) return 1;
+        if (/^매체/.test(domain)) return 2;
+        if (/^문법/.test(domain)) return 3;
+        if (/^문학/.test(domain)) return 4;
+        if (/^비문학/.test(domain)) return 5;
+        return 6;
+    }
+
+    /**
+     * 영역의 대분류 그룹 반환 (배경색용)
+     */
+    getDomainGroup(domain) {
+        if (/^화법|^작문|^매체/.test(domain)) return 0;
+        if (/^문법/.test(domain)) return 1;
+        if (/^문학/.test(domain)) return 2;
+        if (/^비문학/.test(domain)) return 3;
+        return 4;
+    }
+
+    /**
+     * 레이더 차트 배경색 플러그인 생성
+     */
+    createRadarBackgroundPlugin(domains) {
+        const self = this;
+        const groupColors = [
+            'rgba(147, 197, 253, 0.3)',  // 화법/작문/매체 - 파랑
+            'rgba(167, 243, 208, 0.3)',  // 문법 - 초록
+            'rgba(253, 230, 138, 0.3)',  // 문학 - 노랑
+            'rgba(252, 165, 165, 0.3)',  // 비문학 - 빨강
+            'rgba(209, 213, 219, 0.3)'   // 기타 - 회색
+        ];
+
+        return {
+            id: 'radarBackground',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const scale = chart.scales.r;
+
+                if (!scale || domains.length === 0) return;
+
+                const centerX = scale.xCenter;
+                const centerY = scale.yCenter;
+                const radius = scale.drawingArea;
+                const anglePerLabel = (2 * Math.PI) / domains.length;
+                const startAngle = -Math.PI / 2;
+
+                let currentGroup = -1;
+                let groupStartIndex = 0;
+
+                for (let i = 0; i <= domains.length; i++) {
+                    const group = i < domains.length ? self.getDomainGroup(domains[i]) : -1;
+
+                    if (group !== currentGroup || i === domains.length) {
+                        if (currentGroup >= 0 && i > groupStartIndex) {
+                            const sectorStartAngle = startAngle + (groupStartIndex - 0.5) * anglePerLabel;
+                            const sectorEndAngle = startAngle + (i - 0.5) * anglePerLabel;
+
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(centerX, centerY);
+                            ctx.arc(centerX, centerY, radius, sectorStartAngle, sectorEndAngle);
+                            ctx.closePath();
+                            ctx.fillStyle = groupColors[currentGroup] || groupColors[4];
+                            ctx.fill();
+                            ctx.restore();
+                        }
+
+                        currentGroup = group;
+                        groupStartIndex = i;
+                    }
+                }
+            }
+        };
+    }
+
+    // New dashboard data loading methods for portal layout
+    async loadDashboardData() {
+        try {
+            await Promise.all([
+                this.loadTodoItems(),
+                this.loadRecentScore()
+            ]);
+        } catch (error) {
+            console.error('대시보드 데이터 로드 실패:', error);
+        }
+    }
+
+    async loadTodoItems() {
+        const container = document.getElementById('studentTodoList');
+        if (!container) return;
+
+        try {
+            // Load pending assignments
+            const token = await this.getAuthToken();
+            const response = await fetch(`${APP_CONFIG.API_BASE_URL}/student/assignments`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Failed to load assignments');
+
+            const result = await response.json();
+            const assignments = result.assignments || [];
+
+            // Filter active assignments (not completed by student)
+            const now = new Date();
+            const pendingAssignments = assignments.filter(a => {
+                // 완료된 과제는 제외
+                if (a.isComplete) return false;
+                // 마감일이 지난 과제는 제외
+                if (a.dueDate && new Date(a.dueDate) < now) return false;
+                return true;
+            });
+
+            // Sort by due date
+            pendingAssignments.sort((a, b) => {
+                if (!a.dueDate) return 1;
+                if (!b.dueDate) return -1;
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+
+            this.renderTodoItems(pendingAssignments.slice(0, 5), container);
+        } catch (error) {
+            console.error('할 일 목록 로드 실패:', error);
+            this.renderEmptyTodo(container);
+        }
+    }
+
+    renderTodoItems(assignments, container) {
+        if (assignments.length === 0) {
+            this.renderEmptyTodo(container);
+            return;
+        }
+
+        const now = new Date();
+
+        container.innerHTML = assignments.map(assignment => {
+            const dueDate = assignment.dueDate ? new Date(assignment.dueDate) : null;
+            const daysLeft = dueDate ? Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24)) : null;
+
+            let timeText = '마감 없음';
+            let isUrgent = false;
+            if (daysLeft !== null) {
+                if (daysLeft <= 0) {
+                    timeText = '오늘 마감';
+                    isUrgent = true;
+                } else if (daysLeft === 1) {
+                    timeText = '내일 마감';
+                    isUrgent = true;
+                } else if (daysLeft <= 3) {
+                    timeText = `${daysLeft}일 뒤 마감`;
+                    isUrgent = true;
+                } else {
+                    timeText = `${daysLeft}일 뒤 마감`;
+                }
+            }
+
+            const indicatorClass = isUrgent ? 'urgent' : 'pending';
+            const tagClass = isUrgent ? 'urgent' : 'info';
+            const tagText = isUrgent ? '긴급' : '과제';
+
+            return `
+                <div class="feed-item" onclick="${typeof studentPortalController !== 'undefined' ? `studentPortalController.navigateTo('my-assignments')` : ''}">
+                    <div class="feed-item-indicator ${indicatorClass}">📋</div>
+                    <div class="feed-item-content">
+                        <div class="feed-item-meta">
+                            <span class="feed-item-tag ${tagClass}">${tagText}</span>
+                            <span class="feed-item-time">${timeText}</span>
+                        </div>
+                        <div class="feed-item-title">${this.escapeHtml(assignment.name)}</div>
+                        <div class="feed-item-description">${assignment.className || assignment.description || ''}</div>
+                    </div>
+                    <div class="feed-item-arrow">→</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderEmptyTodo(container) {
+        container.innerHTML = `
+            <div class="feed-empty">
+                <div class="feed-empty-icon">✅</div>
+                <div class="feed-empty-title">할 일이 없습니다</div>
+                <div class="feed-empty-text">제출할 과제가 없습니다.</div>
+            </div>
+        `;
+    }
+
+    async loadRecentScore() {
+        const container = document.getElementById('recentScoreCard');
+        if (!container) return;
+
+        try {
+            if (this.exams.length === 0) {
+                this.renderEmptyScore(container);
+                return;
+            }
+
+            // Get most recent exam result
+            const recentExam = this.exams[0];
+            const token = await this.getAuthToken();
+            const response = await fetch(`${APP_CONFIG.API_BASE_URL}/student/exams/${recentExam.id}/result`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Failed to load result');
+
+            const result = await response.json();
+            this.renderRecentScore(recentExam, result.data, container);
+        } catch (error) {
+            console.error('최근 성적 로드 실패:', error);
+            this.renderEmptyScore(container);
+        }
+    }
+
+    renderRecentScore(exam, data, container) {
+        const percentile = data.totalStudents > 0 ? Math.round((1 - (data.rank / data.totalStudents)) * 100) : 0;
+        const badgeClass = percentile >= 80 ? 'high' : percentile >= 50 ? 'mid' : 'low';
+        const badgeText = percentile >= 80 ? '상위' : percentile >= 50 ? '중위' : '하위';
+
+        container.innerHTML = `
+            <div class="score-card">
+                <div class="score-card-header">
+                    <div class="score-card-title">${this.escapeHtml(exam.name)}</div>
+                    <span class="score-card-badge ${badgeClass}">${badgeText} ${100 - percentile}%</span>
+                </div>
+                <div class="score-card-body">
+                    <div class="score-value">${Math.round(data.percentage)}<span>점</span></div>
+                    <div class="score-details">
+                        <div class="score-detail-item">
+                            <span class="score-detail-label">등수</span>
+                            <span class="score-detail-value">${data.rank}등 / ${data.totalStudents}명</span>
+                        </div>
+                        <div class="score-detail-item">
+                            <span class="score-detail-label">평균</span>
+                            <span class="score-detail-value">${data.averageScore ? Math.round(data.averageScore) : '-'}점</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="score-card-footer">
+                    <a href="#" class="link" onclick="event.preventDefault(); ${typeof studentPortalController !== 'undefined' ? `studentPortalController.navigateTo('my-reports')` : ''}">성적표 보기 →</a>
+                </div>
+            </div>
+        `;
+    }
+
+    renderEmptyScore(container) {
+        container.innerHTML = `
+            <div class="feed-empty">
+                <div class="feed-empty-icon">📊</div>
+                <div class="feed-empty-title">아직 성적이 없습니다</div>
+                <div class="feed-empty-text">응시한 시험이 없습니다.</div>
+            </div>
+        `;
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // For portal navigation compatibility
+    loadExamCards() {
+        this.renderExamCards();
+    }
+
+    loadExamCheckboxes() {
+        this.renderExamCheckboxes();
+    }
+
+    loadTrendData() {
+        this.renderTrendCharts();
     }
 
     // 모바일 여부 확인
@@ -82,9 +371,16 @@ class StudentDashboard {
             const result = await response.json();
             this.profile = result.data;
 
-            // Update header
-            document.getElementById('studentInfo').textContent =
-                `${this.profile.name} (${this.profile.school} ${this.profile.grade})`;
+            // Update header (legacy)
+            const studentInfo = document.getElementById('studentInfo');
+            if (studentInfo) {
+                studentInfo.textContent = `${this.profile.name} (${this.profile.school} ${this.profile.grade})`;
+            }
+
+            // Update portal user info (new layout)
+            if (typeof studentPortalController !== 'undefined') {
+                studentPortalController.updateUserInfo(this.profile);
+            }
         } catch (error) {
             if (error.message === 'Session expired') return;
             console.error('Load profile error:', error);
@@ -127,34 +423,46 @@ class StudentDashboard {
     }
 
     setupEventListeners() {
-        // Hamburger menu
+        // Hamburger menu (legacy)
         this.setupHamburgerMenu();
 
-        // Tab switching
+        // Tab switching (legacy)
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
         });
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            cognitoAuth.logout();
-        });
+        // Logout (legacy)
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                cognitoAuth.logout();
+            });
+        }
 
         // Change password
-        document.getElementById('changePasswordBtn').addEventListener('click', () => {
-            this.closeHeaderMenu();
-            this.showChangePasswordModal();
-        });
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        if (changePasswordBtn) {
+            changePasswordBtn.addEventListener('click', () => {
+                this.closeHeaderMenu();
+                this.showChangePasswordModal();
+            });
+        }
 
         // Select all exams
-        document.getElementById('selectAllExamsBtn').addEventListener('click', () => {
-            this.toggleSelectAllExams();
-        });
+        const selectAllExamsBtn = document.getElementById('selectAllExamsBtn');
+        if (selectAllExamsBtn) {
+            selectAllExamsBtn.addEventListener('click', () => {
+                this.toggleSelectAllExams();
+            });
+        }
 
         // Generate wrong note
-        document.getElementById('generateWrongNoteBtn').addEventListener('click', () => {
-            this.generateWrongNote();
-        });
+        const generateWrongNoteBtn = document.getElementById('generateWrongNoteBtn');
+        if (generateWrongNoteBtn) {
+            generateWrongNoteBtn.addEventListener('click', () => {
+                this.generateWrongNote();
+            });
+        }
     }
 
     setupHamburgerMenu() {
@@ -441,7 +749,15 @@ class StudentDashboard {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        const labels = Object.keys(domainScores);
+
+        // 영역 정렬
+        const labels = Object.keys(domainScores).sort((a, b) => {
+            const orderA = this.getDomainSortOrder(a);
+            const orderB = this.getDomainSortOrder(b);
+            if (orderA !== orderB) return orderA - orderB;
+            return a.localeCompare(b, 'ko');
+        });
+
         const data = labels.map(domain => {
             const score = domainScores[domain];
             return score.maxScore > 0 ? Math.round((score.score / score.maxScore) * 100) : 0;
@@ -450,6 +766,8 @@ class StudentDashboard {
         if (this.charts[canvasId]) {
             this.charts[canvasId].destroy();
         }
+
+        const backgroundPlugin = this.createRadarBackgroundPlugin(labels);
 
         this.charts[canvasId] = new Chart(ctx, {
             type: 'radar',
@@ -473,11 +791,11 @@ class StudentDashboard {
                         max: 100,
                         ticks: {
                             stepSize: 20,
-                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                            font: { size: this.isMobile() ? 5 : 10 }
                         },
                         pointLabels: {
                             font: {
-                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                size: this.isMobile() ? 6 : 11,
                                 weight: 'bold'
                             }
                         }
@@ -486,7 +804,8 @@ class StudentDashboard {
                 plugins: {
                     legend: { display: false }
                 }
-            }
+            },
+            plugins: [backgroundPlugin]
         });
     }
 
@@ -635,12 +954,22 @@ class StudentDashboard {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        const labels = Object.keys(domainAccuracy);
+
+        // 영역 정렬
+        const labels = Object.keys(domainAccuracy).sort((a, b) => {
+            const orderA = this.getDomainSortOrder(a);
+            const orderB = this.getDomainSortOrder(b);
+            if (orderA !== orderB) return orderA - orderB;
+            return a.localeCompare(b, 'ko');
+        });
+
         const rates = labels.map(domain => domainAccuracy[domain].rate);
 
         if (this.charts['wrongNoteDomainChart']) {
             this.charts['wrongNoteDomainChart'].destroy();
         }
+
+        const backgroundPlugin = this.createRadarBackgroundPlugin(labels);
 
         this.charts['wrongNoteDomainChart'] = new Chart(ctx, {
             type: 'radar',
@@ -676,17 +1005,18 @@ class StudentDashboard {
                             callback: function(value) {
                                 return value + '%';
                             },
-                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                            font: { size: this.isMobile() ? 5 : 10 }
                         },
                         pointLabels: {
                             font: {
-                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                size: this.isMobile() ? 6 : 11,
                                 weight: 'bold'
                             }
                         }
                     }
                 }
-            }
+            },
+            plugins: [backgroundPlugin]
         });
     }
 
@@ -829,7 +1159,15 @@ class StudentDashboard {
         }
 
         const ctx = canvas.getContext('2d');
-        const labels = Object.keys(domainTotals);
+
+        // 영역 정렬
+        const labels = Object.keys(domainTotals).sort((a, b) => {
+            const orderA = this.getDomainSortOrder(a);
+            const orderB = this.getDomainSortOrder(b);
+            if (orderA !== orderB) return orderA - orderB;
+            return a.localeCompare(b, 'ko');
+        });
+
         const data = labels.map(domain => {
             const totals = domainTotals[domain];
             return totals.maxScore > 0 ? Math.round((totals.score / totals.maxScore) * 100) : 0;
@@ -838,6 +1176,8 @@ class StudentDashboard {
         if (this.charts['domainTrend']) {
             this.charts['domainTrend'].destroy();
         }
+
+        const backgroundPlugin = this.createRadarBackgroundPlugin(labels);
 
         this.charts['domainTrend'] = new Chart(ctx, {
             type: 'radar',
@@ -858,11 +1198,11 @@ class StudentDashboard {
                         max: 100,
                         ticks: {
                             stepSize: 20,
-                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                            font: { size: this.isMobile() ? 5 : 10 }
                         },
                         pointLabels: {
                             font: {
-                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                size: this.isMobile() ? 6 : 11,
                                 weight: 'bold'
                             }
                         }
@@ -871,7 +1211,8 @@ class StudentDashboard {
                 plugins: {
                     legend: { display: false }
                 }
-            }
+            },
+            plugins: [backgroundPlugin]
         });
     }
 

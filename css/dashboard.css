@@ -1,0 +1,618 @@
+/* ============================================
+   Dashboard Styles - 타임라인/피드 스타일
+   ============================================ */
+
+/* Dashboard Container */
+.dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Welcome Section */
+.dashboard-welcome {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-welcome::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary);
+}
+
+.welcome-greeting {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.welcome-greeting .user-name {
+    color: var(--accent);
+}
+
+.welcome-message {
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+.welcome-date {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Feed Section */
+.feed-section {
+    margin-bottom: 32px;
+}
+
+.feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.feed-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.feed-title-icon {
+    font-size: 18px;
+}
+
+.feed-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s ease;
+}
+
+.feed-link:hover {
+    color: var(--primary-dark);
+}
+
+/* Feed Items */
+.feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.feed-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.feed-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(249, 168, 212, 0.15);
+}
+
+.feed-item-indicator {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.feed-item-indicator.urgent {
+    background: #fef3c7;
+}
+
+.feed-item-indicator.pending {
+    background: var(--primary-light);
+}
+
+.feed-item-indicator.success {
+    background: #d1fae5;
+}
+
+.feed-item-indicator.info {
+    background: #e0f2fe;
+}
+
+.feed-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.feed-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.feed-item-tag {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.feed-item-tag.urgent {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.feed-item-tag.pending {
+    background: var(--primary-light);
+    color: var(--accent);
+}
+
+.feed-item-tag.success {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.feed-item-tag.info {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.feed-item-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.feed-item-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.feed-item-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.feed-item-action {
+    margin-top: 12px;
+}
+
+.feed-item-action .btn {
+    font-size: 13px;
+    padding: 8px 16px;
+}
+
+.feed-item-arrow {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 20px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.feed-item:hover .feed-item-arrow {
+    opacity: 1;
+}
+
+/* Activity Timeline */
+.activity-timeline {
+    position: relative;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.activity-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    position: relative;
+}
+
+.activity-item:first-child {
+    padding-top: 0;
+}
+
+.activity-item:last-child {
+    padding-bottom: 0;
+}
+
+.activity-dot {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+    margin-top: 4px;
+    margin-left: 18px;
+}
+
+.activity-dot.new {
+    background: var(--primary-dark);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-text {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.activity-text strong {
+    font-weight: 600;
+}
+
+.activity-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* Score Card (학생용) */
+.score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.score-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.score-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.score-card-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.score-card-badge.high {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.score-card-badge.mid {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.score-card-badge.low {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.score-card-body {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.score-value {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.score-value span {
+    font-size: 20px;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.score-details {
+    flex: 1;
+}
+
+.score-detail-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.score-detail-item:last-child {
+    border-bottom: none;
+}
+
+.score-detail-label {
+    color: var(--text-secondary);
+}
+
+.score-detail-value {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.score-card-footer {
+    margin-top: 16px;
+    text-align: right;
+}
+
+/* Comment Card (학생용) */
+.comment-card {
+    background: var(--primary-light);
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.comment-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.comment-text {
+    font-size: 15px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-style: italic;
+}
+
+.comment-author {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+/* Progress Card */
+.progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.progress-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.progress-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.complete {
+    background: var(--success);
+}
+
+/* Quick Stats (관리자용) */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: var(--primary-light);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* Empty Feed */
+.feed-empty {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.feed-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.feed-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.feed-empty-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard {
+        max-width: 100%;
+    }
+
+    .dashboard-welcome {
+        padding: 24px;
+    }
+
+    .welcome-greeting {
+        font-size: 20px;
+    }
+
+    .feed-item {
+        padding: 16px;
+    }
+
+    .feed-item-indicator {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .feed-item-arrow {
+        display: none;
+    }
+
+    .score-card-body {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .score-value {
+        font-size: 36px;
+    }
+
+    .quick-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-timeline::before {
+        left: 5px;
+    }
+
+    .activity-dot {
+        margin-left: 0;
+    }
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, var(--border) 25%, #f3f4f6 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 40%;
+    margin-bottom: 12px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

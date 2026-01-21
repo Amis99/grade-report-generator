@@ -7,345 +7,368 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>성적표 생성 프로그램</title>
+    <link rel="stylesheet" href="css/portal.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/sheet-style.css">
     <link rel="stylesheet" href="css/auth-style.css">
 </head>
-<body>
-    <div class="app-container">
-        <!-- 헤더 -->
-        <header class="app-header">
-            <div class="header-logo">
-                <img src="images/logo.png" alt="국어농장" class="logo-image">
-                <h1>성적표 생성 프로그램</h1>
-            </div>
-            <div class="header-right">
-                <div id="userInfoDisplay" class="user-info-header" style="display: none;">
-                    <span class="user-name" id="headerUserName"></span>
-                    <span class="user-org" id="headerUserOrg"></span>
-                </div>
-                <button id="hamburgerBtn" class="hamburger-btn" aria-label="메뉴">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                </button>
-                <div id="headerMenu" class="header-dropdown">
-                    <button id="studentAccountBtn" class="dropdown-item" style="display: none;">
-                        <span class="dropdown-icon">👥</span> 학생 계정 관리
-                    </button>
-                    <button id="adminMenuBtn" class="dropdown-item" style="display: none;">
-                        <span class="dropdown-icon">⚙️</span> 관리자 메뉴 <span id="pendingCount" class="badge"></span>
-                    </button>
-                    <div class="dropdown-divider" id="menuDivider1" style="display: none;"></div>
-                    <button id="exportDataBtn" class="dropdown-item">
-                        <span class="dropdown-icon">💾</span> 데이터 백업
-                    </button>
-                    <button id="importDataBtn" class="dropdown-item">
-                        <span class="dropdown-icon">📂</span> 데이터 복원
-                    </button>
-                    <div class="dropdown-divider"></div>
-                    <button id="changePasswordBtn" class="dropdown-item" style="display: none;">
-                        <span class="dropdown-icon">🔑</span> 비밀번호 변경
-                    </button>
-                    <button id="logoutBtn" class="dropdown-item dropdown-item-danger" style="display: none;">
-                        <span class="dropdown-icon">🚪</span> 로그아웃
-                    </button>
-                </div>
-            </div>
-        </header>
+<body class="portal-layout">
+    <!-- 사이드바 오버레이 (모바일) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- 탭 네비게이션 -->
-        <nav class="tab-navigation">
-            <button class="tab-btn active" data-tab="exam-management">시험 관리</button>
-            <button class="tab-btn" data-tab="student-management">학생 관리</button>
-            <button class="tab-btn" data-tab="class-management">수강반 관리</button>
-            <button class="tab-btn" data-tab="assignment-management">과제 관리</button>
-            <button class="tab-btn" data-tab="answer-input">답안 입력</button>
-            <button class="tab-btn" data-tab="grading">채점 및 분석</button>
-            <button class="tab-btn" data-tab="report">성적표 생성</button>
-            <button class="tab-btn" data-tab="wrong-note">학생별 오답 노트</button>
-        </nav>
+    <div class="portal-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-logo">
+                    <div class="sidebar-logo-icon">
+                        <img src="images/logo.png" alt="로고" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <span class="sidebar-logo-text">국어<span>농장</span></span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">메인</div>
+                    <a class="nav-item active" data-page="dashboard">
+                        <span class="nav-item-icon">🏠</span>
+                        <span class="nav-item-text">대시보드</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">시험 관리</div>
+                    <a class="nav-item" data-page="exam-management">
+                        <span class="nav-item-icon">📝</span>
+                        <span class="nav-item-text">시험 관리</span>
+                    </a>
+                    <a class="nav-item" data-page="answer-input">
+                        <span class="nav-item-icon">✏️</span>
+                        <span class="nav-item-text">답안 입력</span>
+                    </a>
+                    <a class="nav-item" data-page="grading">
+                        <span class="nav-item-icon">📊</span>
+                        <span class="nav-item-text">채점 및 분석</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">학생 & 수강반</div>
+                    <a class="nav-item" data-page="student-management">
+                        <span class="nav-item-icon">👥</span>
+                        <span class="nav-item-text">학생 관리</span>
+                    </a>
+                    <a class="nav-item" data-page="class-management">
+                        <span class="nav-item-icon">📚</span>
+                        <span class="nav-item-text">수강반 관리</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">과제 & 성적</div>
+                    <a class="nav-item" data-page="assignment-management">
+                        <span class="nav-item-icon">📋</span>
+                        <span class="nav-item-text">과제 관리</span>
+                    </a>
+                    <a class="nav-item" data-page="report">
+                        <span class="nav-item-icon">📄</span>
+                        <span class="nav-item-text">성적표 생성</span>
+                    </a>
+                    <a class="nav-item" data-page="wrong-note">
+                        <span class="nav-item-icon">📓</span>
+                        <span class="nav-item-text">오답 노트</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">설정</div>
+                    <a class="nav-item" data-page="settings">
+                        <span class="nav-item-icon">⚙️</span>
+                        <span class="nav-item-text">설정</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user" id="sidebarUser">
+                    <div class="sidebar-user-avatar" id="sidebarUserAvatar">관</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebarUserName">관리자</div>
+                        <div class="sidebar-user-role" id="sidebarUserOrg">국어농장</div>
+                    </div>
+                </div>
+                <button class="logout-btn" id="sidebarLogoutBtn">
+                    <span>🚪</span>
+                    <span>로그아웃</span>
+                </button>
+            </div>
+        </aside>
 
         <!-- 메인 콘텐츠 -->
-        <main class="main-content">
-            <!-- 시험 관리 탭 -->
-            <section id="exam-management" class="tab-content active">
-                <div class="section-header">
-                    <h2>시험 관리</h2>
-                    <button id="createExamBtn" class="btn btn-primary">새 시험 만들기</button>
+        <div class="main-content">
+            <!-- 헤더 -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴 열기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12h18M3 6h18M3 18h18"/>
+                        </svg>
+                    </button>
+                    <h1 class="page-title" id="pageTitle">대시보드</h1>
                 </div>
-
-                <div class="exam-list-container">
-                    <h3>시험 목록</h3>
-                    <div class="exam-list-filter">
-                        <input type="text" id="examSearchInput" name="exam-filter" class="form-control" placeholder="시험명, 시행 기관, 학교, 학년으로 검색..." autocomplete="off">
-                    </div>
-                    <div id="examList" class="exam-list">
-                        <!-- 시험 목록이 여기에 동적으로 추가됨 -->
-                    </div>
-                    <div id="examPagination" class="pagination">
-                        <!-- 페이지네이션 버튼이 여기에 동적으로 추가됨 -->
-                    </div>
-                </div>
-
-                <div id="examDetailSection" class="exam-detail-section" style="display: none;">
-                    <div class="detail-header">
-                        <h3>시험 및 문제 관리 (총 <span id="questionCount">0</span>문제, <span id="totalPoints">0</span>점)</h3>
-                        <div class="detail-actions">
-                            <button id="importQuestionsBtn" class="btn btn-secondary">CSV 가져오기</button>
-                            <button id="exportQuestionsBtn" class="btn btn-secondary">CSV 내보내기</button>
-                            <button id="deleteExamBtn" class="btn btn-danger">시험 삭제</button>
-                        </div>
-                    </div>
-
-                    <div id="questionList" class="question-list">
-                        <!-- 시험 정보 + 문제 시트가 여기에 동적으로 추가됨 -->
+                <div class="header-right">
+                    <button class="header-btn" id="notificationBtn" title="알림">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="header-btn-badge" id="notificationBadge" style="display: none;"></span>
+                    </button>
+                    <div class="header-user" id="headerUserBtn">
+                        <div class="header-user-avatar" id="headerUserAvatar">관</div>
+                        <span class="header-user-name" id="headerUserName">관리자</span>
                     </div>
                 </div>
-            </section>
+            </header>
 
-            <!-- 학생 관리 탭 -->
-            <section id="student-management" class="tab-content">
-                <div class="section-header">
-                    <h2>학생 관리</h2>
-                    <div class="header-actions">
-                        <button id="detectDuplicatesBtn" class="btn btn-warning">중복 학생 찾기</button>
-                        <button id="autoMergeBtn" class="btn btn-danger">모두 자동 병합</button>
-                    </div>
-                </div>
-
-                <div class="student-management-container">
-                    <!-- 중복 학생 안내 -->
-                    <div id="duplicateAlert" class="alert alert-info" style="display: none;">
-                        <strong>중복 학생 발견!</strong> 아래 학생들을 확인하고 병합하세요.
-                    </div>
-
-                    <!-- 중복 학생 목록 -->
-                    <div id="duplicateStudentsSection" style="display: none;">
-                        <h3>중복 가능성이 있는 학생</h3>
-                        <div id="duplicateStudentsList" class="duplicate-students-list">
-                            <!-- 중복 학생 그룹이 동적으로 추가됨 -->
-                        </div>
-                    </div>
-
-                    <!-- 전체 학생 목록 -->
-                    <div class="all-students-section">
-                        <h3>전체 학생 목록</h3>
-                        <div class="student-list-filter">
-                            <div class="filter-row">
-                                <label class="select-all-checkbox">
-                                    <input type="checkbox" id="selectAllStudents" onchange="studentManager.toggleSelectAll(this.checked)">
-                                    <span>전체 선택</span>
-                                </label>
-                                <input type="text" id="studentSearchInput" class="form-control" placeholder="학생 이름, 학교, 학년으로 검색...">
-                                <select id="studentClassFilter" class="form-control">
-                                    <option value="">모든 수강반</option>
-                                </select>
+            <!-- 콘텐츠 영역 -->
+            <div class="content-area">
+                <!-- 대시보드 페이지 -->
+                <div id="dashboard" class="page active">
+                    <div class="dashboard">
+                        <!-- 환영 섹션 -->
+                        <div class="dashboard-welcome">
+                            <div class="welcome-greeting">
+                                안녕하세요, <span class="user-name" id="dashboardUserName">관리자</span>님!
+                            </div>
+                            <div class="welcome-message">오늘도 좋은 하루 되세요.</div>
+                            <div class="welcome-date" id="dashboardDate">
+                                <span>📅</span>
+                                <span id="currentDate">2025년 1월 21일 화요일</span>
                             </div>
                         </div>
-                        <div id="studentList" class="student-list">
-                            <!-- 학생 목록이 동적으로 추가됨 -->
-                        </div>
-                    </div>
 
-                    <!-- 선택된 학생 액션 바 -->
-                    <div id="studentSelectionBar" class="selection-action-bar" style="display: none;">
-                        <span id="selectedStudentCount">0명 선택됨</span>
-                        <div class="selection-actions">
-                            <button class="btn btn-primary" onclick="studentManager.showAddToClassModal()">
-                                수강반에 등록
-                            </button>
-                            <button class="btn btn-secondary" onclick="studentManager.clearSelection()">
-                                선택 해제
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 수강반 등록 모달 -->
-                <div id="addToClassModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>수강반에 학생 등록</h3>
-                            <button class="modal-close" onclick="studentManager.closeAddToClassModal()">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p id="addToClassInfo" style="margin-bottom: 1rem; color: var(--text-secondary);">
-                                선택된 학생 0명을 등록할 수강반을 선택하세요.
-                            </p>
-                            <div class="form-group">
-                                <label for="targetClassSelect">수강반 선택</label>
-                                <select id="targetClassSelect" class="form-control">
-                                    <option value="">수강반을 선택하세요</option>
-                                </select>
+                        <!-- 오늘의 할 일 -->
+                        <div class="feed-section">
+                            <div class="feed-header">
+                                <div class="feed-title">
+                                    <span class="feed-title-icon">📌</span>
+                                    오늘의 할 일
+                                </div>
+                                <a href="#" class="feed-link" data-page="assignment-management">
+                                    모두 보기 →
+                                </a>
+                            </div>
+                            <div class="feed-list" id="todoFeedList">
+                                <!-- 동적으로 추가됨 -->
                             </div>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" onclick="studentManager.closeAddToClassModal()">
-                                취소
-                            </button>
-                            <button type="button" class="btn btn-primary" onclick="studentManager.addSelectedToClass()">
-                                등록
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            <!-- 수강반 관리 탭 -->
-            <section id="class-management" class="tab-content">
-                <div class="section-header">
-                    <h2>수강반 관리</h2>
-                    <button id="createClassBtn" class="btn btn-primary" onclick="classManager.showCreateClassModal()">새 수강반 만들기</button>
-                </div>
-
-                <!-- 필터 영역 -->
-                <div class="class-filter-bar">
-                    <div class="filter-group" id="orgFilterGroup" style="display: none;">
-                        <label>기관</label>
-                        <select id="classOrgFilter" class="form-control" onchange="classManager.onOrgFilterChange()">
-                            <option value="">전체 기관</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>검색</label>
-                        <input type="text" id="classSearchInput" class="form-control"
-                               placeholder="수강반 이름으로 검색..."
-                               oninput="classManager.onSearchChange(this.value)">
-                    </div>
-                </div>
-
-                <!-- 좌우 분할 레이아웃 -->
-                <div class="class-management-layout">
-                    <!-- 좌측: 수강반 리스트 -->
-                    <div class="class-list-panel">
-                        <div class="panel-header">
-                            <span>수강반 목록</span>
-                            <span id="classListCount" class="count-badge">0개</span>
-                        </div>
-                        <div id="classList" class="class-list-items">
-                            <!-- 수강반 리스트가 동적으로 추가됨 -->
-                        </div>
-                        <div id="classPagination" class="pagination">
-                            <!-- 페이지네이션 -->
-                        </div>
-                    </div>
-
-                    <!-- 우측: 수강반 상세 및 학생 목록 -->
-                    <div class="class-detail-panel" id="classDetailPanel">
-                        <div class="panel-placeholder" id="classDetailPlaceholder">
-                            <p>좌측에서 수강반을 선택하세요</p>
-                        </div>
-                        <div id="classDetailContent" style="display: none;">
-                            <div class="detail-header">
-                                <div class="detail-title-row">
-                                    <h3 id="classDetailTitle">수강반명</h3>
-                                    <div class="detail-actions">
-                                        <button class="btn btn-sm btn-secondary" onclick="classManager.showEditClassModal()">수정</button>
-                                        <button class="btn btn-sm btn-danger" onclick="classManager.deleteSelectedClass()">삭제</button>
-                                    </div>
+                        <!-- 최근 활동 -->
+                        <div class="feed-section">
+                            <div class="feed-header">
+                                <div class="feed-title">
+                                    <span class="feed-title-icon">🕐</span>
+                                    최근 활동
                                 </div>
-                                <p id="classDetailInfo" class="detail-info"></p>
                             </div>
-                            <div class="class-students-section">
-                                <div class="students-header">
-                                    <h4>소속 학생 (<span id="classStudentCount">0</span>명)</h4>
-                                    <button class="btn btn-secondary btn-sm" onclick="classManager.showAddStudentModal()">
-                                        학생 추가
-                                    </button>
-                                </div>
-                                <div id="classStudentList" class="class-student-list">
-                                    <!-- 학생 목록이 동적으로 추가됨 -->
-                                </div>
+                            <div class="activity-timeline" id="activityTimeline">
+                                <!-- 동적으로 추가됨 -->
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- 과제 관리 탭 -->
-            <section id="assignment-management" class="tab-content">
-                <div class="assignment-management-layout">
-                    <!-- 좌측: 과제 목록 -->
-                    <div class="assignment-list-panel">
-                        <div class="panel-header">
-                            <h3>과제 목록</h3>
-                            <button class="btn btn-primary btn-sm" id="createAssignmentBtn" onclick="assignmentManager.showCreateModal()">+ 새 과제</button>
-                        </div>
-                        <div class="filter-bar">
-                            <select id="assignmentClassFilter" class="form-control" onchange="assignmentManager.onClassFilterChange()">
-                                <option value="">전체 수강반</option>
-                            </select>
-                            <select id="assignmentStatusFilter" class="form-control" onchange="assignmentManager.onStatusFilterChange()">
-                                <option value="">전체 상태</option>
-                                <option value="draft">초안</option>
-                                <option value="active">진행 중</option>
-                                <option value="closed">마감</option>
-                            </select>
-                        </div>
-                        <div class="list-count">
-                            <span id="assignmentListCount">0</span>개의 과제
-                        </div>
-                        <div id="assignmentList" class="assignment-list"></div>
+                <!-- 시험 관리 페이지 -->
+                <div id="exam-management" class="page">
+                    <div class="section-header">
+                        <h2>시험 관리</h2>
+                        <button id="createExamBtn" class="btn btn-primary">새 시험 만들기</button>
                     </div>
 
-                    <!-- 우측: 과제 상세 -->
-                    <div class="assignment-detail-panel">
-                        <div id="assignmentDetailPlaceholder" class="detail-placeholder">
-                            <div class="placeholder-icon">📋</div>
-                            <p>과제를 선택하세요</p>
-                            <span class="placeholder-hint">좌측 목록에서 과제를 클릭하면 상세 정보가 표시됩니다</span>
+                    <div class="exam-list-container">
+                        <h3>시험 목록</h3>
+                        <div class="exam-list-filter">
+                            <input type="text" id="examSearchInput" name="exam-filter" class="form-control" placeholder="시험명, 시행 기관, 학교, 학년으로 검색..." autocomplete="off">
                         </div>
-                        <div id="assignmentDetailContent" class="detail-content" style="display: none;">
-                            <!-- 헤더 -->
-                            <div class="detail-header-card">
-                                <div class="header-top">
-                                    <h2 id="assignmentDetailTitle">과제 제목</h2>
-                                    <span id="assignmentStatusBadge" class="status-badge">상태</span>
-                                </div>
-                                <div id="assignmentDetailInfo" class="header-info"></div>
-                                <div class="status-change-section">
-                                    <span class="status-label">상태 변경:</span>
-                                    <div class="status-buttons" id="statusButtons">
-                                        <button class="status-btn draft" onclick="assignmentManager.changeStatus('draft')">초안</button>
-                                        <button class="status-btn active" onclick="assignmentManager.changeStatus('active')">진행 중</button>
-                                        <button class="status-btn closed" onclick="assignmentManager.changeStatus('closed')">마감</button>
-                                    </div>
-                                </div>
-                                <div class="header-actions">
-                                    <button class="btn btn-edit" onclick="assignmentManager.showEditModal()">수정</button>
-                                    <button class="btn btn-delete" onclick="assignmentManager.deleteSelectedAssignment()">삭제</button>
-                                </div>
-                            </div>
+                        <div id="examList" class="exam-list">
+                            <!-- 시험 목록이 여기에 동적으로 추가됨 -->
+                        </div>
+                        <div id="examPagination" class="pagination">
+                            <!-- 페이지네이션 버튼이 여기에 동적으로 추가됨 -->
+                        </div>
+                    </div>
 
-                            <!-- PDF 카드 -->
-                            <div class="detail-card">
-                                <div class="card-header">
-                                    <h4>PDF 파일</h4>
-                                    <input type="file" id="assignmentPdfInput" accept=".pdf" style="display: none;" onchange="assignmentManager.handlePdfUpload(event)">
-                                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('assignmentPdfInput').click()">PDF 업로드</button>
-                                </div>
-                                <div class="card-body">
-                                    <div id="assignmentPdfInfo" class="pdf-status">PDF가 업로드되지 않았습니다.</div>
-                                    <div id="assignmentPagesSection" class="pages-action" style="display: none;">
-                                        <button class="btn btn-outline" onclick="assignmentManager.showPagesPreviewModal()">
-                                            페이지 미리보기 (<span id="assignmentPageCount">0</span>페이지)
-                                        </button>
-                                    </div>
-                                </div>
+                    <div id="examDetailSection" class="exam-detail-section" style="display: none;">
+                        <div class="detail-header">
+                            <h3>시험 및 문제 관리 (총 <span id="questionCount">0</span>문제, <span id="totalPoints">0</span>점)</h3>
+                            <div class="detail-actions">
+                                <button id="importQuestionsBtn" class="btn btn-secondary">CSV 가져오기</button>
+                                <button id="exportQuestionsBtn" class="btn btn-secondary">CSV 내보내기</button>
+                                <button id="deleteExamBtn" class="btn btn-danger">시험 삭제</button>
                             </div>
+                        </div>
 
-                            <!-- 제출 현황 카드 -->
-                            <div class="detail-card">
-                                <div class="card-header">
-                                    <h4>제출 현황</h4>
-                                    <select id="submissionClassFilter" class="form-control form-control-sm" onchange="assignmentManager.loadSubmissions()">
-                                        <option value="">수강반 선택</option>
+                        <div id="questionList" class="question-list">
+                            <!-- 시험 정보 + 문제 시트가 여기에 동적으로 추가됨 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 학생 관리 페이지 -->
+                <div id="student-management" class="page">
+                    <div class="section-header">
+                        <h2>학생 관리</h2>
+                        <div class="header-actions">
+                            <button id="detectDuplicatesBtn" class="btn btn-warning">중복 학생 찾기</button>
+                            <button id="autoMergeBtn" class="btn btn-danger">모두 자동 병합</button>
+                        </div>
+                    </div>
+
+                    <div class="student-management-container">
+                        <!-- 중복 학생 안내 -->
+                        <div id="duplicateAlert" class="alert alert-info" style="display: none;">
+                            <strong>중복 학생 발견!</strong> 아래 학생들을 확인하고 병합하세요.
+                        </div>
+
+                        <!-- 중복 학생 목록 -->
+                        <div id="duplicateStudentsSection" style="display: none;">
+                            <h3>중복 가능성이 있는 학생</h3>
+                            <div id="duplicateStudentsList" class="duplicate-students-list">
+                                <!-- 중복 학생 그룹이 동적으로 추가됨 -->
+                            </div>
+                        </div>
+
+                        <!-- 전체 학생 목록 -->
+                        <div class="all-students-section">
+                            <h3>전체 학생 목록</h3>
+                            <div class="student-list-filter">
+                                <div class="filter-row">
+                                    <label class="select-all-checkbox">
+                                        <input type="checkbox" id="selectAllStudents" onchange="studentManager.toggleSelectAll(this.checked)">
+                                        <span>전체 선택</span>
+                                    </label>
+                                    <input type="text" id="studentSearchInput" class="form-control" placeholder="학생 이름, 학교, 학년으로 검색...">
+                                    <select id="studentClassFilter" class="form-control">
+                                        <option value="">모든 수강반</option>
                                     </select>
                                 </div>
-                                <div class="card-body">
-                                    <div id="submissionsTable" class="submissions-table">
-                                        <p class="empty-hint">수강반을 선택하면 학생별 제출 현황이 표시됩니다.</p>
+                            </div>
+                            <div id="studentList" class="student-list">
+                                <!-- 학생 목록이 동적으로 추가됨 -->
+                            </div>
+                        </div>
+
+                        <!-- 선택된 학생 액션 바 -->
+                        <div id="studentSelectionBar" class="selection-action-bar" style="display: none;">
+                            <span id="selectedStudentCount">0명 선택됨</span>
+                            <div class="selection-actions">
+                                <button class="btn btn-primary" onclick="studentManager.showAddToClassModal()">
+                                    수강반에 등록
+                                </button>
+                                <button class="btn btn-secondary" onclick="studentManager.clearSelection()">
+                                    선택 해제
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 수강반 등록 모달 -->
+                    <div id="addToClassModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>수강반에 학생 등록</h3>
+                                <button class="modal-close" onclick="studentManager.closeAddToClassModal()">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="addToClassInfo" style="margin-bottom: 1rem; color: var(--text-secondary);">
+                                    선택된 학생 0명을 등록할 수강반을 선택하세요.
+                                </p>
+                                <div class="form-group">
+                                    <label for="targetClassSelect">수강반 선택</label>
+                                    <select id="targetClassSelect" class="form-control">
+                                        <option value="">수강반을 선택하세요</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="studentManager.closeAddToClassModal()">
+                                    취소
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="studentManager.addSelectedToClass()">
+                                    등록
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 수강반 관리 페이지 -->
+                <div id="class-management" class="page">
+                    <div class="section-header">
+                        <h2>수강반 관리</h2>
+                        <button id="createClassBtn" class="btn btn-primary" onclick="classManager.showCreateClassModal()">새 수강반 만들기</button>
+                    </div>
+
+                    <!-- 필터 영역 -->
+                    <div class="class-filter-bar">
+                        <div class="filter-group" id="orgFilterGroup" style="display: none;">
+                            <label>기관</label>
+                            <select id="classOrgFilter" class="form-control" onchange="classManager.onOrgFilterChange()">
+                                <option value="">전체 기관</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>검색</label>
+                            <input type="text" id="classSearchInput" class="form-control"
+                                   placeholder="수강반 이름으로 검색..."
+                                   oninput="classManager.onSearchChange(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- 좌우 분할 레이아웃 -->
+                    <div class="class-management-layout">
+                        <!-- 좌측: 수강반 리스트 -->
+                        <div class="class-list-panel">
+                            <div class="panel-header">
+                                <span>수강반 목록</span>
+                                <span id="classListCount" class="count-badge">0개</span>
+                            </div>
+                            <div id="classList" class="class-list-items">
+                                <!-- 수강반 리스트가 동적으로 추가됨 -->
+                            </div>
+                            <div id="classPagination" class="pagination">
+                                <!-- 페이지네이션 -->
+                            </div>
+                        </div>
+
+                        <!-- 우측: 수강반 상세 및 학생 목록 -->
+                        <div class="class-detail-panel" id="classDetailPanel">
+                            <div class="panel-placeholder" id="classDetailPlaceholder">
+                                <p>좌측에서 수강반을 선택하세요</p>
+                            </div>
+                            <div id="classDetailContent" style="display: none;">
+                                <div class="detail-header">
+                                    <div class="detail-title-row">
+                                        <h3 id="classDetailTitle">수강반명</h3>
+                                        <div class="detail-actions">
+                                            <button class="btn btn-sm btn-secondary" onclick="classManager.showEditClassModal()">수정</button>
+                                            <button class="btn btn-sm btn-danger" onclick="classManager.deleteSelectedClass()">삭제</button>
+                                        </div>
+                                    </div>
+                                    <p id="classDetailInfo" class="detail-info"></p>
+                                </div>
+                                <div class="class-students-section">
+                                    <div class="students-header">
+                                        <h4>소속 학생 (<span id="classStudentCount">0</span>명)</h4>
+                                        <button class="btn btn-secondary btn-sm" onclick="classManager.showAddStudentModal()">
+                                            학생 추가
+                                        </button>
+                                    </div>
+                                    <div id="classStudentList" class="class-student-list">
+                                        <!-- 학생 목록이 동적으로 추가됨 -->
                                     </div>
                                 </div>
                             </div>
@@ -353,191 +376,326 @@
                     </div>
                 </div>
 
-                <!-- 모바일용 하단 FAB -->
-                <button class="mobile-fab" id="mobileCreateAssignmentBtn" onclick="assignmentManager.showCreateModal()">+</button>
-            </section>
+                <!-- 과제 관리 페이지 -->
+                <div id="assignment-management" class="page">
+                    <div class="assignment-management-layout">
+                        <!-- 좌측: 과제 목록 -->
+                        <div class="assignment-list-panel">
+                            <div class="panel-header">
+                                <h3>과제 목록</h3>
+                                <button class="btn btn-primary btn-sm" id="createAssignmentBtn" onclick="assignmentManager.showCreateModal()">+ 새 과제</button>
+                            </div>
+                            <div class="filter-bar">
+                                <select id="assignmentClassFilter" class="form-control" onchange="assignmentManager.onClassFilterChange()">
+                                    <option value="">전체 수강반</option>
+                                </select>
+                                <select id="assignmentStatusFilter" class="form-control" onchange="assignmentManager.onStatusFilterChange()">
+                                    <option value="">전체 상태</option>
+                                    <option value="draft">초안</option>
+                                    <option value="active">진행 중</option>
+                                    <option value="closed">마감</option>
+                                </select>
+                            </div>
+                            <div class="list-count">
+                                <span id="assignmentListCount">0</span>개의 과제
+                            </div>
+                            <div id="assignmentList" class="assignment-list"></div>
+                        </div>
 
-            <!-- 답안 입력 탭 -->
-            <section id="answer-input" class="tab-content">
-                <div class="section-header">
-                    <h2>답안 입력</h2>
-                </div>
+                        <!-- 우측: 과제 상세 -->
+                        <div class="assignment-detail-panel">
+                            <div id="assignmentDetailPlaceholder" class="detail-placeholder">
+                                <div class="placeholder-icon">📋</div>
+                                <p>과제를 선택하세요</p>
+                                <span class="placeholder-hint">좌측 목록에서 과제를 클릭하면 상세 정보가 표시됩니다</span>
+                            </div>
+                            <div id="assignmentDetailContent" class="detail-content" style="display: none;">
+                                <!-- 헤더 -->
+                                <div class="detail-header-card">
+                                    <div class="header-top">
+                                        <h2 id="assignmentDetailTitle">과제 제목</h2>
+                                        <span id="assignmentStatusBadge" class="status-badge">상태</span>
+                                    </div>
+                                    <div id="assignmentDetailInfo" class="header-info"></div>
+                                    <div class="status-change-section">
+                                        <span class="status-label">상태 변경:</span>
+                                        <div class="status-buttons" id="statusButtons">
+                                            <button class="status-btn draft" onclick="assignmentManager.changeStatus('draft')">초안</button>
+                                            <button class="status-btn active" onclick="assignmentManager.changeStatus('active')">진행 중</button>
+                                            <button class="status-btn closed" onclick="assignmentManager.changeStatus('closed')">마감</button>
+                                        </div>
+                                    </div>
+                                    <div class="header-actions">
+                                        <button class="btn btn-edit" onclick="assignmentManager.showEditModal()">수정</button>
+                                        <button class="btn btn-delete" onclick="assignmentManager.deleteSelectedAssignment()">삭제</button>
+                                    </div>
+                                </div>
 
-                <div class="answer-input-controls">
-                    <div class="form-group">
-                        <label>시험 선택</label>
-                        <div class="searchable-select" id="answerExamSelectWrapper">
-                            <select id="answerExamSelect" class="form-control">
-                                <option value="">시험을 선택하세요</option>
-                            </select>
+                                <!-- PDF 카드 -->
+                                <div class="detail-card">
+                                    <div class="card-header">
+                                        <h4>PDF 파일</h4>
+                                        <input type="file" id="assignmentPdfInput" accept=".pdf" style="display: none;" onchange="assignmentManager.handlePdfUpload(event)">
+                                        <button class="btn btn-primary btn-sm" onclick="document.getElementById('assignmentPdfInput').click()">PDF 업로드</button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="assignmentPdfInfo" class="pdf-status">PDF가 업로드되지 않았습니다.</div>
+                                        <div id="assignmentPagesSection" class="pages-action" style="display: none;">
+                                            <button class="btn btn-outline" onclick="assignmentManager.showPagesPreviewModal()">
+                                                페이지 미리보기 (<span id="assignmentPageCount">0</span>페이지)
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 제출 현황 카드 -->
+                                <div class="detail-card">
+                                    <div class="card-header">
+                                        <h4>제출 현황</h4>
+                                        <select id="submissionClassFilter" class="form-control form-control-sm" onchange="assignmentManager.loadSubmissions()">
+                                            <option value="">수강반 선택</option>
+                                        </select>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="submissionsTable" class="submissions-table">
+                                            <p class="empty-hint">수강반을 선택하면 학생별 제출 현황이 표시됩니다.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="answer-toolbar">
-                        <button id="selectStudentBtn" class="btn btn-primary">답안 입력 시작</button>
-                        <button id="importAnswersBtn" class="btn btn-secondary">답안 CSV 일괄 업로드</button>
-                        <button id="exportAnswersBtn" class="btn btn-secondary">답안 CSV 내보내기</button>
-                    </div>
+                    <!-- 모바일용 하단 FAB -->
+                    <button class="mobile-fab" id="mobileCreateAssignmentBtn" onclick="assignmentManager.showCreateModal()">+</button>
                 </div>
 
-                <div id="answerFormSection" class="answer-form-section" style="display: none;">
-                    <div id="answerFormContainer" class="answer-form-container">
-                        <!-- 답안 입력 시트가 여기에 동적으로 생성됨 -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- 채점 및 분석 탭 -->
-            <section id="grading" class="tab-content">
-                <div class="section-header">
-                    <h2>채점 및 분석</h2>
-                </div>
-
-                <div class="grading-controls">
-                    <div class="form-group">
-                        <label>시험 선택</label>
-                        <div class="searchable-select" id="gradingExamSelectWrapper">
-                            <select id="gradingExamSelect" class="form-control">
-                                <option value="">시험을 선택하세요</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="gradingResultsSection" class="grading-results-section" style="display: none;">
-                    <div class="grading-summary">
-                        <h3>채점 현황</h3>
-                        <div id="gradingSummary" class="summary-cards">
-                            <!-- 요약 정보가 여기에 표시됨 -->
-                        </div>
+                <!-- 답안 입력 페이지 -->
+                <div id="answer-input" class="page">
+                    <div class="section-header">
+                        <h2>답안 입력</h2>
                     </div>
 
-                    <div class="results-table-section">
-                        <h3>학생별 성적</h3>
-                        <button id="exportResultsBtn" class="btn btn-secondary">성적표 CSV 내보내기</button>
-                        <div id="resultsTable" class="results-table">
-                            <!-- 성적표 테이블이 여기에 표시됨 -->
-                        </div>
-                    </div>
-
-                    <div class="question-analysis-section">
-                        <h3>문제별 분석</h3>
-                        <div id="questionAnalysis" class="question-analysis">
-                            <!-- 문제별 분석이 여기에 표시됨 -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 성적표 생성 탭 -->
-            <section id="report" class="tab-content">
-                <div class="section-header">
-                    <h2>성적표 생성</h2>
-                </div>
-
-                <div class="report-controls">
-                    <div class="form-group">
-                        <label>시험 선택</label>
-                        <div class="searchable-select" id="reportExamSelectWrapper">
-                            <select id="reportExamSelect" class="form-control">
-                                <option value="">시험을 선택하세요</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>학생 선택</label>
-                        <div class="searchable-select" id="reportStudentSelectWrapper">
-                            <select id="reportStudentSelect" class="form-control">
-                                <option value="">학생을 선택하세요</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="report-actions">
-                        <button id="generateReportBtn" class="btn btn-primary">성적표 생성</button>
-                        <button id="printReportBtn" class="btn btn-secondary">인쇄</button>
-                        <button id="exportPdfBtn" class="btn btn-secondary">PDF 저장</button>
-                    </div>
-                </div>
-
-                <div id="reportPreview" class="report-preview">
-                    <!-- 성적표 미리보기가 여기에 표시됨 -->
-                </div>
-            </section>
-
-            <!-- 학생별 오답 노트 탭 -->
-            <section id="wrong-note" class="tab-content">
-                <div class="section-header">
-                    <h2>학생별 오답 노트</h2>
-                </div>
-
-                <div class="wrong-note-controls">
-                    <div class="form-group">
-                        <label>학생 선택</label>
-                        <div class="searchable-select" id="wrongNoteStudentSelectWrapper">
-                            <select id="wrongNoteStudentSelect" class="form-control">
-                                <option value="">학생을 선택하세요</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="wrongNoteExamSelection" class="exam-selection-section" style="display: none;">
+                    <div class="answer-input-controls">
                         <div class="form-group">
-                            <div class="form-group-header">
-                                <label>시험 선택 (복수 선택 가능)</label>
-                                <button id="selectAllExamsBtn" class="btn btn-sm btn-secondary">모두 선택</button>
-                            </div>
-                            <div id="wrongNoteExamList" class="exam-checkbox-list">
-                                <!-- 시험 체크박스 목록이 여기에 표시됨 -->
+                            <label>시험 선택</label>
+                            <div class="searchable-select" id="answerExamSelectWrapper">
+                                <select id="answerExamSelect" class="form-control">
+                                    <option value="">시험을 선택하세요</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="wrong-note-actions">
-                            <button id="generateWrongNoteBtn" class="btn btn-primary">오답 노트 생성</button>
-                            <button id="printWrongNoteBtn" class="btn btn-secondary">인쇄</button>
-                            <button id="exportWrongNotePdfBtn" class="btn btn-secondary">PDF 저장</button>
+                        <div class="answer-toolbar">
+                            <button id="selectStudentBtn" class="btn btn-primary">답안 입력 시작</button>
+                            <button id="importAnswersBtn" class="btn btn-secondary">답안 CSV 일괄 업로드</button>
+                            <button id="exportAnswersBtn" class="btn btn-secondary">답안 CSV 내보내기</button>
+                        </div>
+                    </div>
+
+                    <div id="answerFormSection" class="answer-form-section" style="display: none;">
+                        <div id="answerFormContainer" class="answer-form-container">
+                            <!-- 답안 입력 시트가 여기에 동적으로 생성됨 -->
                         </div>
                     </div>
                 </div>
 
-                <div id="wrongNoteResultsSection" class="wrong-note-results-section" style="display: none;">
-                    <div class="wrong-note-summary">
-                        <h3>학습 통계</h3>
-                        <div id="wrongNoteSummary" class="summary-cards">
-                            <!-- 요약 정보가 여기에 표시됨 -->
-                        </div>
+                <!-- 채점 및 분석 페이지 -->
+                <div id="grading" class="page">
+                    <div class="section-header">
+                        <h2>채점 및 분석</h2>
                     </div>
 
-                    <div class="charts-section">
-                        <div class="trend-chart-section">
-                            <h3>성적 추이</h3>
-                            <div class="trend-chart">
-                                <canvas id="wrongNoteTrendChart" width="800" height="320"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="domain-stats-section">
-                            <h3>영역별 정답률</h3>
-                            <div class="domain-chart">
-                                <canvas id="wrongNoteDomainChart" width="400" height="400"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="passage-stats-section">
-                            <h3>단원/지문별 통계</h3>
-                            <div id="wrongNotePassageStats" class="passage-stats-container">
-                                <!-- 단원/지문별 통계가 여기에 표시됨 -->
+                    <div class="grading-controls">
+                        <div class="form-group">
+                            <label>시험 선택</label>
+                            <div class="searchable-select" id="gradingExamSelectWrapper">
+                                <select id="gradingExamSelect" class="form-control">
+                                    <option value="">시험을 선택하세요</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div id="wrongNotePreview" class="wrong-note-preview">
-                        <!-- 오답 노트가 여기에 표시됨 -->
+                    <div id="gradingResultsSection" class="grading-results-section" style="display: none;">
+                        <div class="grading-summary">
+                            <h3>채점 현황</h3>
+                            <div id="gradingSummary" class="summary-cards">
+                                <!-- 요약 정보가 여기에 표시됨 -->
+                            </div>
+                        </div>
+
+                        <div class="results-table-section">
+                            <h3>학생별 성적</h3>
+                            <button id="exportResultsBtn" class="btn btn-secondary">성적표 CSV 내보내기</button>
+                            <div id="resultsTable" class="results-table">
+                                <!-- 성적표 테이블이 여기에 표시됨 -->
+                            </div>
+                        </div>
+
+                        <div class="question-analysis-section">
+                            <h3>문제별 분석</h3>
+                            <div id="questionAnalysis" class="question-analysis">
+                                <!-- 문제별 분석이 여기에 표시됨 -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
-        </main>
+
+                <!-- 성적표 생성 페이지 -->
+                <div id="report" class="page">
+                    <div class="section-header">
+                        <h2>성적표 생성</h2>
+                    </div>
+
+                    <div class="report-controls">
+                        <div class="form-group">
+                            <label>시험 선택</label>
+                            <div class="searchable-select" id="reportExamSelectWrapper">
+                                <select id="reportExamSelect" class="form-control">
+                                    <option value="">시험을 선택하세요</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>학생 선택</label>
+                            <div class="searchable-select" id="reportStudentSelectWrapper">
+                                <select id="reportStudentSelect" class="form-control">
+                                    <option value="">학생을 선택하세요</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="report-actions">
+                            <button id="generateReportBtn" class="btn btn-primary">성적표 생성</button>
+                            <button id="printReportBtn" class="btn btn-secondary">인쇄</button>
+                            <button id="exportPdfBtn" class="btn btn-secondary">PDF 저장</button>
+                        </div>
+                    </div>
+
+                    <div id="reportPreview" class="report-preview">
+                        <!-- 성적표 미리보기가 여기에 표시됨 -->
+                    </div>
+                </div>
+
+                <!-- 오답 노트 페이지 -->
+                <div id="wrong-note" class="page">
+                    <div class="section-header">
+                        <h2>학생별 오답 노트</h2>
+                    </div>
+
+                    <div class="wrong-note-controls">
+                        <div class="form-group">
+                            <label>학생 선택</label>
+                            <div class="searchable-select" id="wrongNoteStudentSelectWrapper">
+                                <select id="wrongNoteStudentSelect" class="form-control">
+                                    <option value="">학생을 선택하세요</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="wrongNoteExamSelection" class="exam-selection-section" style="display: none;">
+                            <div class="form-group">
+                                <div class="form-group-header">
+                                    <label>시험 선택 (복수 선택 가능)</label>
+                                    <button id="selectAllExamsBtn" class="btn btn-sm btn-secondary">모두 선택</button>
+                                </div>
+                                <div id="wrongNoteExamList" class="exam-checkbox-list">
+                                    <!-- 시험 체크박스 목록이 여기에 표시됨 -->
+                                </div>
+                            </div>
+
+                            <div class="wrong-note-actions">
+                                <button id="generateWrongNoteBtn" class="btn btn-primary">오답 노트 생성</button>
+                                <button id="printWrongNoteBtn" class="btn btn-secondary">인쇄</button>
+                                <button id="exportWrongNotePdfBtn" class="btn btn-secondary">PDF 저장</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="wrongNoteResultsSection" class="wrong-note-results-section" style="display: none;">
+                        <div class="wrong-note-summary">
+                            <h3>학습 통계</h3>
+                            <div id="wrongNoteSummary" class="summary-cards">
+                                <!-- 요약 정보가 여기에 표시됨 -->
+                            </div>
+                        </div>
+
+                        <div class="charts-section">
+                            <div class="trend-chart-section">
+                                <h3>성적 추이</h3>
+                                <div class="trend-chart">
+                                    <canvas id="wrongNoteTrendChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="domain-stats-section">
+                                <h3>영역별 정답률</h3>
+                                <div class="domain-chart">
+                                    <canvas id="wrongNoteDomainChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="passage-stats-section">
+                                <h3>단원/지문별 통계</h3>
+                                <div id="wrongNotePassageStats" class="passage-stats-container">
+                                    <!-- 단원/지문별 통계가 여기에 표시됨 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="wrongNotePreview" class="wrong-note-preview">
+                            <!-- 오답 노트가 여기에 표시됨 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 설정 페이지 -->
+                <div id="settings" class="page">
+                    <div class="section-header">
+                        <h2>설정</h2>
+                    </div>
+
+                    <div class="settings-content">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">데이터 관리</h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <button id="exportDataBtn" class="btn btn-secondary">
+                                        💾 데이터 백업
+                                    </button>
+                                    <button id="importDataBtn" class="btn btn-secondary">
+                                        📂 데이터 복원
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-header">
+                                <h3 class="card-title">계정 관리</h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <button id="studentAccountBtn" class="btn btn-secondary" style="display: none;">
+                                        👥 학생 계정 관리
+                                    </button>
+                                    <button id="adminMenuBtn" class="btn btn-secondary" style="display: none;">
+                                        ⚙️ 관리자 메뉴 <span id="pendingCount" class="badge"></span>
+                                    </button>
+                                    <button id="changePasswordBtn" class="btn btn-secondary" style="display: none;">
+                                        🔑 비밀번호 변경
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 모달: 문제 추가/편집 -->
@@ -701,28 +859,30 @@
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
 
     <!-- 애플리케이션 스크립트 -->
-    <script src="js/config.js?v=20250121b"></script>
-    <script src="js/data-model.js?v=20250121b"></script>
-    <script src="js/cognito-auth.js?v=20250121b"></script>
-    <script src="js/api-client.js?v=20250121b"></script>
-    <script src="js/auth-utils.js?v=20250121b"></script>
-    <script src="js/session-manager.js?v=20250121b"></script>
-    <script src="js/auth-service.js?v=20250121b"></script>
-    <script src="js/admin-panel.js?v=20250121b"></script>
-    <script src="js/student-account-manager.js?v=20250121b"></script>
-    <script src="js/csv-utils.js?v=20250121b"></script>
-    <script src="js/searchable-select.js?v=20250121b"></script>
-    <script src="js/exam-manager.js?v=20250121b"></script>
-    <script src="js/exam-manager-sheet.js?v=20250121b"></script>
-    <script src="js/answer-input.js?v=20250121b"></script>
-    <script src="js/answer-input-sheet.js?v=20250121b"></script>
-    <script src="js/grading.js?v=20250121b"></script>
-    <script src="js/report-generator.js?v=20250121b"></script>
-    <script src="js/wrong-note.js?v=20250121b"></script>
-    <script src="js/student-manager.js?v=20250121b"></script>
-    <script src="js/auto-merge-students.js?v=20250121b"></script>
-    <script src="js/class-manager.js?v=20250121b"></script>
-    <script src="js/assignment-manager.js?v=20250121b"></script>
-    <script src="js/app.js?v=20250121b"></script>
+    <script src="js/config.js?v=20250121c"></script>
+    <script src="js/data-model.js?v=20250121c"></script>
+    <script src="js/cognito-auth.js?v=20250121c"></script>
+    <script src="js/api-client.js?v=20250121c"></script>
+    <script src="js/auth-utils.js?v=20250121c"></script>
+    <script src="js/session-manager.js?v=20250121c"></script>
+    <script src="js/auth-service.js?v=20250121c"></script>
+    <script src="js/admin-panel.js?v=20250121c"></script>
+    <script src="js/student-account-manager.js?v=20250121c"></script>
+    <script src="js/csv-utils.js?v=20250121c"></script>
+    <script src="js/searchable-select.js?v=20250121c"></script>
+    <script src="js/exam-manager.js?v=20250121c"></script>
+    <script src="js/exam-manager-sheet.js?v=20250121c"></script>
+    <script src="js/answer-input.js?v=20250121c"></script>
+    <script src="js/answer-input-sheet.js?v=20250121c"></script>
+    <script src="js/grading.js?v=20250121c"></script>
+    <script src="js/report-generator.js?v=20250121c"></script>
+    <script src="js/wrong-note.js?v=20250121c"></script>
+    <script src="js/student-manager.js?v=20250121c"></script>
+    <script src="js/auto-merge-students.js?v=20250121c"></script>
+    <script src="js/class-manager.js?v=20250121c"></script>
+    <script src="js/assignment-manager.js?v=20250121c"></script>
+    <script src="js/portal.js?v=20250121c"></script>
+    <script src="js/admin-dashboard.js?v=20250121c"></script>
+    <script src="js/app.js?v=20250121c"></script>
 </body>
 </html>

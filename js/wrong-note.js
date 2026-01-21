@@ -214,7 +214,7 @@ class WrongNote {
     }
 
     /**
-     * 추이 차트
+     * 추이 차트 (성적표와 동일한 스타일)
      */
     renderTrendChart() {
         const canvas = document.getElementById('wrongNoteTrendChart');
@@ -226,17 +226,16 @@ class WrongNote {
                 const result = storage.getExamResult(exam.id, this.currentStudent.id);
                 if (!result) return null;
 
-                const questions = storage.getQuestionsByExamId(exam.id);
-                const wrongCount = result.wrongQuestions?.length || 0;
-                const correctCount = questions.length - wrongCount;
-                const correctRate = questions.length > 0
-                    ? (correctCount / questions.length * 100)
-                    : 0;
+                // 해당 시험의 모든 학생 결과 (평균, 최고점, 최저점 계산용)
+                const allResults = storage.getAllExamResults(exam.id);
+                const allScores = allResults.map(r => r.totalScore).filter(s => s != null);
 
                 return {
                     name: exam.name,
                     score: result.totalScore || 0,
-                    correctRate: correctRate
+                    average: allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : null,
+                    maxScore: allScores.length > 0 ? Math.max(...allScores) : null,
+                    minScore: allScores.length > 0 ? Math.min(...allScores) : null
                 };
             })
             .filter(data => data !== null);
@@ -250,18 +249,14 @@ class WrongNote {
 
         const labels = validExamData.map(d => d.name);
         const scores = validExamData.map(d => d.score);
-        const correctRates = validExamData.map(d => d.correctRate);
+        const averages = validExamData.map(d => d.average);
+        const maxScores = validExamData.map(d => d.maxScore);
+        const minScores = validExamData.map(d => d.minScore);
 
         // 기존 차트 제거
         if (this.trendChart) {
             this.trendChart.destroy();
         }
-
-        // 점수 축 범위 계산 (유효한 값만 사용)
-        const validScores = scores.filter(s => s > 0);
-        const minScore = validScores.length > 0 ? Math.min(...validScores) : 0;
-        const yAxisMin = Math.max(0, Math.floor(minScore / 10) * 10 - 10);
-        const yAxisMax = 100;
 
         const ctx = canvas.getContext('2d');
         const isMobile = this.isMobile();
@@ -270,107 +265,132 @@ class WrongNote {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '점수',
+                    label: '최고점',
+                    data: maxScores,
+                    borderColor: 'rgba(34, 197, 94, 0.3)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderWidth: isMobile ? 1 : 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: '+1',
+                    tension: 0.3,
+                    order: 3
+                }, {
+                    label: '최저점',
+                    data: minScores,
+                    borderColor: 'rgba(239, 68, 68, 0.3)',
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    borderWidth: isMobile ? 1 : 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                    tension: 0.3,
+                    order: 4
+                }, {
+                    label: '평균 점수',
+                    data: averages,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: isMobile ? 1 : 2,
+                    borderDash: [5, 5],
+                    pointRadius: isMobile ? 2 : 4,
+                    pointHoverRadius: isMobile ? 3 : 6,
+                    pointHitRadius: isMobile ? 20 : 10,
+                    tension: 0.3,
+                    order: 2
+                }, {
+                    label: '내 점수',
                     data: scores,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
                     borderWidth: isMobile ? 2 : 3,
                     pointRadius: isMobile ? 2 : 5,
                     pointHoverRadius: isMobile ? 4 : 7,
-                    pointHitRadius: isMobile ? 20 : 10,  // 모바일 터치 영역 확대
-                    yAxisID: 'y'
-                }, {
-                    label: '정답률',
-                    data: correctRates,
-                    borderColor: '#16a34a',
-                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                    borderWidth: isMobile ? 2 : 3,
-                    pointRadius: isMobile ? 2 : 5,
-                    pointHoverRadius: isMobile ? 4 : 7,
-                    pointHitRadius: isMobile ? 20 : 10,  // 모바일 터치 영역 확대
-                    yAxisID: 'y1'
+                    pointHitRadius: isMobile ? 20 : 10,
+                    tension: 0.3,
+                    order: 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 interaction: {
-                    mode: isMobile ? 'nearest' : 'index',  // 모바일에서 가장 가까운 점 감지
+                    mode: isMobile ? 'nearest' : 'index',
                     intersect: false,
                     axis: 'x'
                 },
                 plugins: {
                     legend: {
-                        display: !this.isMobile(),  // 모바일에서 범례 숨김
+                        display: !this.isMobile(),
                         position: 'top',
                         labels: {
+                            usePointStyle: true,
+                            padding: 15,
                             font: {
                                 size: 12
                             }
                         }
                     },
+                    title: {
+                        display: false
+                    },
                     tooltip: {
                         enabled: true,
                         titleFont: {
-                            size: isMobile ? 9 : 14  // 모바일에서 1/3 축소
+                            size: isMobile ? 9 : 14
                         },
                         bodyFont: {
-                            size: isMobile ? 8 : 13  // 모바일에서 1/3 축소
+                            size: isMobile ? 8 : 13
                         },
                         padding: isMobile ? 4 : 10,
                         boxPadding: isMobile ? 2 : 4,
                         callbacks: {
                             title: function(context) {
-                                return context[0].label;  // 시험명 표시
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(1) + '점';
+                                }
+                                return label;
                             }
                         }
+                    },
+                    filler: {
+                        propagate: true
                     }
                 },
                 scales: {
                     y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
+                        beginAtZero: true,
                         title: {
-                            display: !this.isMobile(),  // 모바일에서 축 제목 숨김
+                            display: !this.isMobile(),
                             text: '점수',
                             font: {
                                 size: 12
                             }
                         },
                         ticks: {
+                            callback: function(value) {
+                                return value + '점';
+                            },
                             font: {
                                 size: this.isMobile() ? 9 : 12
                             }
-                        },
-                        min: yAxisMin,
-                        max: yAxisMax
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: !this.isMobile(),  // 모바일에서 축 제목 숨김
-                            text: '정답률 (%)',
-                            font: {
-                                size: 12
-                            }
-                        },
-                        ticks: {
-                            font: {
-                                size: this.isMobile() ? 9 : 12
-                            }
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        },
-                        min: 0,
-                        max: 100
+                        }
                     },
                     x: {
+                        title: {
+                            display: false
+                        },
                         ticks: {
-                            display: !this.isMobile(),  // 모바일에서 시험명 숨김
+                            display: !this.isMobile(),
                             font: {
                                 size: 12
                             }
@@ -379,6 +399,89 @@ class WrongNote {
                 }
             }
         });
+    }
+
+    /**
+     * 영역의 정렬 우선순위 반환 (화법 → 작문 → 매체 → 문법 → 문학 → 비문학)
+     */
+    getDomainSortOrder(domain) {
+        if (/^화법/.test(domain)) return 0;
+        if (/^작문/.test(domain)) return 1;
+        if (/^매체/.test(domain)) return 2;
+        if (/^문법/.test(domain)) return 3;
+        if (/^문학/.test(domain)) return 4;
+        if (/^비문학/.test(domain)) return 5;
+        return 6; // 기타
+    }
+
+    /**
+     * 영역의 대분류 그룹 반환 (배경색용)
+     */
+    getDomainGroup(domain) {
+        if (/^화법|^작문|^매체/.test(domain)) return 0; // 화법/작문/매체
+        if (/^문법/.test(domain)) return 1; // 문법
+        if (/^문학/.test(domain)) return 2; // 문학
+        if (/^비문학/.test(domain)) return 3; // 비문학
+        return 4; // 기타
+    }
+
+    /**
+     * 레이더 차트 배경색 플러그인 생성
+     */
+    createRadarBackgroundPlugin(domains) {
+        const self = this;
+        const groupColors = [
+            'rgba(147, 197, 253, 0.3)',  // 화법/작문/매체 - 파랑
+            'rgba(167, 243, 208, 0.3)',  // 문법 - 초록
+            'rgba(253, 230, 138, 0.3)',  // 문학 - 노랑
+            'rgba(252, 165, 165, 0.3)',  // 비문학 - 빨강
+            'rgba(209, 213, 219, 0.3)'   // 기타 - 회색
+        ];
+
+        return {
+            id: 'radarBackground',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const chartArea = chart.chartArea;
+                const scale = chart.scales.r;
+
+                if (!scale || domains.length === 0) return;
+
+                const centerX = scale.xCenter;
+                const centerY = scale.yCenter;
+                const radius = scale.drawingArea;
+                const anglePerLabel = (2 * Math.PI) / domains.length;
+                const startAngle = -Math.PI / 2; // 12시 방향부터 시작
+
+                // 각 영역별로 배경 그리기
+                let currentGroup = -1;
+                let groupStartIndex = 0;
+
+                for (let i = 0; i <= domains.length; i++) {
+                    const group = i < domains.length ? self.getDomainGroup(domains[i]) : -1;
+
+                    if (group !== currentGroup || i === domains.length) {
+                        // 이전 그룹 그리기
+                        if (currentGroup >= 0 && i > groupStartIndex) {
+                            const sectorStartAngle = startAngle + (groupStartIndex - 0.5) * anglePerLabel;
+                            const sectorEndAngle = startAngle + (i - 0.5) * anglePerLabel;
+
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(centerX, centerY);
+                            ctx.arc(centerX, centerY, radius, sectorStartAngle, sectorEndAngle);
+                            ctx.closePath();
+                            ctx.fillStyle = groupColors[currentGroup] || groupColors[4];
+                            ctx.fill();
+                            ctx.restore();
+                        }
+
+                        currentGroup = group;
+                        groupStartIndex = i;
+                    }
+                }
+            }
+        };
     }
 
     /**
@@ -404,7 +507,16 @@ class WrongNote {
             });
         });
 
-        const domains = Object.keys(domainStats);
+        // 지정된 순서로 정렬: 화법 → 작문 → 매체 → 문법 → 문학 → 비문학
+        const domains = Object.keys(domainStats)
+            .filter(d => domainStats[d].total > 0)
+            .sort((a, b) => {
+                const orderA = this.getDomainSortOrder(a);
+                const orderB = this.getDomainSortOrder(b);
+                if (orderA !== orderB) return orderA - orderB;
+                return a.localeCompare(b, 'ko'); // 같은 대분류 내에서 가나다순
+            });
+
         const rates = domains.map(d => {
             const stats = domainStats[d];
             return stats.total > 0 ? (stats.correct / stats.total * 100) : 0;
@@ -416,6 +528,8 @@ class WrongNote {
         }
 
         const ctx = canvas.getContext('2d');
+        const backgroundPlugin = this.createRadarBackgroundPlugin(domains);
+
         this.domainChart = new Chart(ctx, {
             type: 'radar',
             data: {
@@ -451,7 +565,7 @@ class WrongNote {
                         labels: {
                             usePointStyle: true,
                             padding: this.isMobile() ? 4 : 8,
-                            font: { size: this.isMobile() ? 6 : 11 }  // 모바일에서 절반
+                            font: { size: this.isMobile() ? 6 : 11 }
                         }
                     }
                 },
@@ -464,18 +578,19 @@ class WrongNote {
                             callback: function(value) {
                                 return value + '%';
                             },
-                            font: { size: this.isMobile() ? 5 : 10 }  // 모바일에서 절반
+                            font: { size: this.isMobile() ? 5 : 10 }
                         },
                         pointLabels: {
                             font: {
-                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                size: this.isMobile() ? 6 : 11,
                                 weight: 'bold'
                             },
                             padding: this.isMobile() ? 2 : 5
                         }
                     }
                 }
-            }
+            },
+            plugins: [backgroundPlugin]
         });
     }
 
@@ -513,21 +628,19 @@ class WrongNote {
         const statsDiv = document.getElementById('wrongNotePassageStats');
         statsDiv.innerHTML = sortedPassages.map(([passage, stats]) => {
             const total = stats.correct + stats.wrong;
-            const correctRate = total > 0 ? (stats.correct / total * 100) : 0;
-            const wrongRate = total > 0 ? (stats.wrong / total * 100) : 0;
+            const correctRate = total > 0 ? Math.round(stats.correct / total * 100) : 0;
 
             return `
                 <div class="passage-stat-item">
-                    <div class="passage-name">${passage}</div>
-                    <div class="passage-bars">
-                        <div class="passage-bar-container">
-                            <div class="passage-bar correct" style="width: ${correctRate}%"></div>
-                            <div class="passage-bar wrong" style="width: ${wrongRate}%"></div>
+                    <div class="passage-info">
+                        <span class="passage-name">${passage}</span>
+                        <span class="passage-score-text">${stats.correct}/${total}</span>
+                    </div>
+                    <div class="passage-bar-wrapper">
+                        <div class="passage-mini-bar">
+                            <div class="passage-mini-bar-fill" style="width: ${correctRate}%"></div>
                         </div>
-                        <div class="passage-stats-text">
-                            <span class="correct-text">정답 ${stats.correct}</span>
-                            <span class="wrong-text">오답 ${stats.wrong}</span>
-                        </div>
+                        <span class="passage-rate">${correctRate}%</span>
                     </div>
                 </div>
             `;
@@ -692,9 +805,20 @@ class WrongNote {
                     });
                 });
 
+                // 지정된 순서로 정렬: 화법 → 작문 → 매체 → 문법 → 문학 → 비문학
+                const sortedDomains = Object.keys(domainStats)
+                    .filter(d => domainStats[d].total > 0)
+                    .sort((a, b) => {
+                        const orderA = this.getDomainSortOrder(a);
+                        const orderB = this.getDomainSortOrder(b);
+                        if (orderA !== orderB) return orderA - orderB;
+                        return a.localeCompare(b, 'ko');
+                    });
+
                 // 영역별 데이터 테이블 HTML 생성
-                const domainTableHTML = Object.entries(domainStats)
-                    .map(([domain, stats]) => {
+                const domainTableHTML = sortedDomains
+                    .map(domain => {
+                        const stats = domainStats[domain];
                         const rate = stats.total > 0 ? (stats.correct / stats.total * 100).toFixed(1) : 0;
                         return `
                             <tr>
@@ -802,32 +926,36 @@ class WrongNote {
                 passageTitle.style.color = '#1e293b';
                 passagePageContent.appendChild(passageTitle);
 
-                // 통계 항목 생성
+                // 통계 항목 생성 (리스트 형태)
                 const statsContainer = document.createElement('div');
                 statsContainer.style.display = 'flex';
                 statsContainer.style.flexDirection = 'column';
-                statsContainer.style.gap = '1rem';
+                statsContainer.style.gap = '0.5rem';
 
                 pagePassages.forEach(([passage, stats]) => {
                     const total = stats.correct + stats.wrong;
-                    const correctRate = total > 0 ? (stats.correct / total * 100) : 0;
-                    const wrongRate = total > 0 ? (stats.wrong / total * 100) : 0;
+                    const correctRate = total > 0 ? Math.round(stats.correct / total * 100) : 0;
 
                     const statItem = document.createElement('div');
-                    statItem.style.padding = '1rem';
-                    statItem.style.background = '#f8fafc';
+                    statItem.style.display = 'flex';
+                    statItem.style.alignItems = 'center';
+                    statItem.style.justifyContent = 'space-between';
+                    statItem.style.padding = '0.6rem 1rem';
+                    statItem.style.background = '#ffffff';
                     statItem.style.borderRadius = '6px';
-                    statItem.style.borderLeft = '4px solid #2563eb';
+                    statItem.style.border = '1px solid #e5e7eb';
+                    statItem.style.gap = '1rem';
 
                     statItem.innerHTML = `
-                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">${passage}</div>
-                        <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden; background: #e5e7eb; margin-bottom: 0.5rem;">
-                            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: white; background: #16a34a; width: ${correctRate}%;"></div>
-                            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: white; background: #ef4444; width: ${wrongRate}%;"></div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+                            <span style="font-weight: 500; color: #1e293b; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${passage}</span>
+                            <span style="font-size: 0.75rem; color: #6b7280; white-space: nowrap;">${stats.correct}/${total}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0;">
-                            <span style="color: #16a34a; font-weight: 600;">정답 ${stats.correct}</span>
-                            <span style="color: #ef4444; font-weight: 600;">오답 ${stats.wrong}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                            <div style="width: 80px; height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; border: 1px solid #e2e8f0;">
+                                <div style="height: 100%; background: #f9a8d4; border-radius: 4px; width: ${correctRate}%;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem; font-weight: 600; color: #1e293b; min-width: 35px; text-align: right;">${correctRate}%</span>
                         </div>
                     `;
                     statsContainer.appendChild(statItem);

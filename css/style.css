@@ -2029,88 +2029,106 @@ body {
     justify-content: center;
     align-items: center;
     padding: 1rem;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* 오답노트 차트 레이아웃 */
+.wrong-note-charts-grid {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* 오답노트 차트 크기 제한 */
+#wrongNoteTrendChart {
+    max-width: 700px;
+    max-height: 300px;
+}
+
+#wrongNoteDomainChart {
+    max-width: 500px;
+    max-height: 500px;
+}
+
+/* 오답노트 결과 섹션 overflow 방지 */
+.wrong-note-results-section {
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .passage-stats-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .passage-stat-item {
     display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    background: var(--background-color);
-    border-radius: 0.375rem;
-    border-left: 4px solid var(--primary-color);
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--card-background);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    gap: 1rem;
 }
 
-.passage-stat-header {
+.passage-stat-item:hover {
+    background: #fdf2f8;
+}
+
+.passage-info {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .passage-name {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.passage-score {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.passage-bars {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.passage-bar-container {
-    display: flex;
-    height: 24px;
-    border-radius: 4px;
+    font-size: 0.9rem;
+    white-space: nowrap;
     overflow: hidden;
-    background: #e5e7eb;
+    text-overflow: ellipsis;
 }
 
-.passage-bar {
+.passage-score-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.passage-bar-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.passage-mini-bar {
+    width: 100px;
+    height: 12px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.passage-mini-bar-fill {
+    height: 100%;
+    background: #f9a8d4;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.passage-rate {
+    font-size: 0.8rem;
     font-weight: 600;
-    color: white;
-    transition: width 0.3s;
-}
-
-.passage-bar.correct {
-    background: var(--success-color);
-}
-
-.passage-bar.wrong {
-    background: var(--danger-color);
-}
-
-.passage-stats-text {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    padding: 0.25rem 0;
-}
-
-.correct-text {
-    color: var(--success-color);
-    font-weight: 600;
-}
-
-.wrong-text {
-    color: var(--danger-color);
-    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 40px;
+    text-align: right;
 }
 
 .wrong-note-preview {
@@ -2266,6 +2284,16 @@ body {
 
     .wrong-note-charts {
         grid-template-columns: 1fr;
+    }
+
+    #wrongNoteTrendChart {
+        max-width: 100%;
+        max-height: 200px;
+    }
+
+    #wrongNoteDomainChart {
+        max-width: 250px;
+        max-height: 250px;
     }
 
     .exam-checkbox-item {
@@ -3445,6 +3473,55 @@ body {
     flex: 0 0 auto;
     width: auto;
     min-width: 160px;
+}
+
+/* 아이콘 버튼 스타일 */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-background);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover:not(.disabled) {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-icon:hover:not(.disabled) svg {
+    stroke: white;
+}
+
+.btn-icon.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
+.btn-icon.has-comment {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.btn-icon.has-comment:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
 }
 
 /* 모바일 반응형 */

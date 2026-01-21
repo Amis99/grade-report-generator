@@ -572,6 +572,86 @@ class ReportGenerator {
     }
 
     /**
+     * 영역의 정렬 우선순위 반환 (화법 → 작문 → 매체 → 문법 → 문학 → 비문학)
+     */
+    getDomainSortOrder(domain) {
+        if (/^화법/.test(domain)) return 0;
+        if (/^작문/.test(domain)) return 1;
+        if (/^매체/.test(domain)) return 2;
+        if (/^문법/.test(domain)) return 3;
+        if (/^문학/.test(domain)) return 4;
+        if (/^비문학/.test(domain)) return 5;
+        return 6;
+    }
+
+    /**
+     * 영역의 대분류 그룹 반환 (배경색용)
+     */
+    getDomainGroup(domain) {
+        if (/^화법|^작문|^매체/.test(domain)) return 0;
+        if (/^문법/.test(domain)) return 1;
+        if (/^문학/.test(domain)) return 2;
+        if (/^비문학/.test(domain)) return 3;
+        return 4;
+    }
+
+    /**
+     * 레이더 차트 배경색 플러그인 생성
+     */
+    createRadarBackgroundPlugin(domains) {
+        const self = this;
+        const groupColors = [
+            'rgba(147, 197, 253, 0.3)',  // 화법/작문/매체 - 파랑
+            'rgba(167, 243, 208, 0.3)',  // 문법 - 초록
+            'rgba(253, 230, 138, 0.3)',  // 문학 - 노랑
+            'rgba(252, 165, 165, 0.3)',  // 비문학 - 빨강
+            'rgba(209, 213, 219, 0.3)'   // 기타 - 회색
+        ];
+
+        return {
+            id: 'radarBackground',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const scale = chart.scales.r;
+
+                if (!scale || domains.length === 0) return;
+
+                const centerX = scale.xCenter;
+                const centerY = scale.yCenter;
+                const radius = scale.drawingArea;
+                const anglePerLabel = (2 * Math.PI) / domains.length;
+                const startAngle = -Math.PI / 2;
+
+                let currentGroup = -1;
+                let groupStartIndex = 0;
+
+                for (let i = 0; i <= domains.length; i++) {
+                    const group = i < domains.length ? self.getDomainGroup(domains[i]) : -1;
+
+                    if (group !== currentGroup || i === domains.length) {
+                        if (currentGroup >= 0 && i > groupStartIndex) {
+                            const sectorStartAngle = startAngle + (groupStartIndex - 0.5) * anglePerLabel;
+                            const sectorEndAngle = startAngle + (i - 0.5) * anglePerLabel;
+
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(centerX, centerY);
+                            ctx.arc(centerX, centerY, radius, sectorStartAngle, sectorEndAngle);
+                            ctx.closePath();
+                            ctx.fillStyle = groupColors[currentGroup] || groupColors[4];
+                            ctx.fill();
+                            ctx.restore();
+                        }
+
+                        currentGroup = group;
+                        groupStartIndex = i;
+                    }
+                }
+            }
+        };
+    }
+
+    /**
      * 영역별 점수 차트 렌더링 (레이더 차트)
      */
     renderDomainChart() {
@@ -579,7 +659,14 @@ class ReportGenerator {
         if (!canvas) return;
 
         const domainScores = this.currentResult.domainScores;
-        const domains = Object.keys(domainScores);
+
+        // 영역을 정렬
+        const domains = Object.keys(domainScores).sort((a, b) => {
+            const orderA = this.getDomainSortOrder(a);
+            const orderB = this.getDomainSortOrder(b);
+            if (orderA !== orderB) return orderA - orderB;
+            return a.localeCompare(b, 'ko');
+        });
 
         if (domains.length === 0) {
             canvas.style.display = 'none';
@@ -587,7 +674,6 @@ class ReportGenerator {
         }
 
         // 데이터 준비 - 정답률 기준
-        const labels = domains;
         const rates = domains.map(d => {
             const ds = domainScores[d];
             return ds.total > 0 ? (ds.correct / ds.total * 100) : 0;
@@ -600,10 +686,12 @@ class ReportGenerator {
 
         // 새 차트 생성 - 레이더 차트
         const ctx = canvas.getContext('2d');
+        const backgroundPlugin = this.createRadarBackgroundPlugin(domains);
+
         this.domainChart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: labels,
+                labels: domains,
                 datasets: [{
                     label: '정답률',
                     data: rates,
@@ -668,19 +756,20 @@ class ReportGenerator {
                                 return value + '%';
                             },
                             font: {
-                                size: this.isMobile() ? 5 : 10  // 모바일에서 절반
+                                size: this.isMobile() ? 5 : 10
                             }
                         },
                         pointLabels: {
                             font: {
-                                size: this.isMobile() ? 6 : 11,  // 모바일에서 절반
+                                size: this.isMobile() ? 6 : 11,
                                 weight: 'bold'
                             },
                             padding: this.isMobile() ? 2 : 5
                         }
                     }
                 }
-            }
+            },
+            plugins: [backgroundPlugin]
         });
     }
 
