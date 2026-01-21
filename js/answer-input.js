@@ -186,7 +186,7 @@ class AnswerInput {
                 <div class="answer-input-field">
                     <label>답:</label>
                     <select class="form-control answer-input" data-question-id="${question.id}" style="max-width: 200px;">
-                        <option value="">선택 안 함</option>
+                        <option value="" ${!selectedValue ? 'selected' : ''}>선택 안 함</option>
                         ${[1, 2, 3, 4, 5].map(num => `
                             <option value="${num}" ${selectedValue == num ? 'selected' : ''}>
                                 ${num}번

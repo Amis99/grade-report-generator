@@ -3,7 +3,7 @@
  * Firebase storage.js를 대체하는 AWS API Gateway 클라이언트
  * 기존 storage 인터페이스와 호환성 유지
  */
-console.log('📦 api-client.js 버전 2025-01-03 로드됨 (답안 저장 수정)');
+console.log('📦 api-client.js 버전 2025-01-21b 로드됨 (답안 삭제 API 추가)');
 
 class ApiClient {
     constructor() {
@@ -15,7 +15,8 @@ class ApiClient {
             answers: [],
             users: [],
             registrations: [],
-            classes: []
+            classes: [],
+            assignments: []
         };
         this.cacheLoaded = false;
         this.useFirebase = false; // 호환성용 플래그
@@ -478,7 +479,13 @@ class ApiClient {
         try {
             const result = await this.request('GET', `/exams/${examId}/answers`);
             const answers = Array.isArray(result) ? result : (result.answers || result || []);
-            return answers.map(a => new Answer(a));
+            const answerObjs = answers.map(a => new Answer(a));
+
+            // 캐시 업데이트 (이 시험의 기존 캐시 제거 후 새 데이터로 교체)
+            this.cache.answers = this.cache.answers.filter(a => a.examId !== examId);
+            this.cache.answers.push(...answerObjs);
+
+            return answerObjs;
         } catch (error) {
             console.error('Failed to fetch answers:', error);
             throw error;
@@ -572,7 +579,15 @@ class ApiClient {
     }
 
     async deleteAnswer(id) {
-        this.cache.answers = this.cache.answers.filter(a => a.id !== id);
+        console.log('🗑️ deleteAnswer 호출됨:', id);
+        try {
+            await this.request('DELETE', `/answers/${id}`);
+            this.cache.answers = this.cache.answers.filter(a => a.id !== id);
+            console.log('✅ 답안 삭제 성공');
+        } catch (error) {
+            console.error('❌ 답안 삭제 실패:', error);
+            throw error;
+        }
     }
 
     async deleteAnswersByExamId(examId) {
@@ -1081,6 +1096,204 @@ class ApiClient {
      */
     async getStudentClasses(studentId) {
         return await this.request('GET', `/students/${studentId}/classes`);
+    }
+
+    // === 과제(Assignment) 관리 API ===
+
+    /**
+     * 과제 목록 조회
+     * @param {Object} params - 필터 파라미터 (classId, status, organization)
+     */
+    async getAssignments(params = {}) {
+        let endpoint = '/assignments';
+        const queryParams = [];
+
+        if (params.classId) {
+            queryParams.push(`classId=${encodeURIComponent(params.classId)}`);
+        }
+        if (params.status) {
+            queryParams.push(`status=${encodeURIComponent(params.status)}`);
+        }
+        if (params.organization) {
+            queryParams.push(`organization=${encodeURIComponent(params.organization)}`);
+        }
+
+        if (queryParams.length > 0) {
+            endpoint += '?' + queryParams.join('&');
+        }
+
+        const result = await this.request('GET', endpoint);
+        this.cache.assignments = result.assignments || [];
+        return this.cache.assignments;
+    }
+
+    /**
+     * 과제 상세 조회
+     */
+    async getAssignment(assignmentId) {
+        return await this.request('GET', `/assignments/${assignmentId}`);
+    }
+
+    /**
+     * 과제 생성
+     */
+    async createAssignment(assignmentData) {
+        const result = await this.request('POST', '/assignments', assignmentData);
+        // 캐시 업데이트
+        this.cache.assignments.push(result);
+        return result;
+    }
+
+    /**
+     * 과제 수정
+     */
+    async updateAssignment(assignmentId, assignmentData) {
+        const result = await this.request('PUT', `/assignments/${assignmentId}`, assignmentData);
+        // 캐시 업데이트
+        const index = this.cache.assignments.findIndex(a => a.id === assignmentId);
+        if (index >= 0) {
+            this.cache.assignments[index] = result;
+        }
+        return result;
+    }
+
+    /**
+     * 과제 삭제
+     */
+    async deleteAssignment(assignmentId) {
+        await this.request('DELETE', `/assignments/${assignmentId}`);
+        // 캐시 업데이트
+        this.cache.assignments = this.cache.assignments.filter(a => a.id !== assignmentId);
+    }
+
+    /**
+     * 과제 PDF 업로드 (Presigned URL 사용)
+     * @param {string} assignmentId - 과제 ID
+     * @param {Array} pages - 페이지 데이터 배열 [{ pageNumber, thumbnailBase64, pHash }]
+     * @param {Function} onProgress - 진행 상황 콜백 (current, total)
+     */
+    async uploadAssignmentPdf(assignmentId, pages, onProgress = null) {
+        // 1. Get presigned URLs
+        const { urls } = await this.request('POST', `/assignments/${assignmentId}/upload-urls`, {
+            totalPages: pages.length
+        });
+
+        // 2. Upload each page thumbnail directly to S3
+        const uploadedPages = [];
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            const urlInfo = urls.find(u => u.pageNumber === page.pageNumber);
+
+            if (!urlInfo) {
+                throw new Error(`No upload URL for page ${page.pageNumber}`);
+            }
+
+            // Convert base64 to blob
+            const binaryString = atob(page.thumbnailBase64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let j = 0; j < binaryString.length; j++) {
+                bytes[j] = binaryString.charCodeAt(j);
+            }
+            const blob = new Blob([bytes], { type: 'image/png' });
+
+            // Upload to S3
+            const uploadResponse = await fetch(urlInfo.uploadUrl, {
+                method: 'PUT',
+                body: blob,
+                headers: {
+                    'Content-Type': 'image/png'
+                }
+            });
+
+            if (!uploadResponse.ok) {
+                throw new Error(`Failed to upload page ${page.pageNumber}: ${uploadResponse.status}`);
+            }
+
+            uploadedPages.push({
+                pageNumber: page.pageNumber,
+                thumbnailKey: urlInfo.thumbnailKey,
+                pHash: page.pHash
+            });
+
+            if (onProgress) {
+                onProgress(i + 1, pages.length);
+            }
+        }
+
+        // 3. Finalize upload
+        return await this.request('POST', `/assignments/${assignmentId}/finalize-upload`, {
+            pages: uploadedPages
+        });
+    }
+
+    /**
+     * 과제 페이지 목록 조회 (썸네일 URL 포함)
+     */
+    async getAssignmentPages(assignmentId) {
+        return await this.request('GET', `/assignments/${assignmentId}/pages`);
+    }
+
+    /**
+     * 과제 제출 현황 조회
+     * @param {string} assignmentId - 과제 ID
+     * @param {Object} params - 필터 파라미터 (classId, includeImages)
+     */
+    async getAssignmentSubmissions(assignmentId, params = {}) {
+        let endpoint = `/assignments/${assignmentId}/submissions`;
+        const queryParams = [];
+
+        if (params.classId) {
+            queryParams.push(`classId=${encodeURIComponent(params.classId)}`);
+        }
+        if (params.includeImages) {
+            queryParams.push('includeImages=true');
+        }
+
+        if (queryParams.length > 0) {
+            endpoint += '?' + queryParams.join('&');
+        }
+
+        return await this.request('GET', endpoint);
+    }
+
+    /**
+     * 학생 제출물에 코멘트 추가
+     */
+    async addSubmissionComment(assignmentId, studentId, comment) {
+        return await this.request('PUT', `/assignments/${assignmentId}/submissions/${studentId}/comment`, { comment });
+    }
+
+    /**
+     * 제출 상태 업데이트 (인정/거부)
+     */
+    async updateSubmissionStatus(assignmentId, studentId, pageNumber, passed) {
+        return await this.request('PUT', `/assignments/${assignmentId}/submissions/${studentId}/pages/${pageNumber}`, { passed });
+    }
+
+    // === 학생용 과제 API ===
+
+    /**
+     * 내 과제 목록 조회 (학생용)
+     */
+    async getMyAssignments() {
+        const result = await this.request('GET', '/student/assignments');
+        return result.assignments || [];
+    }
+
+    /**
+     * 과제 상세 조회 (학생용, 페이지 썸네일 및 제출 상태 포함)
+     */
+    async getMyAssignmentDetail(assignmentId) {
+        return await this.request('GET', `/student/assignments/${assignmentId}`);
+    }
+
+    /**
+     * 과제 페이지 제출 (학생용)
+     * @param {string} assignmentId - 과제 ID
+     * @param {Array} images - 이미지 배열 [{ imageBase64, pHash }]
+     */
+    async submitAssignmentPages(assignmentId, images) {
+        return await this.request('POST', `/student/assignments/${assignmentId}/submit`, { images });
     }
 }
 

@@ -206,7 +206,7 @@ AnswerInput.prototype.renderStudentRow = function(questions, student, answers = 
                                     data-question-id="${q.id}"
                                     data-question-type="${q.type}"
                                     ${disabled}>
-                                <option value=""></option>
+                                <option value="" ${!value ? 'selected' : ''}>-</option>
                                 ${[1, 2, 3, 4, 5].map(num => `
                                     <option value="${num}" ${value == num ? 'selected' : ''}>${num}</option>
                                 `).join('')}

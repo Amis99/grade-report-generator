@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- PDF.js for processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
     <div class="student-container">
@@ -40,6 +42,7 @@
         <!-- 탭 네비게이션 -->
         <nav class="student-tabs">
             <button class="tab-btn active" data-tab="my-reports">내 성적표</button>
+            <button class="tab-btn" data-tab="my-assignments">내 과제</button>
             <button class="tab-btn" data-tab="wrong-notes">오답 노트</button>
             <button class="tab-btn" data-tab="trend">성적 추이</button>
         </nav>
@@ -54,6 +57,19 @@
             </div>
             <div id="reportContainer" class="report-container" style="display: none;">
                 <!-- 성적표가 여기에 표시됨 -->
+            </div>
+        </section>
+
+        <!-- 내 과제 탭 -->
+        <section id="my-assignments" class="tab-content">
+            <div class="section-header">
+                <h2>내 과제</h2>
+            </div>
+            <div id="assignmentCardsContainer" class="assignment-cards">
+                <!-- 과제 카드가 동적으로 추가됨 -->
+            </div>
+            <div id="assignmentDetailContainer" class="assignment-detail-container" style="display: none;">
+                <!-- 과제 상세 및 제출 화면 -->
             </div>
         </section>
 
@@ -109,5 +125,6 @@
     <script src="js/session-manager.js"></script>
     <script src="js/auth-service.js"></script>
     <script src="js/student-dashboard.js"></script>
+    <script src="js/student-assignments.js?v=20250121"></script>
 </body>
 </html>

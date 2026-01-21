@@ -421,6 +421,11 @@ class App {
                     classManager.init();
                 }
                 break;
+            case 'assignment-management':
+                if (window.assignmentManager) {
+                    assignmentManager.init();
+                }
+                break;
             case 'answer-input':
                 if (window.answerInput) {
                     answerInput.loadExamSelect();

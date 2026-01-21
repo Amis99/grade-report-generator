@@ -59,6 +59,7 @@
             <button class="tab-btn active" data-tab="exam-management">시험 관리</button>
             <button class="tab-btn" data-tab="student-management">학생 관리</button>
             <button class="tab-btn" data-tab="class-management">수강반 관리</button>
+            <button class="tab-btn" data-tab="assignment-management">과제 관리</button>
             <button class="tab-btn" data-tab="answer-input">답안 입력</button>
             <button class="tab-btn" data-tab="grading">채점 및 분석</button>
             <button class="tab-btn" data-tab="report">성적표 생성</button>
@@ -260,6 +261,100 @@
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <!-- 과제 관리 탭 -->
+            <section id="assignment-management" class="tab-content">
+                <div class="assignment-management-layout">
+                    <!-- 좌측: 과제 목록 -->
+                    <div class="assignment-list-panel">
+                        <div class="panel-header">
+                            <h3>과제 목록</h3>
+                            <button class="btn btn-primary btn-sm" id="createAssignmentBtn" onclick="assignmentManager.showCreateModal()">+ 새 과제</button>
+                        </div>
+                        <div class="filter-bar">
+                            <select id="assignmentClassFilter" class="form-control" onchange="assignmentManager.onClassFilterChange()">
+                                <option value="">전체 수강반</option>
+                            </select>
+                            <select id="assignmentStatusFilter" class="form-control" onchange="assignmentManager.onStatusFilterChange()">
+                                <option value="">전체 상태</option>
+                                <option value="draft">초안</option>
+                                <option value="active">진행 중</option>
+                                <option value="closed">마감</option>
+                            </select>
+                        </div>
+                        <div class="list-count">
+                            <span id="assignmentListCount">0</span>개의 과제
+                        </div>
+                        <div id="assignmentList" class="assignment-list"></div>
+                    </div>
+
+                    <!-- 우측: 과제 상세 -->
+                    <div class="assignment-detail-panel">
+                        <div id="assignmentDetailPlaceholder" class="detail-placeholder">
+                            <div class="placeholder-icon">📋</div>
+                            <p>과제를 선택하세요</p>
+                            <span class="placeholder-hint">좌측 목록에서 과제를 클릭하면 상세 정보가 표시됩니다</span>
+                        </div>
+                        <div id="assignmentDetailContent" class="detail-content" style="display: none;">
+                            <!-- 헤더 -->
+                            <div class="detail-header-card">
+                                <div class="header-top">
+                                    <h2 id="assignmentDetailTitle">과제 제목</h2>
+                                    <span id="assignmentStatusBadge" class="status-badge">상태</span>
+                                </div>
+                                <div id="assignmentDetailInfo" class="header-info"></div>
+                                <div class="status-change-section">
+                                    <span class="status-label">상태 변경:</span>
+                                    <div class="status-buttons" id="statusButtons">
+                                        <button class="status-btn draft" onclick="assignmentManager.changeStatus('draft')">초안</button>
+                                        <button class="status-btn active" onclick="assignmentManager.changeStatus('active')">진행 중</button>
+                                        <button class="status-btn closed" onclick="assignmentManager.changeStatus('closed')">마감</button>
+                                    </div>
+                                </div>
+                                <div class="header-actions">
+                                    <button class="btn btn-edit" onclick="assignmentManager.showEditModal()">수정</button>
+                                    <button class="btn btn-delete" onclick="assignmentManager.deleteSelectedAssignment()">삭제</button>
+                                </div>
+                            </div>
+
+                            <!-- PDF 카드 -->
+                            <div class="detail-card">
+                                <div class="card-header">
+                                    <h4>PDF 파일</h4>
+                                    <input type="file" id="assignmentPdfInput" accept=".pdf" style="display: none;" onchange="assignmentManager.handlePdfUpload(event)">
+                                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('assignmentPdfInput').click()">PDF 업로드</button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="assignmentPdfInfo" class="pdf-status">PDF가 업로드되지 않았습니다.</div>
+                                    <div id="assignmentPagesSection" class="pages-action" style="display: none;">
+                                        <button class="btn btn-outline" onclick="assignmentManager.showPagesPreviewModal()">
+                                            페이지 미리보기 (<span id="assignmentPageCount">0</span>페이지)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 제출 현황 카드 -->
+                            <div class="detail-card">
+                                <div class="card-header">
+                                    <h4>제출 현황</h4>
+                                    <select id="submissionClassFilter" class="form-control form-control-sm" onchange="assignmentManager.loadSubmissions()">
+                                        <option value="">수강반 선택</option>
+                                    </select>
+                                </div>
+                                <div class="card-body">
+                                    <div id="submissionsTable" class="submissions-table">
+                                        <p class="empty-hint">수강반을 선택하면 학생별 제출 현황이 표시됩니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 모바일용 하단 FAB -->
+                <button class="mobile-fab" id="mobileCreateAssignmentBtn" onclick="assignmentManager.showCreateModal()">+</button>
             </section>
 
             <!-- 답안 입력 탭 -->
@@ -599,32 +694,35 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- PDF.js for processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <!-- AWS Cognito SDK -->
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
 
     <!-- 애플리케이션 스크립트 -->
-    <script src="js/config.js?v=20250103b"></script>
-    <script src="js/data-model.js?v=20250103b"></script>
-    <script src="js/cognito-auth.js?v=20250103b"></script>
-    <script src="js/api-client.js?v=20250103b"></script>
-    <script src="js/auth-utils.js?v=20250103b"></script>
-    <script src="js/session-manager.js?v=20250103b"></script>
-    <script src="js/auth-service.js?v=20250103b"></script>
-    <script src="js/admin-panel.js?v=20250103b"></script>
-    <script src="js/student-account-manager.js?v=20250103b"></script>
-    <script src="js/csv-utils.js?v=20250103b"></script>
-    <script src="js/searchable-select.js?v=20250103b"></script>
-    <script src="js/exam-manager.js?v=20250103b"></script>
-    <script src="js/exam-manager-sheet.js?v=20250103b"></script>
-    <script src="js/answer-input.js?v=20250103b"></script>
-    <script src="js/answer-input-sheet.js?v=20250103b"></script>
-    <script src="js/grading.js?v=20250103b"></script>
-    <script src="js/report-generator.js?v=20250103b"></script>
-    <script src="js/wrong-note.js?v=20250103b"></script>
-    <script src="js/student-manager.js?v=20250103b"></script>
-    <script src="js/auto-merge-students.js?v=20250103b"></script>
-    <script src="js/class-manager.js?v=20250103b"></script>
-    <script src="js/app.js?v=20250103b"></script>
+    <script src="js/config.js?v=20250121b"></script>
+    <script src="js/data-model.js?v=20250121b"></script>
+    <script src="js/cognito-auth.js?v=20250121b"></script>
+    <script src="js/api-client.js?v=20250121b"></script>
+    <script src="js/auth-utils.js?v=20250121b"></script>
+    <script src="js/session-manager.js?v=20250121b"></script>
+    <script src="js/auth-service.js?v=20250121b"></script>
+    <script src="js/admin-panel.js?v=20250121b"></script>
+    <script src="js/student-account-manager.js?v=20250121b"></script>
+    <script src="js/csv-utils.js?v=20250121b"></script>
+    <script src="js/searchable-select.js?v=20250121b"></script>
+    <script src="js/exam-manager.js?v=20250121b"></script>
+    <script src="js/exam-manager-sheet.js?v=20250121b"></script>
+    <script src="js/answer-input.js?v=20250121b"></script>
+    <script src="js/answer-input-sheet.js?v=20250121b"></script>
+    <script src="js/grading.js?v=20250121b"></script>
+    <script src="js/report-generator.js?v=20250121b"></script>
+    <script src="js/wrong-note.js?v=20250121b"></script>
+    <script src="js/student-manager.js?v=20250121b"></script>
+    <script src="js/auto-merge-students.js?v=20250121b"></script>
+    <script src="js/class-manager.js?v=20250121b"></script>
+    <script src="js/assignment-manager.js?v=20250121b"></script>
+    <script src="js/app.js?v=20250121b"></script>
 </body>
 </html>
