@@ -144,7 +144,7 @@ body {
     padding: 12px 16px;
     background: none;
     border: none;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
     color: var(--text-primary);
     cursor: pointer;
     transition: background 0.15s;
@@ -1842,6 +1842,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     user-select: none;
+    font-size: 0.75rem;
 }
 
 .custom-select-trigger:hover {
@@ -1896,7 +1897,7 @@ body {
     border: none;
     border-bottom: 1px solid var(--border-color);
     outline: none;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
 }
 
 .custom-select-search:focus {
@@ -1913,6 +1914,7 @@ body {
     cursor: pointer;
     transition: background 0.15s;
     border-bottom: 1px solid var(--background-color);
+    font-size: 0.75rem;
 }
 
 .custom-select-option:last-child {
@@ -1963,10 +1965,11 @@ body {
 .exam-checkbox-item {
     display: flex;
     align-items: center;
-    padding: 0.75rem;
+    padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--background-color);
     cursor: pointer;
     transition: background 0.15s;
+    font-size: 0.75rem;
 }
 
 .exam-checkbox-item:last-child {
@@ -1978,9 +1981,9 @@ body {
 }
 
 .exam-checkbox-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 0.75rem;
+    width: 14px;
+    height: 14px;
+    margin-right: 0.5rem;
     cursor: pointer;
 }
 
@@ -1992,7 +1995,7 @@ body {
 
 .exam-checkbox-item small {
     color: var(--text-secondary);
-    font-size: 0.875rem;
+    font-size: 0.7rem;
 }
 
 .wrong-note-actions {

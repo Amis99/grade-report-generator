@@ -392,9 +392,21 @@ class WrongNote {
                         ticks: {
                             display: !this.isMobile(),
                             font: {
-                                size: 12
+                                size: 11
+                            },
+                            maxRotation: -45,
+                            minRotation: -45,
+                            callback: function(value, index, ticks) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 8 ? label.substring(0, 8) + '…' : label;
                             }
                         }
+                    }
+                },
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 30
                     }
                 }
             }
