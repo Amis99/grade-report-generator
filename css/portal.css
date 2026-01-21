@@ -377,6 +377,7 @@ body.portal-layout {
 .content-area {
     flex: 1;
     padding: 24px;
+    overflow-x: auto;
 }
 
 /* Page Container */
