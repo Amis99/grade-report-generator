@@ -929,8 +929,8 @@ class StudentManager {
                     <td class="action-buttons">
                         <button class="btn btn-sm btn-secondary btn-icon" onclick="studentManager.openEditModal('${student.id}')">✏️</button>
                         ${student.hasAccount ?
-                            `<button class="btn btn-sm btn-danger btn-icon" onclick="studentManager.deleteAccount('${student.id}')">계정삭제</button>` :
-                            `<button class="btn btn-sm btn-success btn-icon" onclick="studentManager.showCreateAccountModal('${student.id}')">계정생성</button>`
+                            `<button class="btn btn-sm btn-danger btn-icon" onclick="studentManager.deleteAccount('${student.id}')" title="계정 삭제">🗑️</button>` :
+                            `<button class="btn btn-sm btn-success btn-icon" onclick="studentManager.showCreateAccountModal('${student.id}')" title="계정 생성">➕</button>`
                         }
                     </td>
                 </tr>
