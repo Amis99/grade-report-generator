@@ -615,6 +615,7 @@ body {
     padding: 2rem;
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
+    overflow-x: auto;
 }
 
 .detail-header {
@@ -734,6 +735,7 @@ body {
     padding: 2rem;
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
+    overflow-x: auto;
 }
 
 .student-info-display {
@@ -792,6 +794,7 @@ body {
 .grading-results-section {
     display: grid;
     gap: 2rem;
+    overflow-x: auto;
 }
 
 .grading-summary {
@@ -1784,7 +1787,7 @@ body {
 .student-list-table {
     background: white;
     border-radius: 0.5rem;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: var(--shadow);
 }
 
@@ -2056,10 +2059,50 @@ body {
     overflow-x: hidden;
 }
 
+/* 단원/지문별 통계 접기 기능 */
+.passage-stats-section.collapsible .section-header-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+}
+
+.passage-stats-section.collapsible .section-header-toggle:hover {
+    opacity: 0.8;
+}
+
+.passage-stats-section.collapsible .toggle-icon {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.passage-stats-section.collapsible.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.passage-stats-section.collapsible.collapsed .passage-stats-container {
+    display: none;
+}
+
+/* 단원/지문별 통계 2단 그리드 */
 .passage-stats-container {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+.passage-stats-container.passage-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .passage-stats-container.passage-stats-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .passage-stat-item {

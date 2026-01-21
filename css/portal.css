@@ -24,6 +24,16 @@
     --sidebar-collapsed-width: 64px;
     --header-height: 60px;
     --transition-speed: 0.3s;
+
+    /* Font Sizes - Desktop */
+    --font-title: 1.5rem;
+    --font-section: 1.25rem;
+    --font-card-title: 1rem;
+    --font-body: 0.9rem;
+    --font-small: 0.8rem;
+    --font-caption: 0.75rem;
+    --font-button: 0.875rem;
+    --font-input: 0.875rem;
 }
 
 /* Reset & Base */
@@ -94,7 +104,7 @@ body.portal-layout {
 }
 
 .sidebar-logo-text {
-    font-size: 16px;
+    font-size: var(--font-card-title);
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -125,7 +135,7 @@ body.portal-layout {
 
 .nav-section-title {
     padding: 8px 20px;
-    font-size: 11px;
+    font-size: var(--font-caption);
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -167,7 +177,7 @@ body.portal-layout {
 }
 
 .nav-item-text {
-    font-size: 14px;
+    font-size: var(--font-body);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -177,7 +187,7 @@ body.portal-layout {
     margin-left: auto;
     background: var(--primary);
     color: var(--text-primary);
-    font-size: 11px;
+    font-size: var(--font-caption);
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 10px;
@@ -222,7 +232,7 @@ body.portal-layout {
 }
 
 .sidebar-user-name {
-    font-size: 14px;
+    font-size: var(--font-body);
     font-weight: 500;
     color: var(--text-primary);
     white-space: nowrap;
@@ -231,7 +241,7 @@ body.portal-layout {
 }
 
 .sidebar-user-role {
-    font-size: 12px;
+    font-size: var(--font-small);
     color: var(--text-secondary);
 }
 
@@ -288,7 +298,7 @@ body.portal-layout {
 }
 
 .page-title {
-    font-size: 18px;
+    font-size: var(--font-section);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -358,7 +368,7 @@ body.portal-layout {
 }
 
 .header-user-name {
-    font-size: 14px;
+    font-size: var(--font-body);
     font-weight: 500;
     color: var(--text-primary);
 }
@@ -466,6 +476,17 @@ body.portal-layout {
    Responsive - Mobile (< 768px)
    ============================================ */
 @media (max-width: 768px) {
+    :root {
+        --font-title: 1.25rem;
+        --font-section: 1.1rem;
+        --font-card-title: 0.95rem;
+        --font-body: 0.85rem;
+        --font-small: 0.75rem;
+        --font-caption: 0.7rem;
+        --font-button: 0.8rem;
+        --font-input: 0.85rem;
+    }
+
     .sidebar {
         transform: translateX(-100%);
         width: 280px;
@@ -530,7 +551,7 @@ body.portal-layout {
 }
 
 .card-title {
-    font-size: 16px;
+    font-size: var(--font-card-title);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -546,7 +567,7 @@ body.portal-layout {
     justify-content: center;
     gap: 8px;
     padding: 10px 20px;
-    font-size: 14px;
+    font-size: var(--font-button);
     font-weight: 500;
     border-radius: 8px;
     border: none;
@@ -588,7 +609,7 @@ body.portal-layout {
 
 .btn-sm {
     padding: 6px 12px;
-    font-size: 13px;
+    font-size: var(--font-small);
 }
 
 .btn-icon {
@@ -614,7 +635,7 @@ body.portal-layout {
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
-    font-size: 12px;
+    font-size: var(--font-small);
     font-weight: 500;
     border-radius: 20px;
 }
@@ -653,14 +674,14 @@ body.portal-layout {
 }
 
 .empty-state-title {
-    font-size: 18px;
+    font-size: var(--font-section);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .empty-state-text {
-    font-size: 14px;
+    font-size: var(--font-body);
     margin-bottom: 24px;
 }
 
@@ -698,7 +719,7 @@ body.portal-layout {
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: var(--font-body);
     cursor: pointer;
     transition: all 0.2s ease;
     margin-top: 12px;

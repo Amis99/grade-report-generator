@@ -1096,3 +1096,11 @@ class WrongNote {
         }
     }
 }
+
+// 단원/지문별 통계 접기/펼치기 전역 함수
+function togglePassageStats() {
+    const section = document.querySelector('.passage-stats-section.collapsible');
+    if (section) {
+        section.classList.toggle('collapsed');
+    }
+}

@@ -32,7 +32,7 @@
 
 .header-left h1 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: var(--font-title, 1.5rem);
     color: #333;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .student-info {
-    font-size: 0.9rem;
+    font-size: var(--font-body, 0.9rem);
     color: #666;
 }
 
@@ -170,7 +170,7 @@
     background: #f0f0f0;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: var(--font-body, 0.9rem);
     transition: all 0.2s;
 }
 
@@ -240,7 +240,7 @@
 }
 
 .exam-card-meta {
-    font-size: 0.85rem;
+    font-size: var(--font-small, 0.8rem);
     color: #666;
 }
 
@@ -283,13 +283,13 @@
 }
 
 .score-item .label {
-    font-size: 0.85rem;
+    font-size: var(--font-small, 0.8rem);
     color: #666;
     margin-bottom: 5px;
 }
 
 .score-item .value {
-    font-size: 1.5rem;
+    font-size: var(--font-title, 1.5rem);
     font-weight: bold;
     color: #4a7c59;
 }
@@ -436,7 +436,7 @@
 /* Trend Charts */
 .trend-charts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
 }
 

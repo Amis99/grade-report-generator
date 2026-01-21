@@ -68,12 +68,10 @@ class StudentPortalController {
         // URL 해시 변경 감지
         window.addEventListener('hashchange', () => this.handleHashChange());
 
-        // 초기 해시 체크는 인증 완료 후 student-dashboard.js에서 호출됨
-        // 대시보드만 바로 표시 (API 호출 없음)
-        const hash = window.location.hash.slice(1);
-        if (hash && hash !== 'dashboard' && this.pageTitles[hash]) {
-            // 인증 완료 후 처리하기 위해 저장
-            this.pendingPage = hash;
+        // 새로고침 시 항상 대시보드로 시작
+        // 해시를 초기화하고 대시보드 표시
+        if (window.location.hash) {
+            history.replaceState(null, '', window.location.pathname);
         }
 
         // 윈도우 리사이즈 이벤트

@@ -637,9 +637,12 @@
                                 </div>
                             </div>
 
-                            <div class="passage-stats-section">
-                                <h3>단원/지문별 통계</h3>
-                                <div id="wrongNotePassageStats" class="passage-stats-container">
+                            <div class="passage-stats-section collapsible">
+                                <div class="section-header-toggle" onclick="togglePassageStats()">
+                                    <h3>단원/지문별 통계</h3>
+                                    <span class="toggle-icon">▼</span>
+                                </div>
+                                <div id="wrongNotePassageStats" class="passage-stats-container passage-stats-grid">
                                     <!-- 단원/지문별 통계가 여기에 표시됨 -->
                                 </div>
                             </div>

@@ -30,7 +30,7 @@
 }
 
 .welcome-greeting {
-    font-size: 24px;
+    font-size: var(--font-title);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 8px;
@@ -41,13 +41,13 @@
 }
 
 .welcome-message {
-    font-size: 15px;
+    font-size: var(--font-body);
     color: var(--text-secondary);
 }
 
 .welcome-date {
     margin-top: 16px;
-    font-size: 13px;
+    font-size: var(--font-small);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -70,7 +70,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 16px;
+    font-size: var(--font-card-title);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -80,7 +80,7 @@
 }
 
 .feed-link {
-    font-size: 13px;
+    font-size: var(--font-small);
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
@@ -157,7 +157,7 @@
 }
 
 .feed-item-tag {
-    font-size: 11px;
+    font-size: var(--font-caption);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -186,12 +186,12 @@
 }
 
 .feed-item-time {
-    font-size: 12px;
+    font-size: var(--font-caption);
     color: var(--text-secondary);
 }
 
 .feed-item-title {
-    font-size: 15px;
+    font-size: var(--font-body);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
@@ -201,7 +201,7 @@
 }
 
 .feed-item-description {
-    font-size: 14px;
+    font-size: var(--font-small);
     color: var(--text-secondary);
     line-height: 1.5;
 }
@@ -211,7 +211,7 @@
 }
 
 .feed-item-action .btn {
-    font-size: 13px;
+    font-size: var(--font-small);
     padding: 8px 16px;
 }
 
@@ -283,7 +283,7 @@
 }
 
 .activity-text {
-    font-size: 14px;
+    font-size: var(--font-body);
     color: var(--text-primary);
     line-height: 1.5;
 }
@@ -293,7 +293,7 @@
 }
 
 .activity-time {
-    font-size: 12px;
+    font-size: var(--font-caption);
     color: var(--text-secondary);
     margin-top: 4px;
 }
@@ -314,13 +314,13 @@
 }
 
 .score-card-title {
-    font-size: 15px;
+    font-size: var(--font-body);
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .score-card-badge {
-    font-size: 12px;
+    font-size: var(--font-caption);
     padding: 4px 10px;
     border-radius: 20px;
     font-weight: 500;
@@ -367,7 +367,7 @@
 .score-detail-item {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: var(--font-body);
     padding: 6px 0;
     border-bottom: 1px solid var(--border);
 }
@@ -404,7 +404,7 @@
 }
 
 .comment-text {
-    font-size: 15px;
+    font-size: var(--font-body);
     color: var(--text-primary);
     line-height: 1.6;
     font-style: italic;
@@ -412,7 +412,7 @@
 
 .comment-author {
     margin-top: 12px;
-    font-size: 13px;
+    font-size: var(--font-small);
     color: var(--text-secondary);
     text-align: right;
 }
@@ -433,13 +433,13 @@
 }
 
 .progress-title {
-    font-size: 14px;
+    font-size: var(--font-body);
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .progress-value {
-    font-size: 14px;
+    font-size: var(--font-body);
     font-weight: 600;
     color: var(--accent);
 }
@@ -496,14 +496,14 @@
 }
 
 .stat-value {
-    font-size: 28px;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
 }
 
 .stat-label {
-    font-size: 13px;
+    font-size: var(--font-small);
     color: var(--text-secondary);
     margin-top: 4px;
 }
@@ -524,14 +524,14 @@
 }
 
 .feed-empty-title {
-    font-size: 16px;
+    font-size: var(--font-card-title);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .feed-empty-text {
-    font-size: 14px;
+    font-size: var(--font-body);
     color: var(--text-secondary);
 }
 
