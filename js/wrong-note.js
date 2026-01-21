@@ -641,11 +641,13 @@ class WrongNote {
         statsDiv.innerHTML = sortedPassages.map(([passage, stats]) => {
             const total = stats.correct + stats.wrong;
             const correctRate = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+            // 지문명 12자 제한
+            const displayName = passage.length > 12 ? passage.substring(0, 12) + '…' : passage;
 
             return `
-                <div class="passage-stat-item">
+                <div class="passage-stat-item" title="${passage}">
                     <div class="passage-info">
-                        <span class="passage-name">${passage}</span>
+                        <span class="passage-name">${displayName}</span>
                         <span class="passage-score-text">${stats.correct}/${total}</span>
                     </div>
                     <div class="passage-bar-wrapper">
@@ -947,6 +949,8 @@ class WrongNote {
                 pagePassages.forEach(([passage, stats]) => {
                     const total = stats.correct + stats.wrong;
                     const correctRate = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+                    // 지문명 12자 제한
+                    const displayName = passage.length > 12 ? passage.substring(0, 12) + '…' : passage;
 
                     const statItem = document.createElement('div');
                     statItem.style.display = 'flex';
@@ -960,7 +964,7 @@ class WrongNote {
 
                     statItem.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
-                            <span style="font-weight: 500; color: #1e293b; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${passage}</span>
+                            <span style="font-weight: 500; color: #1e293b; font-size: 0.85rem; white-space: nowrap;">${displayName}</span>
                             <span style="font-size: 0.75rem; color: #6b7280; white-space: nowrap;">${stats.correct}/${total}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
