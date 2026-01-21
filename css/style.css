@@ -431,6 +431,198 @@ body {
 }
 
 /* 학생 관리 */
+/* 학생 관리 탭 */
+.student-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0;
+}
+
+.student-tab-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.student-tab-btn:hover {
+    color: var(--primary-color);
+    background: var(--background-color);
+}
+
+.student-tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.student-tab-content {
+    display: none;
+}
+
+.student-tab-content.active {
+    display: block;
+}
+
+/* 학생 통계 */
+.student-stats, .account-stats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.student-stats span, .account-stats span {
+    color: var(--text-secondary);
+}
+
+.student-stats strong, .account-stats strong {
+    color: var(--text-primary);
+}
+
+/* 계정 관리 탭 스타일 */
+.student-account-container {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+}
+
+.account-actions-bar {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.account-filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.account-filter-bar .form-control {
+    max-width: 200px;
+}
+
+.account-filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.account-table-wrapper {
+    overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.account-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.account-table th,
+.account-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.account-table th {
+    background: var(--background-color);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.account-table tbody tr:hover {
+    background: var(--background-color);
+}
+
+.account-table .col-select {
+    width: 40px;
+    text-align: center;
+}
+
+.account-table .col-org {
+    min-width: 80px;
+}
+
+.account-table .account-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.account-badge.has-account {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.account-badge.no-account {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.account-table .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.account-table .btn-icon {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+/* 병합 학생 목록 */
+.merge-students-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.merge-student-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.merge-student-item:hover {
+    background: var(--background-color);
+}
+
+.merge-student-item.selected {
+    border-color: var(--primary-color);
+    background: #eff6ff;
+}
+
+.merge-student-item input[type="radio"] {
+    margin: 0;
+}
+
 .student-management-container {
     display: flex;
     flex-direction: column;

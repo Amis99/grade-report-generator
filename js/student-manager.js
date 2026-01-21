@@ -1,5 +1,5 @@
 /**
- * 학생 관리 모듈
+ * 학생 관리 모듈 (통합: 기본 정보 + 계정 관리)
  */
 
 class StudentManager {
@@ -8,7 +8,16 @@ class StudentManager {
         this.selectedClassId = '';
         this.classes = [];
         this.studentClassMap = new Map(); // studentId -> [classIds]
-        this.selectedStudents = new Set(); // 선택된 학생 ID 목록
+        this.selectedStudents = new Set(); // 선택된 학생 ID 목록 (기본 탭)
+
+        // 계정 관리 탭 상태
+        this.currentTab = 'student-basic';
+        this.accountFilterHasAccount = null; // null: 전체, true: 계정 있음, false: 계정 없음
+        this.accountSelectionMode = false;
+        this.accountSelectedStudents = new Set(); // 계정 탭에서 선택된 학생
+        this.accountCounter = 1;
+        this.currentCreateAccountStudent = null;
+
         this.init();
     }
 
@@ -16,6 +25,60 @@ class StudentManager {
         this.setupEventListeners();
         await this.loadClasses();
         this.loadStudentList();
+        this.setupOrgFilter();
+    }
+
+    /**
+     * 본사 관리자인지 확인
+     */
+    isAdmin() {
+        const user = SessionManager.getCurrentUser();
+        return user?.role === 'admin';
+    }
+
+    /**
+     * 기관 필터 설정 (admin만 표시)
+     */
+    setupOrgFilter() {
+        const isAdmin = this.isAdmin();
+
+        // 기본 탭 기관 필터
+        const studentOrgFilter = document.getElementById('studentOrgFilter');
+        if (studentOrgFilter) {
+            studentOrgFilter.style.display = isAdmin ? 'block' : 'none';
+            if (isAdmin) {
+                this.populateOrgFilter(studentOrgFilter);
+                studentOrgFilter.addEventListener('change', () => this.loadStudentList());
+            }
+        }
+
+        // 계정 탭 기관 필터
+        const accountOrgFilter = document.getElementById('accountOrgFilter');
+        if (accountOrgFilter) {
+            accountOrgFilter.style.display = isAdmin ? 'block' : 'none';
+            if (isAdmin) {
+                this.populateOrgFilter(accountOrgFilter);
+            }
+        }
+
+        // 헤더 액션 버튼 (탭에 따라 토글)
+        this.updateHeaderActions();
+    }
+
+    /**
+     * 기관 드롭다운 채우기
+     */
+    populateOrgFilter(selectElement) {
+        const students = storage.getAllStudents();
+        const orgs = new Set();
+        students.forEach(s => {
+            if (s.organization) orgs.add(s.organization);
+        });
+
+        selectElement.innerHTML = '<option value="">모든 기관</option>' +
+            Array.from(orgs).sort().map(org =>
+                `<option value="${org}">${org}</option>`
+            ).join('');
     }
 
     /**
@@ -638,6 +701,569 @@ class StudentManager {
         } catch (error) {
             console.error('수강반 등록 오류:', error);
             alert('수강반 등록에 실패했습니다: ' + error.message);
+        }
+    }
+
+    // ========================================
+    // 탭 전환 기능
+    // ========================================
+
+    /**
+     * 탭 전환
+     */
+    switchTab(tabId) {
+        this.currentTab = tabId;
+
+        // 탭 버튼 활성화 상태 변경
+        document.querySelectorAll('.student-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+        });
+
+        // 탭 콘텐츠 표시/숨김
+        document.querySelectorAll('.student-tab-content').forEach(content => {
+            content.classList.toggle('active', content.id === tabId);
+        });
+
+        // 헤더 액션 버튼 업데이트
+        this.updateHeaderActions();
+
+        // 탭별 데이터 로드
+        if (tabId === 'student-accounts') {
+            this.loadAccountList();
+        }
+    }
+
+    /**
+     * 헤더 액션 버튼 업데이트
+     */
+    updateHeaderActions() {
+        const headerActions = document.getElementById('studentHeaderActions');
+        if (!headerActions) return;
+
+        if (this.currentTab === 'student-basic') {
+            headerActions.style.display = 'flex';
+        } else {
+            headerActions.style.display = 'none';
+        }
+    }
+
+    // ========================================
+    // 계정 관리 기능
+    // ========================================
+
+    /**
+     * 계정 목록 로드
+     */
+    loadAccountList() {
+        let students = storage.getAllStudents();
+
+        // 권한에 따른 필터링
+        students = AuthService.filterStudents(students);
+
+        // 계정 번호 카운터 계산
+        this.calculateNextAccountNumber(students);
+
+        // 필터 적용
+        students = this.getFilteredAccountStudents(students);
+
+        // 통계 업데이트
+        this.updateAccountStats(students);
+
+        // 테이블 렌더링
+        this.renderAccountTable(students);
+    }
+
+    /**
+     * 다음 계정 번호 계산
+     */
+    calculateNextAccountNumber(students) {
+        const orgPrefix = this.getOrganizationPrefix();
+        let maxNum = 0;
+
+        students.forEach(s => {
+            if (s.username && s.username.startsWith(orgPrefix)) {
+                const numPart = s.username.substring(orgPrefix.length);
+                const num = parseInt(numPart, 10);
+                if (!isNaN(num) && num > maxNum) {
+                    maxNum = num;
+                }
+            }
+        });
+
+        this.accountCounter = maxNum + 1;
+    }
+
+    /**
+     * 기관 접두어 가져오기
+     */
+    getOrganizationPrefix(orgOverride = null) {
+        const user = SessionManager.getCurrentUser();
+        const org = orgOverride || user?.organization || '국어농장';
+
+        const orgMap = {
+            '국어농장': 'gf',
+            '언어의창': 'lw',
+            '언어의 창': 'lw',
+            '테스트': 'te'
+        };
+
+        if (orgMap[org]) {
+            return orgMap[org];
+        }
+
+        // 한글 기관명에서 접두어 생성
+        const englishMatch = org.match(/[a-zA-Z]/g);
+        if (englishMatch && englishMatch.length >= 2) {
+            return (englishMatch[0] + englishMatch[1]).toLowerCase();
+        }
+
+        return 'st';
+    }
+
+    /**
+     * 필터링된 계정 학생 목록
+     */
+    getFilteredAccountStudents(students) {
+        let filtered = [...students];
+
+        // 검색어 필터
+        const searchInput = document.getElementById('accountSearchInput');
+        const searchQuery = searchInput?.value.trim().toLowerCase() || '';
+        if (searchQuery) {
+            filtered = filtered.filter(s =>
+                s.name.toLowerCase().includes(searchQuery) ||
+                (s.school || '').toLowerCase().includes(searchQuery)
+            );
+        }
+
+        // 계정 유무 필터
+        if (this.accountFilterHasAccount === true) {
+            filtered = filtered.filter(s => s.hasAccount);
+        } else if (this.accountFilterHasAccount === false) {
+            filtered = filtered.filter(s => !s.hasAccount);
+        }
+
+        // 기관 필터 (admin만)
+        if (this.isAdmin()) {
+            const orgFilter = document.getElementById('accountOrgFilter');
+            const selectedOrg = orgFilter?.value || '';
+            if (selectedOrg) {
+                filtered = filtered.filter(s => s.organization === selectedOrg);
+            }
+        }
+
+        // 이름순 정렬
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+        return filtered;
+    }
+
+    /**
+     * 계정 통계 업데이트
+     */
+    updateAccountStats(filteredStudents) {
+        const allStudents = AuthService.filterStudents(storage.getAllStudents());
+        const statsDiv = document.getElementById('accountStats');
+        if (!statsDiv) return;
+
+        const totalCount = allStudents.length;
+        const hasAccountCount = allStudents.filter(s => s.hasAccount).length;
+        const filteredCount = filteredStudents.length;
+
+        statsDiv.innerHTML = `
+            <span>전체: <strong>${totalCount}</strong>명</span>
+            <span>계정 있음: <strong>${hasAccountCount}</strong>명</span>
+            <span>검색 결과: <strong>${filteredCount}</strong>명</span>
+        `;
+    }
+
+    /**
+     * 계정 테이블 렌더링
+     */
+    renderAccountTable(students) {
+        const tbody = document.getElementById('accountTableBody');
+        if (!tbody) return;
+
+        const isAdmin = this.isAdmin();
+
+        // 기관 컬럼 표시 여부
+        document.querySelectorAll('.account-table .col-org').forEach(el => {
+            el.style.display = isAdmin ? 'table-cell' : 'none';
+        });
+
+        // 선택 컬럼 표시 여부
+        document.querySelectorAll('.account-table .col-select').forEach(el => {
+            el.style.display = this.accountSelectionMode ? 'table-cell' : 'none';
+        });
+
+        if (students.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="${isAdmin ? 7 : 6}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        학생이 없습니다.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = students.map(student => {
+            const isSelected = this.accountSelectedStudents.has(student.id);
+            return `
+                <tr data-student-id="${student.id}">
+                    <td class="col-select" style="display: ${this.accountSelectionMode ? 'table-cell' : 'none'};">
+                        <input type="checkbox"
+                               ${isSelected ? 'checked' : ''}
+                               onchange="studentManager.toggleAccountStudentSelection('${student.id}', this.checked)">
+                    </td>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.school || '-'}</td>
+                    <td>${student.grade || '-'}</td>
+                    ${isAdmin ? `<td class="col-org">${student.organization || '-'}</td>` : ''}
+                    <td>
+                        ${student.hasAccount ?
+                            `<span class="account-badge has-account">${student.username}</span>` :
+                            `<span class="account-badge no-account">없음</span>`
+                        }
+                    </td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-secondary btn-icon" onclick="studentManager.openEditModal('${student.id}')">✏️</button>
+                        ${student.hasAccount ?
+                            `<button class="btn btn-sm btn-danger btn-icon" onclick="studentManager.deleteAccount('${student.id}')">계정삭제</button>` :
+                            `<button class="btn btn-sm btn-success btn-icon" onclick="studentManager.showCreateAccountModal('${student.id}')">계정생성</button>`
+                        }
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    /**
+     * 계정 필터 검색
+     */
+    filterAccounts() {
+        this.loadAccountList();
+    }
+
+    /**
+     * 계정 유무 필터 설정
+     */
+    setAccountFilter(hasAccount) {
+        this.accountFilterHasAccount = hasAccount;
+
+        // 버튼 스타일 업데이트
+        document.querySelectorAll('.account-filter-buttons button').forEach(btn => {
+            const filter = btn.getAttribute('data-filter');
+            let isActive = false;
+            if (filter === 'all' && hasAccount === null) isActive = true;
+            else if (filter === 'no-account' && hasAccount === false) isActive = true;
+            else if (filter === 'has-account' && hasAccount === true) isActive = true;
+
+            btn.classList.toggle('btn-primary', isActive);
+            btn.classList.toggle('btn-secondary', !isActive);
+        });
+
+        this.loadAccountList();
+    }
+
+    /**
+     * 계정 선택 모드 토글
+     */
+    toggleAccountSelection() {
+        this.accountSelectionMode = !this.accountSelectionMode;
+        this.accountSelectedStudents.clear();
+
+        const toggleBtn = document.getElementById('toggleAccountSelectionBtn');
+        if (toggleBtn) {
+            toggleBtn.textContent = this.accountSelectionMode ? '선택 취소' : '학생 선택';
+            toggleBtn.classList.toggle('btn-secondary', this.accountSelectionMode);
+            toggleBtn.classList.toggle('btn-outline', !this.accountSelectionMode);
+        }
+
+        this.updateMergeButton();
+        this.loadAccountList();
+    }
+
+    /**
+     * 계정 탭에서 학생 선택
+     */
+    toggleAccountStudentSelection(studentId, isSelected) {
+        if (isSelected) {
+            this.accountSelectedStudents.add(studentId);
+        } else {
+            this.accountSelectedStudents.delete(studentId);
+        }
+        this.updateMergeButton();
+    }
+
+    /**
+     * 병합 버튼 표시/숨김
+     */
+    updateMergeButton() {
+        const mergeBtn = document.getElementById('mergeAccountsBtn');
+        if (mergeBtn) {
+            if (this.accountSelectionMode && this.accountSelectedStudents.size >= 2) {
+                mergeBtn.style.display = 'inline-block';
+                mergeBtn.textContent = `선택한 ${this.accountSelectedStudents.size}명 병합`;
+            } else {
+                mergeBtn.style.display = 'none';
+            }
+        }
+    }
+
+    // ========================================
+    // 신규 학생 추가
+    // ========================================
+
+    /**
+     * 신규 학생 추가 모달 열기
+     */
+    showAddStudentModal() {
+        document.getElementById('newStudentName').value = '';
+        document.getElementById('newStudentSchool').value = '';
+        document.getElementById('newStudentGrade').value = '';
+        document.getElementById('createAccountCheckbox').checked = true;
+
+        // 자동 아이디 생성
+        const username = this.getOrganizationPrefix() + String(this.accountCounter).padStart(3, '0');
+        document.getElementById('newStudentUsername').value = username;
+        document.getElementById('newStudentPassword').value = '1234';
+
+        document.getElementById('addStudentModal').classList.add('active');
+    }
+
+    closeAddStudentModal() {
+        document.getElementById('addStudentModal').classList.remove('active');
+    }
+
+    /**
+     * 신규 학생 추가
+     */
+    async addNewStudent() {
+        const name = document.getElementById('newStudentName').value.trim();
+        const school = document.getElementById('newStudentSchool').value.trim();
+        const grade = document.getElementById('newStudentGrade').value.trim();
+        const createAccount = document.getElementById('createAccountCheckbox').checked;
+        const username = document.getElementById('newStudentUsername').value.trim();
+        const password = document.getElementById('newStudentPassword').value.trim();
+
+        if (!name) {
+            alert('학생 이름을 입력해주세요.');
+            return;
+        }
+        if (!school) {
+            alert('학교를 입력해주세요.');
+            return;
+        }
+        if (!grade) {
+            alert('학년을 입력해주세요.');
+            return;
+        }
+
+        try {
+            const user = SessionManager.getCurrentUser();
+            const newStudent = {
+                id: 'student_' + Date.now(),
+                name,
+                school,
+                grade,
+                organization: user?.organization || '국어농장'
+            };
+
+            if (createAccount) {
+                newStudent.hasAccount = true;
+                newStudent.username = username;
+                newStudent.password = password;
+            }
+
+            await storage.saveStudent(newStudent);
+
+            alert('학생이 추가되었습니다.');
+            this.closeAddStudentModal();
+            this.accountCounter++;
+            this.loadAccountList();
+            this.loadStudentList();
+        } catch (error) {
+            alert('학생 추가 실패: ' + error.message);
+            console.error(error);
+        }
+    }
+
+    // ========================================
+    // 계정 생성/삭제
+    // ========================================
+
+    /**
+     * 계정 생성 모달 열기
+     */
+    showCreateAccountModal(studentId) {
+        const student = storage.getStudent(studentId);
+        if (!student) {
+            alert('학생 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        this.currentCreateAccountStudent = student;
+
+        document.getElementById('createAccountStudentInfo').textContent =
+            `${student.name} (${student.school} ${student.grade})`;
+
+        const username = this.getOrganizationPrefix(student.organization) +
+            String(this.accountCounter).padStart(3, '0');
+        document.getElementById('createAccountUsername').value = username;
+        document.getElementById('createAccountPassword').value = '1234';
+
+        document.getElementById('createAccountModal').classList.add('active');
+    }
+
+    closeCreateAccountModal() {
+        document.getElementById('createAccountModal').classList.remove('active');
+        this.currentCreateAccountStudent = null;
+    }
+
+    /**
+     * 계정 생성
+     */
+    async createAccount() {
+        if (!this.currentCreateAccountStudent) return;
+
+        const username = document.getElementById('createAccountUsername').value.trim();
+        const password = document.getElementById('createAccountPassword').value.trim();
+
+        if (!username || !password) {
+            alert('아이디와 비밀번호를 입력해주세요.');
+            return;
+        }
+
+        try {
+            const student = this.currentCreateAccountStudent;
+            student.hasAccount = true;
+            student.username = username;
+            student.password = password;
+
+            await storage.saveStudent(student);
+
+            alert('계정이 생성되었습니다.');
+            this.closeCreateAccountModal();
+            this.accountCounter++;
+            this.loadAccountList();
+        } catch (error) {
+            alert('계정 생성 실패: ' + error.message);
+            console.error(error);
+        }
+    }
+
+    /**
+     * 계정 삭제
+     */
+    async deleteAccount(studentId) {
+        const student = storage.getStudent(studentId);
+        if (!student) return;
+
+        if (!confirm(`${student.name} 학생의 계정을 삭제하시겠습니까?\n(학생 정보는 유지됩니다)`)) {
+            return;
+        }
+
+        try {
+            student.hasAccount = false;
+            delete student.username;
+            delete student.password;
+
+            await storage.saveStudent(student);
+
+            alert('계정이 삭제되었습니다.');
+            this.loadAccountList();
+        } catch (error) {
+            alert('계정 삭제 실패: ' + error.message);
+            console.error(error);
+        }
+    }
+
+    // ========================================
+    // 학생 병합
+    // ========================================
+
+    /**
+     * 병합 모달 열기
+     */
+    showMergeModal() {
+        if (this.accountSelectedStudents.size < 2) {
+            alert('2명 이상의 학생을 선택해주세요.');
+            return;
+        }
+
+        const selectedIds = Array.from(this.accountSelectedStudents);
+        const students = selectedIds.map(id => storage.getStudent(id)).filter(s => s);
+
+        const listDiv = document.getElementById('mergeStudentsList');
+        listDiv.innerHTML = students.map((student, idx) => `
+            <div class="merge-student-item ${idx === 0 ? 'selected' : ''}"
+                 onclick="studentManager.selectMergeTarget('${student.id}')">
+                <input type="radio" name="mergeTarget" value="${student.id}" ${idx === 0 ? 'checked' : ''}>
+                <div>
+                    <strong>${student.name}</strong>
+                    <span style="color: var(--text-secondary); margin-left: 0.5rem;">
+                        ${student.school} ${student.grade}
+                        ${student.hasAccount ? `| 계정: ${student.username}` : '| 계정 없음'}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('mergeStudentsModal').classList.add('active');
+    }
+
+    closeMergeModal() {
+        document.getElementById('mergeStudentsModal').classList.remove('active');
+    }
+
+    selectMergeTarget(studentId) {
+        document.querySelectorAll('.merge-student-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        const radio = document.querySelector(`input[name="mergeTarget"][value="${studentId}"]`);
+        if (radio) {
+            radio.checked = true;
+            radio.closest('.merge-student-item').classList.add('selected');
+        }
+    }
+
+    /**
+     * 선택된 학생 병합
+     */
+    async mergeSelectedStudents() {
+        const targetRadio = document.querySelector('input[name="mergeTarget"]:checked');
+        if (!targetRadio) {
+            alert('기준 학생을 선택해주세요.');
+            return;
+        }
+
+        const targetId = targetRadio.value;
+        const sourceIds = Array.from(this.accountSelectedStudents).filter(id => id !== targetId);
+
+        if (!confirm(`${sourceIds.length}명의 학생을 병합하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+            return;
+        }
+
+        try {
+            for (const sourceId of sourceIds) {
+                await storage.mergeStudents(targetId, sourceId);
+            }
+
+            // 답안이 없는 학생 삭제
+            await storage.removeStudentsWithNoAnswers();
+
+            alert('학생 병합이 완료되었습니다.');
+            this.closeMergeModal();
+            this.accountSelectedStudents.clear();
+            this.accountSelectionMode = false;
+            this.updateMergeButton();
+            this.loadAccountList();
+            this.loadStudentList();
+        } catch (error) {
+            alert('병합 중 오류가 발생했습니다: ' + error.message);
+            console.error(error);
         }
     }
 }
