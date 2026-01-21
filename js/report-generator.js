@@ -970,10 +970,10 @@ class ReportGenerator {
                         ticks: {
                             display: !this.isMobile(),  // 모바일에서 시험명 숨김
                             font: {
-                                size: 11
+                                size: 10
                             },
-                            maxRotation: -45,
-                            minRotation: -45,
+                            maxRotation: 45,
+                            minRotation: 45,
                             callback: function(value, index, ticks) {
                                 const label = this.getLabelForValue(value);
                                 return label.length > 8 ? label.substring(0, 8) + '…' : label;
@@ -983,8 +983,8 @@ class ReportGenerator {
                 },
                 layout: {
                     padding: {
-                        left: 0,
-                        right: 30
+                        left: 10,
+                        right: 10
                     }
                 }
             }
@@ -1088,7 +1088,11 @@ class ReportGenerator {
             const wrongQuestions = this.currentResult.wrongQuestions;
 
             if (wrongQuestions.length > 0) {
-                const questionsPerPage = 4;
+                // 조언 길이가 300자 이상인 문제가 있는지 확인
+                const hasLongFeedback = wrongQuestions.some(wq =>
+                    wq.feedback && wq.feedback.length >= 300
+                );
+                const questionsPerPage = hasLongFeedback ? 4 : 5;
                 const totalPages = Math.ceil(wrongQuestions.length / questionsPerPage);
 
                 for (let page = 0; page < totalPages; page++) {
@@ -1174,6 +1178,15 @@ class ReportGenerator {
 
                     document.body.removeChild(wrongPageContent);
                 }
+            }
+
+            // 페이지 번호 푸터 추가
+            const totalPdfPages = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPdfPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.setTextColor(128, 128, 128);
+                pdf.text(`${i} / ${totalPdfPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
             }
 
             pdf.save(`${this.currentExam.name}_${this.currentStudent.name}_성적표.pdf`);

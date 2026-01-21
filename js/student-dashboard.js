@@ -1115,9 +1115,9 @@ class StudentDashboard {
                     x: {
                         ticks: {
                             display: !isMobile,  // 모바일에서 시험명 숨김
-                            font: { size: 11 },
-                            maxRotation: -45,
-                            minRotation: -45,
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45,
                             callback: function(value, index, ticks) {
                                 const label = this.getLabelForValue(value);
                                 return label.length > 8 ? label.substring(0, 8) + '…' : label;
@@ -1127,8 +1127,8 @@ class StudentDashboard {
                 },
                 layout: {
                     padding: {
-                        left: 0,
-                        right: 30
+                        left: 10,
+                        right: 10
                     }
                 },
                 plugins: {

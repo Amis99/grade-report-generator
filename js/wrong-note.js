@@ -392,10 +392,10 @@ class WrongNote {
                         ticks: {
                             display: !this.isMobile(),
                             font: {
-                                size: 11
+                                size: 10
                             },
-                            maxRotation: -45,
-                            minRotation: -45,
+                            maxRotation: 45,
+                            minRotation: 45,
                             callback: function(value, index, ticks) {
                                 const label = this.getLabelForValue(value);
                                 return label.length > 8 ? label.substring(0, 8) + '…' : label;
@@ -405,8 +405,8 @@ class WrongNote {
                 },
                 layout: {
                     padding: {
-                        left: 0,
-                        right: 30
+                        left: 10,
+                        right: 10
                     }
                 }
             }
@@ -914,8 +914,8 @@ class WrongNote {
             const sortedPassageStats = Object.entries(passageStatsData)
                 .sort((a, b) => a[0].localeCompare(b[0], 'ko-KR'));
 
-            // 10개씩 페이지 분할
-            const passagesPerPage = 10;
+            // 20개씩 페이지 분할
+            const passagesPerPage = 20;
             const totalPassagePages = Math.ceil(sortedPassageStats.length / passagesPerPage);
 
             for (let page = 0; page < totalPassagePages; page++) {
@@ -1011,7 +1011,11 @@ class WrongNote {
             });
 
             if (allWrongQuestions.length > 0) {
-                const questionsPerPage = 4;
+                // 조언 길이가 300자 이상인 문제가 있는지 확인
+                const hasLongFeedback = allWrongQuestions.some(item =>
+                    item.feedback && item.feedback.length >= 300
+                );
+                const questionsPerPage = hasLongFeedback ? 4 : 5;
                 const totalPages = Math.ceil(allWrongQuestions.length / questionsPerPage);
 
                 for (let page = 0; page < totalPages; page++) {
@@ -1097,6 +1101,15 @@ class WrongNote {
 
                     document.body.removeChild(wrongPageContent);
                 }
+            }
+
+            // 페이지 번호 푸터 추가
+            const totalPdfPages = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPdfPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.setTextColor(128, 128, 128);
+                pdf.text(`${i} / ${totalPdfPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
             }
 
             pdf.save(`${this.currentStudent.name}_오답노트.pdf`);
