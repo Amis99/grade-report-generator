@@ -29,99 +29,109 @@ class AdminDashboard {
         if (!this.todoFeedList) return;
 
         try {
-            const items = [];
+            const stats = [];
 
-            // 마감 임박 과제 조회
+            // 1. 진행중인 과제 수
             if (typeof storage !== 'undefined' && storage.getAssignments) {
                 const assignments = await storage.getAssignments();
-                const now = new Date();
+                const activeAssignments = assignments.filter(a => a.status === 'active');
 
-                assignments.forEach(assignment => {
-                    if (assignment.status === 'active' && assignment.dueDate) {
-                        const dueDate = new Date(assignment.dueDate);
-                        const daysLeft = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-
-                        if (daysLeft >= 0 && daysLeft <= 7) {
-                            items.push({
-                                type: 'assignment',
-                                urgent: daysLeft <= 3,
-                                title: assignment.title,
-                                description: daysLeft === 0 ? '오늘 마감' : `${daysLeft}일 뒤 마감`,
-                                dueDate: dueDate,
-                                daysLeft: daysLeft,
-                                id: assignment.id
-                            });
-                        }
-                    }
+                stats.push({
+                    icon: '📋',
+                    title: '진행중인 과제',
+                    count: activeAssignments.length,
+                    unit: '개',
+                    color: 'primary',
+                    page: 'assignment-management'
                 });
             }
 
-            // 채점 대기 시험 조회
+            // 2. 답안 입력이 없는 시험 수
             if (typeof storage !== 'undefined' && storage.getExams && storage.getAnswers) {
                 const exams = await storage.getExams();
                 const answers = await storage.getAnswers();
 
+                let noAnswerExamCount = 0;
                 for (const exam of exams) {
                     const examAnswers = answers.filter(a => a.examId === exam.id);
-                    const ungradedCount = examAnswers.filter(a => !a.isGraded).length;
-
-                    if (ungradedCount > 0) {
-                        items.push({
-                            type: 'grading',
-                            urgent: false,
-                            title: exam.name,
-                            description: `미채점 답안 ${ungradedCount}건`,
-                            id: exam.id
-                        });
+                    if (examAnswers.length === 0) {
+                        noAnswerExamCount++;
                     }
                 }
+
+                stats.push({
+                    icon: '✏️',
+                    title: '답안 미입력 시험',
+                    count: noAnswerExamCount,
+                    unit: '개',
+                    color: noAnswerExamCount > 0 ? 'warning' : 'success',
+                    page: 'answer-input'
+                });
             }
 
-            // 정렬 (긴급한 것 먼저)
-            items.sort((a, b) => {
-                if (a.urgent && !b.urgent) return -1;
-                if (!a.urgent && b.urgent) return 1;
-                if (a.daysLeft !== undefined && b.daysLeft !== undefined) {
-                    return a.daysLeft - b.daysLeft;
-                }
-                return 0;
-            });
+            // 3. 최근 3일간 채점한 시험 수
+            if (typeof storage !== 'undefined' && storage.getExams && storage.getAnswers) {
+                const exams = await storage.getExams();
+                const answers = await storage.getAnswers();
+                const threeDaysAgo = new Date();
+                threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-            this.renderTodoItems(items.slice(0, 5));
+                const recentlyGradedExamIds = new Set();
+
+                answers.forEach(answer => {
+                    if (answer.gradedAt) {
+                        const gradedDate = new Date(answer.gradedAt);
+                        if (gradedDate >= threeDaysAgo) {
+                            recentlyGradedExamIds.add(answer.examId);
+                        }
+                    }
+                    // gradedAt이 없는 경우 updatedAt으로 대체 (채점된 답안인 경우)
+                    else if (answer.isGraded && answer.updatedAt) {
+                        const updatedDate = new Date(answer.updatedAt);
+                        if (updatedDate >= threeDaysAgo) {
+                            recentlyGradedExamIds.add(answer.examId);
+                        }
+                    }
+                });
+
+                stats.push({
+                    icon: '📊',
+                    title: '최근 3일 채점 시험',
+                    count: recentlyGradedExamIds.size,
+                    unit: '개',
+                    color: 'info',
+                    page: 'grading'
+                });
+            }
+
+            this.renderTodoStats(stats);
         } catch (error) {
             console.error('할 일 목록 로드 실패:', error);
             this.renderEmptyTodo();
         }
     }
 
-    renderTodoItems(items) {
+    renderTodoStats(stats) {
         if (!this.todoFeedList) return;
 
-        if (items.length === 0) {
+        if (stats.length === 0) {
             this.renderEmptyTodo();
             return;
         }
 
-        this.todoFeedList.innerHTML = items.map(item => {
-            const indicatorClass = item.urgent ? 'urgent' : item.type === 'grading' ? 'pending' : 'info';
-            const tagClass = item.urgent ? 'urgent' : item.type === 'grading' ? 'pending' : 'info';
-            const tagText = item.urgent ? '긴급' : item.type === 'grading' ? '채점 대기' : '마감 예정';
-            const icon = item.type === 'assignment' ? '⏰' : '📊';
-
-            return `
-                <div class="feed-item" onclick="${item.type === 'assignment' ? `portalController.navigateTo('assignment-management')` : `portalController.navigateTo('grading')`}">
-                    <div class="feed-item-indicator ${indicatorClass}">${icon}</div>
-                    <div class="feed-item-content">
-                        <div class="feed-item-meta">
-                            <span class="feed-item-tag ${tagClass}">${tagText}</span>
-                            <span class="feed-item-time">${item.description}</span>
-                        </div>
-                        <div class="feed-item-title">${this.escapeHtml(item.title)}</div>
+        this.todoFeedList.innerHTML = stats.map(stat => `
+            <div class="todo-stat-item" onclick="portalController.navigateTo('${stat.page}')">
+                <div class="todo-stat-icon ${stat.color}">${stat.icon}</div>
+                <div class="todo-stat-content">
+                    <div class="todo-stat-title">${stat.title}</div>
+                    <div class="todo-stat-value">
+                        <span class="todo-stat-count">${stat.count}</span>
+                        <span class="todo-stat-unit">${stat.unit}</span>
                     </div>
-                    <div class="feed-item-arrow">→</div>
                 </div>
-            `;
-        }).join('');
+                <div class="todo-stat-arrow">→</div>
+            </div>
+        `).join('');
     }
 
     renderEmptyTodo() {
@@ -130,8 +140,8 @@ class AdminDashboard {
         this.todoFeedList.innerHTML = `
             <div class="feed-empty">
                 <div class="feed-empty-icon">✅</div>
-                <div class="feed-empty-title">할 일이 없습니다</div>
-                <div class="feed-empty-text">마감 예정인 과제나 채점할 시험이 없습니다.</div>
+                <div class="feed-empty-title">데이터 로딩 중...</div>
+                <div class="feed-empty-text">잠시만 기다려주세요.</div>
             </div>
         `;
     }
@@ -164,12 +174,50 @@ class AdminDashboard {
                     if (student && exam) {
                         activities.push({
                             type: 'answer',
-                            text: `<strong>${student.name}</strong> 학생의 '${exam.name}' 답안이 입력되었습니다.`,
+                            icon: '📝',
+                            text: `<strong>${this.escapeHtml(student.name)}</strong> 학생의 '${this.escapeHtml(exam.name)}' 답안이 입력되었습니다.`,
                             time: new Date(answer.updatedAt),
                             isNew: this.isRecent(answer.updatedAt, 1) // 1시간 이내
                         });
                     }
                 });
+            }
+
+            // 최근 과제 제출 조회
+            if (typeof storage !== 'undefined' && storage.getAssignments && storage.getAssignmentSubmissions) {
+                try {
+                    const assignments = await storage.getAssignments();
+                    const activeAssignments = assignments.filter(a => a.status === 'active');
+
+                    // 각 과제별 제출 현황 조회 (최근 5개 과제만)
+                    const recentAssignments = activeAssignments.slice(0, 5);
+
+                    for (const assignment of recentAssignments) {
+                        try {
+                            // 모든 반의 제출 현황 조회
+                            const result = await storage.getAssignmentSubmissions(assignment.id, {});
+                            const submissions = result.submissions || [];
+
+                            // 최근 제출이 있는 학생들 필터링
+                            submissions.forEach(sub => {
+                                if (sub.lastSubmittedAt) {
+                                    activities.push({
+                                        type: 'submission',
+                                        icon: '📤',
+                                        text: `<strong>${this.escapeHtml(sub.student.name)}</strong> 학생이 '${this.escapeHtml(assignment.title)}' 과제를 제출했습니다.`,
+                                        time: new Date(sub.lastSubmittedAt),
+                                        isNew: this.isRecent(sub.lastSubmittedAt, 1) // 1시간 이내
+                                    });
+                                }
+                            });
+                        } catch (e) {
+                            // 개별 과제 조회 실패 시 무시
+                            console.log('과제 제출 현황 조회 실패:', assignment.id);
+                        }
+                    }
+                } catch (e) {
+                    console.log('과제 목록 조회 실패:', e);
+                }
             }
 
             // 최근 학생 등록 조회
@@ -184,7 +232,8 @@ class AdminDashboard {
                 recentStudents.forEach(student => {
                     activities.push({
                         type: 'student',
-                        text: `새 학생 '<strong>${student.name}</strong>'가 등록되었습니다.`,
+                        icon: '👤',
+                        text: `새 학생 '<strong>${this.escapeHtml(student.name)}</strong>'가 등록되었습니다.`,
                         time: new Date(student.createdAt),
                         isNew: this.isRecent(student.createdAt, 24) // 24시간 이내
                     });
@@ -194,7 +243,7 @@ class AdminDashboard {
             // 시간순 정렬 (최신순)
             activities.sort((a, b) => b.time - a.time);
 
-            this.renderActivityTimeline(activities.slice(0, 10));
+            this.renderActivityTimeline(activities.slice(0, 15));
         } catch (error) {
             console.error('최근 활동 로드 실패:', error);
             this.renderEmptyActivity();
@@ -211,7 +260,7 @@ class AdminDashboard {
 
         this.activityTimeline.innerHTML = activities.map(activity => `
             <div class="activity-item">
-                <div class="activity-dot ${activity.isNew ? 'new' : ''}"></div>
+                <div class="activity-icon ${activity.isNew ? 'new' : ''}">${activity.icon || '📌'}</div>
                 <div class="activity-content">
                     <div class="activity-text">${activity.text}</div>
                     <div class="activity-time">${this.formatRelativeTime(activity.time)}</div>

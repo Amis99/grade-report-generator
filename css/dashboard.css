@@ -229,6 +229,98 @@
     opacity: 1;
 }
 
+/* Todo Stat Items */
+.todo-stat-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.todo-stat-item:last-child {
+    margin-bottom: 0;
+}
+
+.todo-stat-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(249, 168, 212, 0.15);
+    transform: translateX(4px);
+}
+
+.todo-stat-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.todo-stat-icon.primary {
+    background: var(--primary-light);
+}
+
+.todo-stat-icon.warning {
+    background: #fef3c7;
+}
+
+.todo-stat-icon.success {
+    background: #d1fae5;
+}
+
+.todo-stat-icon.info {
+    background: #e0f2fe;
+}
+
+.todo-stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.todo-stat-title {
+    font-size: var(--font-small);
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.todo-stat-value {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.todo-stat-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.todo-stat-unit {
+    font-size: var(--font-body);
+    color: var(--text-secondary);
+}
+
+.todo-stat-arrow {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.todo-stat-item:hover .todo-stat-arrow {
+    opacity: 1;
+    color: var(--primary-dark);
+}
+
 /* Activity Timeline */
 .activity-timeline {
     position: relative;
@@ -275,6 +367,23 @@
 .activity-dot.new {
     background: var(--primary-dark);
     box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.activity-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    border-radius: 50%;
+    font-size: 16px;
+}
+
+.activity-icon.new {
+    background: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .activity-content {

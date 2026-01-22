@@ -519,7 +519,9 @@ body.portal-layout {
     }
 
     .content-area {
-        padding: 16px;
+        padding: 12px;
+        max-width: 100vw;
+        overflow: visible;
     }
 
     .page-title {
@@ -528,6 +530,26 @@ body.portal-layout {
 
     .header-user-name {
         display: none;
+    }
+
+    /* 모든 페이지 공통 모바일 너비 통일 */
+    .page {
+        max-width: 100%;
+        overflow: visible;
+        box-sizing: border-box;
+    }
+
+    .page > * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 카드/섹션 공통 */
+    .card,
+    .section-header,
+    .form-group {
+        max-width: 100%;
+        box-sizing: border-box;
     }
 }
 

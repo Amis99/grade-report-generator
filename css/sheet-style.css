@@ -56,10 +56,14 @@
 }
 
 .question-sheet {
-    width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
-    min-width: 1400px;
+}
+
+/* 답안 시트 테이블은 내용에 맞게 확장 */
+.question-sheet.answer-sheet {
+    width: auto !important;
+    min-width: max-content !important;
 }
 
 .question-sheet thead {
@@ -201,20 +205,79 @@
 /* 답안 시트 전용 */
 .answer-sheet {
     font-size: 0.85rem;
+    min-width: max-content !important;
+    width: max-content !important;
+    table-layout: auto;
+}
+
+/* 답안 시트 가로 스크롤 시 학생명 컬럼 고정 */
+.answer-sheet th.col-student-name,
+.answer-sheet td.col-student-name {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: white;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.answer-sheet thead th.col-student-name {
+    z-index: 12;
+    background: var(--background-color);
+}
+
+.answer-sheet .question-info-row th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 12;
+    background: #f0f4f8;
+}
+
+.answer-sheet tbody tr:hover td.col-student-name {
+    background: #f8fafc;
 }
 
 /* 답안 시트 스크롤 컨테이너 - 헤더 고정, 본문 스크롤 */
 .answer-sheet-scroll-container {
     max-height: 60vh;
-    overflow-y: auto;
-    overflow-x: auto;
+    width: 100%;
+    overflow: scroll !important;
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     background: white;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    display: block;
+    scrollbar-width: auto;
+    scrollbar-color: #888 #e0e0e0;
 }
 
-.answer-sheet-scroll-container .question-sheet {
+/* 스크롤바 항상 표시 */
+.answer-sheet-scroll-container::-webkit-scrollbar {
+    height: 14px;
+    width: 14px;
+    display: block !important;
+}
+
+.answer-sheet-scroll-container::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 7px;
+}
+
+.answer-sheet-scroll-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 7px;
+    border: 2px solid #e0e0e0;
+}
+
+.answer-sheet-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.answer-sheet-scroll-container > table {
     margin: 0;
+    width: auto !important;
+    min-width: max-content !important;
+    table-layout: auto !important;
 }
 
 .answer-sheet-scroll-container thead {
@@ -258,8 +321,23 @@
 /* 답안 시트 전용 스타일 */
 .answer-sheet-wrapper {
     background: white;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 0.5rem;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* 답안 입력 페이지 컨테이너 - 스크롤은 내부에서만 */
+#answerFormSection {
+    overflow: hidden !important;
+    max-width: 100%;
+}
+
+#answerFormContainer {
+    overflow: hidden !important;
+    max-width: 100%;
 }
 
 .student-info-header {
@@ -446,6 +524,64 @@
         padding: 0.3rem 0.5rem;
         font-size: 0.75rem;
     }
+
+    /* 모바일 답안 시트 가로 스크롤 개선 */
+    .answer-sheet-scroll-container {
+        max-height: 50vh;
+        margin: 0 -1rem;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .answer-sheet-wrapper {
+        padding: 1rem;
+    }
+
+    /* 모바일에서 학생명 컬럼 너비 축소 */
+    .answer-sheet .col-student-name {
+        min-width: 80px;
+        width: 80px;
+    }
+
+    .answer-sheet .col-student-info {
+        min-width: 60px;
+        width: 60px;
+        font-size: 0.75rem;
+    }
+
+    .answer-sheet .col-answer-cell {
+        min-width: 60px;
+        width: 60px;
+    }
+
+    /* 모바일에서 문제 정보 행 숨김 (공간 절약) */
+    .answer-sheet .question-info-row {
+        display: none;
+    }
+
+    /* 모바일 스크롤 힌트 */
+    .answer-sheet-scroll-container::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 20px;
+        background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.05));
+        pointer-events: none;
+    }
+
+    .sheet-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .sheet-toolbar-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }
 
 /* 프린트 시 숨김 */
@@ -501,4 +637,324 @@
 .pdf-controls .btn-sm {
     padding: 0.35rem 0.7rem;
     font-size: 0.8rem;
+}
+
+/* =============================================
+   답안 입력 그리드 레이아웃 (새 디자인)
+   ============================================= */
+
+.answer-grid-wrapper {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+/* 헤더 섹션 */
+.answer-header-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.exam-info h3 {
+    margin: 0 0 0.25rem 0;
+    color: #ec4899;
+    font-size: 1.2rem;
+}
+
+.exam-info .question-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.student-selector-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.student-selector label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.student-select-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.student-select-row select {
+    min-width: 200px;
+    flex: 1;
+}
+
+.student-select-row .btn-pink {
+    background: #ec4899;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.student-select-row .btn-pink:hover {
+    background: #db2777;
+}
+
+.student-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.student-position {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: center;
+}
+
+/* 답안 그리드 섹션 */
+.answer-grid-section {
+    min-height: 200px;
+}
+
+.empty-student-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+}
+
+.student-info-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    color: white;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.student-info-bar .student-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.student-info-bar .student-detail {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.student-info-bar .btn-danger {
+    margin-left: auto;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+}
+
+.student-info-bar .btn-danger:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* 답안 그리드 */
+.answer-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.answer-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.answer-cell {
+    flex: 1;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.answer-cell:hover {
+    border-color: #ec4899;
+    box-shadow: 0 2px 8px rgba(236,72,153,0.15);
+}
+
+.answer-cell.empty {
+    background: transparent;
+    border: none;
+}
+
+.question-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.question-label .q-number {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.question-label .q-type {
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.question-label .q-type.multiple {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.question-label .q-type.essay {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.question-label .q-points {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+.answer-cell .answer-input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.answer-cell .answer-input:focus {
+    outline: none;
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236,72,153,0.15);
+}
+
+.answer-cell .answer-input.saved {
+    background: #dcfce7;
+    border-color: #22c55e;
+}
+
+.answer-cell .answer-input.error {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* 하단 버튼 */
+.answer-footer-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.answer-footer-section .btn-pink-outline {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background: white;
+    color: #ec4899;
+    border: 2px solid #ec4899;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.answer-footer-section .btn-pink-outline:hover {
+    background: #fdf2f8;
+}
+
+.answer-footer-section .btn-success {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    background: #ec4899;
+    border: 2px solid #ec4899;
+    border-radius: 0.375rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.answer-footer-section .btn-success:hover {
+    background: #db2777;
+    border-color: #db2777;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .answer-header-section {
+        flex-direction: column;
+    }
+
+    .student-selector-section {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .student-select-row {
+        flex-direction: column;
+    }
+
+    .student-select-row select {
+        min-width: 100%;
+    }
+
+    .student-nav {
+        justify-content: center;
+    }
+
+    .answer-row {
+        flex-wrap: wrap;
+    }
+
+    .answer-cell {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: calc(50% - 0.25rem);
+    }
+
+    .answer-cell.empty {
+        display: none;
+    }
+
+    .student-info-bar {
+        flex-wrap: wrap;
+    }
+
+    .student-info-bar .btn-danger {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        width: 100%;
+    }
 }
