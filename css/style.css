@@ -4763,6 +4763,133 @@ body {
         width: 100%;
         justify-content: center;
     }
+
+    /* 제출 현황 테이블 모바일 카드 레이아웃 */
+    .submissions-table .data-table {
+        display: block;
+    }
+
+    .submissions-table .data-table thead {
+        display: none;
+    }
+
+    .submissions-table .data-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .submissions-table .data-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .submissions-table .data-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+        border: none;
+        width: 100%;
+    }
+
+    .submissions-table .data-table tbody td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+        min-width: 80px;
+    }
+
+    .submissions-table .data-table tbody td:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .submissions-table .data-table tbody td:first-child:before {
+        display: none;
+    }
+
+    .submissions-table .data-table tbody td:first-child strong {
+        font-size: 1rem;
+        color: var(--text-primary);
+    }
+
+    .submissions-table .data-table tbody td:first-child small {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .submissions-table .data-table tbody td:nth-child(2) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .submissions-table .data-table tbody td:nth-child(2):before {
+        content: "진행률";
+    }
+
+    .submissions-table .data-table tbody td:nth-child(3):before {
+        content: "마지막 제출";
+    }
+
+    .submissions-table .data-table tbody td:last-child {
+        justify-content: flex-end;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .submissions-table .data-table tbody td:last-child:before {
+        display: none;
+    }
+
+    .submissions-table .progress-bar {
+        width: 100%;
+        max-width: 150px;
+    }
+
+    .submissions-table .btn-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* 제출 이미지 모달 모바일 스타일 */
+    .submission-info .info-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .submission-info .info-row span {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .submission-info .info-row span:last-child {
+        border-bottom: none;
+    }
+
+    .submission-thumbnails .thumbnails-grid {
+        gap: 0.5rem;
+    }
+
+    .thumb-item {
+        width: 60px;
+    }
+
+    .thumb-item img {
+        height: 85px;
+    }
 }
 
 /* === 반응형 (작은 모바일) === */
