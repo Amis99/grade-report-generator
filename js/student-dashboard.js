@@ -134,30 +134,39 @@ class StudentDashboard {
     }
 
     async loadTodoItems() {
+        console.log('[loadTodoItems] 함수 호출됨');
         const container = document.getElementById('studentTodoList');
-        if (!container) return;
+        console.log('[loadTodoItems] container:', container);
+        if (!container) {
+            console.log('[loadTodoItems] container가 없어서 종료');
+            return;
+        }
 
         try {
-            // Load pending assignments
-            const token = await this.getAuthToken();
-            const response = await fetch(`${APP_CONFIG.API_BASE_URL}/student/assignments`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            // apiClient 사용 (내 과제 페이지와 동일하게)
+            const assignments = await apiClient.getMyAssignments();
 
-            if (!response.ok) throw new Error('Failed to load assignments');
-
-            const result = await response.json();
-            const assignments = result.assignments || [];
+            // 디버깅: API 응답 확인
+            console.log('[loadTodoItems] 과제 목록:', assignments);
 
             // Filter active assignments (not completed by student)
             const now = new Date();
             const pendingAssignments = assignments.filter(a => {
                 // 완료된 과제는 제외
-                if (a.isComplete) return false;
+                if (a.isComplete) {
+                    console.log(`[loadTodoItems] 과제 "${a.name}" 제외 - 완료됨`);
+                    return false;
+                }
                 // 마감일이 지난 과제는 제외
-                if (a.dueDate && new Date(a.dueDate) < now) return false;
+                if (a.dueDate && new Date(a.dueDate) < now) {
+                    console.log(`[loadTodoItems] 과제 "${a.name}" 제외 - 마감일 지남`);
+                    return false;
+                }
+                console.log(`[loadTodoItems] 과제 "${a.name}" 포함`);
                 return true;
             });
+
+            console.log('[loadTodoItems] 필터링 후 과제:', pendingAssignments);
 
             // Sort by due date
             pendingAssignments.sort((a, b) => {
@@ -188,7 +197,7 @@ class StudentDashboard {
             let timeText = '마감 없음';
             let isUrgent = false;
             if (daysLeft !== null) {
-                if (daysLeft <= 0) {
+                if (daysLeft === 0) {
                     timeText = '오늘 마감';
                     isUrgent = true;
                 } else if (daysLeft === 1) {
