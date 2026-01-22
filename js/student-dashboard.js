@@ -1083,7 +1083,11 @@ class StudentDashboard {
 
         const ctx = canvas.getContext('2d');
         const labels = results.map(r => r.exam.name);
-        const scores = results.map(r => r.result.percentage);
+        const myScores = results.map(r => r.result.totalScore);
+        const averageScores = results.map(r => r.result.averageScore || null);
+
+        // 최대 점수 계산 (y축 범위 설정용)
+        const maxScore = Math.max(...results.map(r => r.result.maxScore || 100));
 
         if (this.charts['scoreTrend']) {
             this.charts['scoreTrend'].destroy();
@@ -1095,35 +1099,50 @@ class StudentDashboard {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '백분율 (%)',
-                    data: scores,
-                    borderColor: 'rgba(74, 124, 89, 1)',
-                    backgroundColor: 'rgba(74, 124, 89, 0.1)',
+                    label: '평균 점수',
+                    data: averageScores,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: isMobile ? 1 : 2,
+                    borderDash: [5, 5],
+                    pointRadius: isMobile ? 2 : 4,
+                    pointHoverRadius: isMobile ? 3 : 6,
+                    pointHitRadius: isMobile ? 20 : 10,
                     tension: 0.3,
-                    fill: true,
+                    order: 2
+                }, {
+                    label: '내 점수',
+                    data: myScores,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
                     borderWidth: isMobile ? 2 : 3,
                     pointRadius: isMobile ? 2 : 5,
                     pointHoverRadius: isMobile ? 4 : 7,
-                    pointHitRadius: isMobile ? 20 : 10  // 모바일 터치 영역 확대
+                    pointHitRadius: isMobile ? 20 : 10,
+                    tension: 0.3,
+                    fill: true,
+                    order: 1
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: true,
                 interaction: {
-                    mode: isMobile ? 'nearest' : 'index',  // 모바일에서 가장 가까운 점 감지
+                    mode: isMobile ? 'nearest' : 'index',
                     intersect: false,
                     axis: 'x'
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
+                        max: maxScore,
                         ticks: {
                             font: { size: isMobile ? 9 : 12 }
                         }
                     },
                     x: {
                         ticks: {
-                            display: !isMobile,  // 모바일에서 시험명 숨김
+                            display: !isMobile,
                             font: { size: 10 },
                             maxRotation: 45,
                             minRotation: 45,
@@ -1141,20 +1160,38 @@ class StudentDashboard {
                     }
                 },
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: !isMobile,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    },
                     tooltip: {
                         enabled: true,
                         titleFont: {
-                            size: isMobile ? 9 : 14  // 모바일에서 1/3 축소
+                            size: isMobile ? 9 : 14
                         },
                         bodyFont: {
-                            size: isMobile ? 8 : 13  // 모바일에서 1/3 축소
+                            size: isMobile ? 8 : 13
                         },
                         padding: isMobile ? 4 : 10,
                         boxPadding: isMobile ? 2 : 4,
                         callbacks: {
                             title: function(context) {
-                                return context[0].label;  // 시험명 표시
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(1) + '점';
+                                }
+                                return label;
                             }
                         }
                     }
@@ -1240,20 +1277,19 @@ class StudentDashboard {
     renderTrendSummary(results) {
         const container = document.getElementById('trendSummary');
 
-        // Calculate averages
-        const avgScore = results.reduce((sum, r) => sum + r.result.percentage, 0) / results.length;
+        // Calculate averages (점수 기반)
+        const avgScore = results.reduce((sum, r) => sum + r.result.totalScore, 0) / results.length;
         const avgRank = results.reduce((sum, r) => sum + r.result.rank, 0) / results.length;
 
-        // Find best/worst
-        const best = results.reduce((max, r) => r.result.percentage > max.result.percentage ? r : max, results[0]);
-        const worst = results.reduce((min, r) => r.result.percentage < min.result.percentage ? r : min, results[0]);
+        // Find best/worst (점수 기반)
+        const best = results.reduce((max, r) => r.result.totalScore > max.result.totalScore ? r : max, results[0]);
 
         container.innerHTML = `
             <h3>성적 분석</h3>
             <div class="trend-stats">
                 <div class="stat-item">
                     <span class="stat-label">평균 점수:</span>
-                    <span class="stat-value">${avgScore.toFixed(1)}%</span>
+                    <span class="stat-value">${avgScore.toFixed(1)}점</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">평균 등수:</span>
@@ -1261,7 +1297,7 @@ class StudentDashboard {
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">최고 성적:</span>
-                    <span class="stat-value">${best.exam.name} (${best.result.percentage}%)</span>
+                    <span class="stat-value">${best.exam.name} (${best.result.totalScore.toFixed(1)}점)</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">분석 시험 수:</span>
