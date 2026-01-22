@@ -47,48 +47,41 @@ exports.handler = async (event) => {
         // Get all submissions for this assignment
         const submissions = await queryByPK(Tables.ASSIGNMENT_SUBMISSIONS, `ASSIGNMENT#${assignmentId}`);
 
-        // Get students in the selected class
+        // Get students in the selected class or all target classes
         let studentIds = [];
         let studentMap = {};
 
-        if (queryClassId) {
-            // Get students in the class
+        // 조회할 수강반 목록 결정
+        const classIdsToQuery = queryClassId
+            ? [queryClassId]
+            : (assignment.classIds || []);
+
+        // 각 수강반의 학생 조회
+        for (const classId of classIdsToQuery) {
             const classStudents = await queryByIndex(
                 Tables.STUDENT_CLASSES,
                 'classId-index',
                 'classId = :classId',
-                { ':classId': queryClassId }
+                { ':classId': classId }
             );
 
-            studentIds = classStudents.map(cs => cs.studentId);
-
-            // Get student details
-            for (const studentId of studentIds) {
-                const student = await getItem(Tables.STUDENTS, `STUDENT#${studentId}`, 'METADATA');
-                if (student) {
-                    studentMap[studentId] = {
-                        id: student.studentId,
-                        name: student.name,
-                        school: student.school || '',
-                        grade: student.grade || ''
-                    };
+            for (const cs of classStudents) {
+                if (!studentIds.includes(cs.studentId)) {
+                    studentIds.push(cs.studentId);
                 }
             }
-        } else {
-            // Get all submissions' student IDs
-            const submissionStudentIds = [...new Set(submissions.map(s => s.studentId))];
-            studentIds = submissionStudentIds;
+        }
 
-            for (const studentId of studentIds) {
-                const student = await getItem(Tables.STUDENTS, `STUDENT#${studentId}`, 'METADATA');
-                if (student) {
-                    studentMap[studentId] = {
-                        id: student.studentId,
-                        name: student.name,
-                        school: student.school || '',
-                        grade: student.grade || ''
-                    };
-                }
+        // Get student details
+        for (const studentId of studentIds) {
+            const student = await getItem(Tables.STUDENTS, `STUDENT#${studentId}`, 'METADATA');
+            if (student) {
+                studentMap[studentId] = {
+                    id: student.studentId,
+                    name: student.name,
+                    school: student.school || '',
+                    grade: student.grade || ''
+                };
             }
         }
 

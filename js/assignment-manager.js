@@ -214,7 +214,7 @@ class AssignmentManager {
 
         // 제출 현황 필터 업데이트
         const submissionClassFilter = document.getElementById('submissionClassFilter');
-        submissionClassFilter.innerHTML = '<option value="">수강반을 선택하세요</option>';
+        submissionClassFilter.innerHTML = '<option value="">전체 수강반</option>';
         (a.classIds || []).forEach(cid => {
             const cls = this.classes.find(c => c.id === cid);
             if (cls) {
@@ -224,6 +224,9 @@ class AssignmentManager {
 
         // 상태 버튼 업데이트
         this.updateStatusButtons();
+
+        // 제출 현황 자동 로드 (전체 수강반)
+        await this.loadSubmissions();
     }
 
     /**
@@ -308,14 +311,19 @@ class AssignmentManager {
         const classId = document.getElementById('submissionClassFilter').value;
         const container = document.getElementById('submissionsTable');
 
-        if (!classId || !this.selectedAssignment) {
-            container.innerHTML = '<p class="empty-state">수강반을 선택하세요.</p>';
+        if (!this.selectedAssignment) {
+            container.innerHTML = '<p class="empty-state">과제를 선택하세요.</p>';
             return;
         }
 
         try {
-            // includeImages=true로 이미지 URL도 함께 가져옴
-            const result = await storage.getAssignmentSubmissions(this.selectedAssignment.id, { classId, includeImages: true });
+            // classId가 없으면 과제에 할당된 모든 수강반의 학생 표시
+            const params = { includeImages: true };
+            if (classId) {
+                params.classId = classId;
+            }
+
+            const result = await storage.getAssignmentSubmissions(this.selectedAssignment.id, params);
             this.currentSubmissions = result.submissions || [];
 
             if (this.currentSubmissions.length === 0) {
