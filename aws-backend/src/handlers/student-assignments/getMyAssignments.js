@@ -62,17 +62,23 @@ exports.handler = async (event) => {
                     `STUDENT#${studentId}`
                 );
 
+                const totalPages = a.totalPages || 0;
+                const passedCount = submission?.passedCount || 0;
+                // isComplete: totalPages가 0이면 항상 false (제출할 페이지가 설정되지 않은 과제는 미완료)
+                // totalPages > 0이면 passedCount >= totalPages일 때만 완료
+                const isComplete = totalPages > 0 && passedCount >= totalPages;
+
                 return {
                     id: a.assignmentId,
                     name: a.name,
                     description: a.description || '',
                     dueDate: a.dueDate,
-                    totalPages: a.totalPages || 0,
-                    passedCount: submission?.passedCount || 0,
+                    totalPages: totalPages,
+                    passedCount: passedCount,
                     teacherComment: submission?.teacherComment || null,
                     commentedAt: submission?.commentedAt || null,
                     lastSubmittedAt: submission?.lastSubmittedAt || null,
-                    isComplete: submission?.passedCount >= (a.totalPages || 0)
+                    isComplete: isComplete
                 };
             })
         );

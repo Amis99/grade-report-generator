@@ -272,15 +272,15 @@ class StudentDashboard {
                     <span class="score-card-badge ${badgeClass}">${badgeText} ${100 - percentile}%</span>
                 </div>
                 <div class="score-card-body">
-                    <div class="score-value">${Math.round(data.percentage)}<span>점</span></div>
+                    <div class="score-value">${this.formatScore(data.totalScore)}<span>/${this.formatScore(data.maxScore)}</span></div>
                     <div class="score-details">
                         <div class="score-detail-item">
                             <span class="score-detail-label">등수</span>
                             <span class="score-detail-value">${data.rank}등 / ${data.totalStudents}명</span>
                         </div>
                         <div class="score-detail-item">
-                            <span class="score-detail-label">평균</span>
-                            <span class="score-detail-value">${data.averageScore ? Math.round(data.averageScore) : '-'}점</span>
+                            <span class="score-detail-label">백분율</span>
+                            <span class="score-detail-value">${Math.round(data.percentage)}%</span>
                         </div>
                     </div>
                 </div>
