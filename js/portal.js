@@ -216,13 +216,17 @@ class PortalController {
 
     handleLogout() {
         if (confirm('로그아웃 하시겠습니까?')) {
-            if (typeof authService !== 'undefined' && authService.logout) {
-                authService.logout();
+            // AuthService 클래스의 static 메서드 호출
+            if (typeof AuthService !== 'undefined' && AuthService.logout) {
+                AuthService.logout();
+            } else if (typeof cognitoAuth !== 'undefined' && cognitoAuth.logout) {
+                cognitoAuth.logout();
             } else {
                 // 토큰 제거 및 로그인 페이지로 이동
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('userData');
+                localStorage.removeItem('gradeapp_session');
                 window.location.href = 'login.html';
             }
         }

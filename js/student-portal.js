@@ -193,11 +193,12 @@ class StudentPortalController {
             // Cognito 로그아웃 사용
             if (typeof cognitoAuth !== 'undefined' && cognitoAuth.logout) {
                 cognitoAuth.logout();
-            } else if (typeof authService !== 'undefined' && authService.logout) {
-                authService.logout();
+            } else if (typeof AuthService !== 'undefined' && AuthService.logout) {
+                AuthService.logout();
             } else {
                 // 토큰 제거 및 로그인 페이지로 이동
                 SessionManager.clearSession();
+                localStorage.removeItem('gradeapp_session');
                 window.location.href = 'login.html';
             }
         }
