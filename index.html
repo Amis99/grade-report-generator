@@ -9,7 +9,7 @@
     <title>성적표 생성 프로그램</title>
     <link rel="stylesheet" href="css/portal.css?v=20250122l">
     <link rel="stylesheet" href="css/dashboard.css?v=20250122d">
-    <link rel="stylesheet" href="css/style.css?v=20250122i">
+    <link rel="stylesheet" href="css/style.css?v=20250123a">
     <link rel="stylesheet" href="css/sheet-style.css?v=20250122i">
     <link rel="stylesheet" href="css/auth-style.css">
 </head>
@@ -550,6 +550,9 @@
                                 <button class="btn btn-primary btn-sm" id="createAssignmentBtn" onclick="assignmentManager.showCreateModal()">+ 새 과제</button>
                             </div>
                             <div class="filter-bar">
+                                <input type="text" id="assignmentSearchInput" class="form-control" placeholder="과제명 검색..." oninput="assignmentManager.onSearchChange(this.value)">
+                            </div>
+                            <div class="filter-bar filter-selects">
                                 <select id="assignmentClassFilter" class="form-control" onchange="assignmentManager.onClassFilterChange()">
                                     <option value="">전체 수강반</option>
                                 </select>
