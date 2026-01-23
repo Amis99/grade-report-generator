@@ -88,6 +88,13 @@ class WrongNote {
             return answers.length > 0;
         });
 
+        // 시행일 최신순 정렬
+        studentExams.sort((a, b) => {
+            const dateA = a.date ? new Date(a.date) : new Date(0);
+            const dateB = b.date ? new Date(b.date) : new Date(0);
+            return dateB - dateA;
+        });
+
         if (studentExams.length === 0) {
             alert('이 학생의 답안 데이터가 없습니다.');
             return;

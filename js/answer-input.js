@@ -64,6 +64,13 @@ class AnswerInput {
         // 권한에 따른 시험 필터링
         exams = AuthService.filterExams(exams);
 
+        // 시행일 최신순 정렬
+        exams.sort((a, b) => {
+            const dateA = a.date ? new Date(a.date) : new Date(0);
+            const dateB = b.date ? new Date(b.date) : new Date(0);
+            return dateB - dateA;
+        });
+
         const select = document.getElementById('answerExamSelect');
 
         select.innerHTML = '<option value="">시험을 선택하세요</option>' +

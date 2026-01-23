@@ -62,9 +62,11 @@ class ExamManager {
         // 권한에 따른 시험 필터링
         exams = AuthService.filterExams(exams);
 
-        // 시험을 최신순으로 정렬 (updatedAt 기준)
+        // 시험을 시행일 최신순으로 정렬
         this.allExams = [...exams].sort((a, b) => {
-            return new Date(b.updatedAt) - new Date(a.updatedAt);
+            const dateA = a.date ? new Date(a.date) : new Date(0);
+            const dateB = b.date ? new Date(b.date) : new Date(0);
+            return dateB - dateA;
         });
 
         this.filteredExams = this.allExams;
