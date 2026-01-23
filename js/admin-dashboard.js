@@ -47,9 +47,9 @@ class AdminDashboard {
             }
 
             // 2. 답안 입력이 없는 시험 수
-            if (typeof storage !== 'undefined' && storage.getExams && storage.getAnswers) {
-                const exams = await storage.getExams();
-                const answers = await storage.getAnswers();
+            if (typeof storage !== 'undefined' && storage.getAllExams && storage.getAllAnswers) {
+                const exams = await storage.getAllExams();
+                const answers = await storage.getAllAnswers();
 
                 let noAnswerExamCount = 0;
                 for (const exam of exams) {
@@ -70,9 +70,9 @@ class AdminDashboard {
             }
 
             // 3. 최근 3일간 채점한 시험 수
-            if (typeof storage !== 'undefined' && storage.getExams && storage.getAnswers) {
-                const exams = await storage.getExams();
-                const answers = await storage.getAnswers();
+            if (typeof storage !== 'undefined' && storage.getAllExams && storage.getAllAnswers) {
+                const exams = await storage.getAllExams();
+                const answers = await storage.getAllAnswers();
                 const threeDaysAgo = new Date();
                 threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
@@ -153,10 +153,10 @@ class AdminDashboard {
             const activities = [];
 
             // 최근 답안 입력 조회
-            if (typeof storage !== 'undefined' && storage.getAnswers && storage.getStudents && storage.getExams) {
-                const answers = await storage.getAnswers();
-                const students = await storage.getStudents();
-                const exams = await storage.getExams();
+            if (typeof storage !== 'undefined' && storage.getAllAnswers && storage.getAllStudents && storage.getAllExams) {
+                const answers = await storage.getAllAnswers();
+                const students = await storage.getAllStudents();
+                const exams = await storage.getAllExams();
 
                 const studentMap = new Map(students.map(s => [s.id, s]));
                 const examMap = new Map(exams.map(e => [e.id, e]));
@@ -221,8 +221,8 @@ class AdminDashboard {
             }
 
             // 최근 학생 등록 조회
-            if (typeof storage !== 'undefined' && storage.getStudents) {
-                const students = await storage.getStudents();
+            if (typeof storage !== 'undefined' && storage.getAllStudents) {
+                const students = await storage.getAllStudents();
 
                 const recentStudents = students
                     .filter(s => s.createdAt)
