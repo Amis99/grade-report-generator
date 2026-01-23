@@ -24,26 +24,52 @@ exports.handler = async (event) => {
             return error('Student ID not found in user profile', 400);
         }
 
+        console.log('[getMyAssignments] studentId:', studentId);
+        console.log('[getMyAssignments] organization:', user.organization);
+
         // Get student's classes using PK pattern: STUDENT#{studentId}
         const studentClasses = await queryByPK(
             Tables.STUDENT_CLASSES,
             `STUDENT#${studentId}`
         );
 
+        console.log('[getMyAssignments] studentClasses:', JSON.stringify(studentClasses));
+
         // Extract class IDs from enrollments
         const classIds = studentClasses.map(sc => sc.classId);
 
+        console.log('[getMyAssignments] classIds:', classIds);
+
         if (classIds.length === 0) {
-            return success({ assignments: [] });
+            console.log('[getMyAssignments] 학생이 등록된 수강반이 없음');
+            return success({ assignments: [], debug: { reason: 'no_classes', studentId } });
         }
 
-        // Get all active assignments for student's organization
-        const allAssignments = await queryByIndex(
-            Tables.ASSIGNMENTS,
-            'organization-dueDate-index',
-            'organization = :org',
-            { ':org': user.organization }
-        );
+        // Get organizations from the classes the student is enrolled in
+        const classOrganizations = new Set();
+        for (const classId of classIds) {
+            const classInfo = await getItem(Tables.CLASSES, `CLASS#${classId}`, 'METADATA');
+            if (classInfo && classInfo.organization) {
+                classOrganizations.add(classInfo.organization);
+            }
+        }
+
+        console.log('[getMyAssignments] classOrganizations:', Array.from(classOrganizations));
+
+        // Get assignments from all relevant organizations
+        let allAssignments = [];
+        for (const org of classOrganizations) {
+            const orgAssignments = await queryByIndex(
+                Tables.ASSIGNMENTS,
+                'organization-dueDate-index',
+                'organization = :org',
+                { ':org': org }
+            );
+            allAssignments = allAssignments.concat(orgAssignments);
+        }
+
+        console.log('[getMyAssignments] allAssignments count:', allAssignments.length);
+        console.log('[getMyAssignments] allAssignments:', JSON.stringify(allAssignments.slice(0, 5)));
 
         // Filter assignments by:
         // 1. Status is 'active'
@@ -51,7 +77,13 @@ exports.handler = async (event) => {
         const activeAssignments = allAssignments
             .filter(a => a.SK === 'METADATA')
             .filter(a => a.status === 'active')
-            .filter(a => a.classIds && a.classIds.some(cid => classIds.includes(cid)));
+            .filter(a => {
+                const hasMatchingClass = a.classIds && a.classIds.some(cid => classIds.includes(cid));
+                console.log(`[getMyAssignments] 과제 "${a.name}" classIds: ${JSON.stringify(a.classIds)}, 매칭: ${hasMatchingClass}`);
+                return hasMatchingClass;
+            });
+
+        console.log('[getMyAssignments] activeAssignments count:', activeAssignments.length);
 
         // Get submission status for each assignment
         const assignmentsWithStatus = await Promise.all(

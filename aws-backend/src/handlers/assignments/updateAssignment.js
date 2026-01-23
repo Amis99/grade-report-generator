@@ -66,6 +66,18 @@ exports.handler = async (event) => {
             if (!Array.isArray(classIds) || classIds.length === 0) {
                 return validationError('At least one class must be selected');
             }
+            // org_admin can only assign to classes in their organization
+            if (user.role === 'org_admin') {
+                for (const classId of classIds) {
+                    const classInfo = await getItem(Tables.CLASSES, `CLASS#${classId}`, 'METADATA');
+                    if (!classInfo) {
+                        return validationError(`Class not found: ${classId}`);
+                    }
+                    if (classInfo.organization !== user.organization) {
+                        return error('Permission denied. You can only assign to classes in your organization.', 403);
+                    }
+                }
+            }
             updateParts.push('classIds = :classIds');
             expressionValues[':classIds'] = classIds;
         }
