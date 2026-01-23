@@ -69,38 +69,30 @@ class AdminDashboard {
                 });
             }
 
-            // 3. 최근 3일간 채점한 시험 수
+            // 3. 최근 3일간 답안이 입력된 시험 수
             if (typeof storage !== 'undefined' && storage.getAllExams && storage.getAllAnswers) {
-                const exams = await storage.getAllExams();
                 const answers = await storage.getAllAnswers();
                 const threeDaysAgo = new Date();
                 threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-                const recentlyGradedExamIds = new Set();
+                const recentAnswerExamIds = new Set();
 
                 answers.forEach(answer => {
-                    if (answer.gradedAt) {
-                        const gradedDate = new Date(answer.gradedAt);
-                        if (gradedDate >= threeDaysAgo) {
-                            recentlyGradedExamIds.add(answer.examId);
-                        }
-                    }
-                    // gradedAt이 없는 경우 updatedAt으로 대체 (채점된 답안인 경우)
-                    else if (answer.isGraded && answer.updatedAt) {
+                    if (answer.updatedAt) {
                         const updatedDate = new Date(answer.updatedAt);
                         if (updatedDate >= threeDaysAgo) {
-                            recentlyGradedExamIds.add(answer.examId);
+                            recentAnswerExamIds.add(answer.examId);
                         }
                     }
                 });
 
                 stats.push({
                     icon: '📊',
-                    title: '최근 3일 채점 시험',
-                    count: recentlyGradedExamIds.size,
+                    title: '최근 3일 답안 입력',
+                    count: recentAnswerExamIds.size,
                     unit: '개',
                     color: 'info',
-                    page: 'grading'
+                    page: 'answer-input'
                 });
             }
 
@@ -152,7 +144,7 @@ class AdminDashboard {
         try {
             const activities = [];
 
-            // 최근 답안 입력 조회
+            // 최근 답안 입력 조회 (학생+시험 기준 중복 제거)
             if (typeof storage !== 'undefined' && storage.getAllAnswers && storage.getAllStudents && storage.getAllExams) {
                 const answers = await storage.getAllAnswers();
                 const students = await storage.getAllStudents();
@@ -161,9 +153,20 @@ class AdminDashboard {
                 const studentMap = new Map(students.map(s => [s.id, s]));
                 const examMap = new Map(exams.map(e => [e.id, e]));
 
-                // 최근 답안 (updatedAt 기준 정렬)
-                const recentAnswers = answers
+                // 학생+시험 조합별로 가장 최근 답안만 추출
+                const latestByStudentExam = new Map();
+                answers
                     .filter(a => a.updatedAt)
+                    .forEach(answer => {
+                        const key = `${answer.studentId}_${answer.examId}`;
+                        const existing = latestByStudentExam.get(key);
+                        if (!existing || new Date(answer.updatedAt) > new Date(existing.updatedAt)) {
+                            latestByStudentExam.set(key, answer);
+                        }
+                    });
+
+                // 최근순 정렬 후 상위 10개
+                const recentAnswers = Array.from(latestByStudentExam.values())
                     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                     .slice(0, 10);
 
@@ -204,7 +207,7 @@ class AdminDashboard {
                                     activities.push({
                                         type: 'submission',
                                         icon: '📤',
-                                        text: `<strong>${this.escapeHtml(sub.student.name)}</strong> 학생이 '${this.escapeHtml(assignment.title)}' 과제를 제출했습니다.`,
+                                        text: `<strong>${this.escapeHtml(sub.student.name)}</strong> 학생이 '${this.escapeHtml(assignment.name || assignment.title)}' 과제를 제출했습니다.`,
                                         time: new Date(sub.lastSubmittedAt),
                                         isNew: this.isRecent(sub.lastSubmittedAt, 1) // 1시간 이내
                                     });
