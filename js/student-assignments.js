@@ -1,14 +1,14 @@
 /**
  * Student Assignments
- * 학생용 과제 제출 모듈
+ * 학생용 과제 제출 모듈 - 페이지별 개별 촬영/제출 방식
  */
 
 class StudentAssignments {
     constructor() {
         this.assignments = [];
         this.selectedAssignment = null;
-        this.capturedImages = [];
         this.cameraStream = null;
+        this.currentPageNumber = null; // 현재 촬영 중인 페이지 번호
     }
 
     /**
@@ -96,7 +96,6 @@ class StudentAssignments {
         try {
             const detail = await apiClient.getMyAssignmentDetail(assignmentId);
             this.selectedAssignment = detail;
-            this.capturedImages = [];
             this.renderAssignmentDetail();
         } catch (error) {
             console.error('Failed to load assignment detail:', error);
@@ -105,7 +104,7 @@ class StudentAssignments {
     }
 
     /**
-     * 과제 상세 렌더링
+     * 과제 상세 렌더링 - 페이지별 클릭 제출 방식
      */
     renderAssignmentDetail() {
         const listContainer = document.getElementById('assignmentCardsContainer');
@@ -135,6 +134,7 @@ class StudentAssignments {
 
             <div class="assignment-pages-grid">
                 <h3>페이지 목록</h3>
+                <p class="pages-instruction">촬영할 페이지를 클릭하세요</p>
                 <div class="pages-grid">
                     ${(a.pages || []).map(p => {
                         let statusClass = '';
@@ -145,14 +145,20 @@ class StudentAssignments {
                             statusClass = 'completed';
                             overlayHtml = '<div class="check-overlay passed">O</div>';
                             statusText = '<span class="status-text completed">완료</span>';
-                        } else if (p.rejected || (p.submitted && p.passed === false)) {
+                        } else if (p.rejected) {
                             statusClass = 'rejected';
                             overlayHtml = '<div class="check-overlay rejected">X</div>';
                             statusText = '<span class="status-text rejected">거부됨</span>';
+                        } else if (p.pendingReview) {
+                            statusClass = 'submitted';
+                            overlayHtml = '<div class="check-overlay submitted">!</div>';
+                            statusText = '<span class="status-text submitted">제출됨</span>';
                         }
 
                         return `
-                        <div class="page-item ${statusClass}" data-page="${p.pageNumber}">
+                        <div class="page-item clickable ${statusClass}"
+                             data-page="${p.pageNumber}"
+                             onclick="studentAssignments.openCameraForPage(${p.pageNumber})">
                             <div class="page-thumbnail">
                                 <img src="${p.thumbnailUrl || ''}" alt="Page ${p.pageNumber}"
                                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22140%22><rect fill=%22%23f0f0f0%22 width=%22100%22 height=%22140%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 fill=%22%23999%22>${p.pageNumber}</text></svg>'">
@@ -164,38 +170,6 @@ class StudentAssignments {
                     `;}).join('')}
                 </div>
             </div>
-
-            <div class="submission-section">
-                <h3>과제 제출</h3>
-                <div class="submission-notice">
-                    <strong>📋 제출 안내</strong>
-                    <p>과제 페이지를 <em>1페이지부터 순서대로</em> 촬영해 주세요.</p>
-                    <p>여러 장을 선택할 경우, 페이지 순서대로 선택해야 정확하게 매칭됩니다.</p>
-                </div>
-                <div class="submission-actions">
-                    <button class="btn btn-primary" onclick="studentAssignments.openCamera()">
-                        카메라로 촬영
-                    </button>
-                    <input type="file" id="imageFileInput" accept="image/*" multiple style="display: none;"
-                           onchange="studentAssignments.handleFileSelect(event)">
-                    <button class="btn btn-secondary" onclick="document.getElementById('imageFileInput').click()">
-                        파일에서 선택
-                    </button>
-                </div>
-
-                <div id="capturedImagesPreview" class="captured-images-preview" style="display: none;">
-                    <h4>선택된 이미지</h4>
-                    <div id="capturedImagesList" class="captured-images-list"></div>
-                    <div class="submit-actions">
-                        <button class="btn btn-secondary" onclick="studentAssignments.clearCapturedImages()">
-                            초기화
-                        </button>
-                        <button class="btn btn-primary" onclick="studentAssignments.submitImages()">
-                            제출하기
-                        </button>
-                    </div>
-                </div>
-            </div>
         `;
     }
 
@@ -204,20 +178,21 @@ class StudentAssignments {
      */
     backToList() {
         this.selectedAssignment = null;
-        this.capturedImages = [];
         this.stopCamera();
         this.loadAssignments();
     }
 
     /**
-     * 카메라 열기
+     * 특정 페이지용 카메라 모달 열기
      */
-    async openCamera() {
+    async openCameraForPage(pageNumber) {
+        this.currentPageNumber = pageNumber;
+
         const modalHtml = `
             <div id="cameraModal" class="modal active">
                 <div class="modal-content camera-modal-content">
                     <div class="modal-header">
-                        <h3>과제 촬영</h3>
+                        <h3>${pageNumber}페이지 촬영</h3>
                         <button class="modal-close" onclick="studentAssignments.closeCameraModal()">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -228,7 +203,12 @@ class StudentAssignments {
                             </div>
                         </div>
                         <div class="camera-controls">
-                            <button class="btn btn-primary capture-btn" onclick="studentAssignments.capturePhoto()">
+                            <input type="file" id="pageFileInput" accept="image/*" style="display: none;"
+                                   onchange="studentAssignments.handlePageFileSelect(event)">
+                            <button class="btn btn-secondary" onclick="document.getElementById('pageFileInput').click()">
+                                파일 선택
+                            </button>
+                            <button class="btn btn-primary capture-btn" onclick="studentAssignments.captureAndSubmitPage()">
                                 촬영
                             </button>
                         </div>
@@ -256,148 +236,127 @@ class StudentAssignments {
             video.srcObject = this.cameraStream;
         } catch (error) {
             console.error('Camera access failed:', error);
-            this.closeCameraModal();
-            this.showError('카메라에 접근할 수 없습니다. 카메라 권한을 확인해주세요.');
+            // 카메라 실패 시 파일 선택만 가능하도록 유지
+            const videoEl = document.getElementById('cameraVideo');
+            if (videoEl) {
+                videoEl.style.display = 'none';
+            }
+            const guideEl = document.querySelector('.a4-guideline');
+            if (guideEl) {
+                guideEl.style.display = 'none';
+            }
+            const cameraContainer = document.querySelector('.camera-container');
+            if (cameraContainer) {
+                cameraContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">카메라를 사용할 수 없습니다.<br>파일 선택 버튼을 이용해주세요.</div>';
+            }
         }
     }
 
     /**
-     * 사진 촬영 (A4 가이드라인 영역만 크롭)
+     * 촬영 후 즉시 단일 페이지 제출
      */
-    async capturePhoto() {
+    async captureAndSubmitPage() {
         const video = document.getElementById('cameraVideo');
-        if (!video) return;
+        if (!video || !this.currentPageNumber) return;
 
-        // A4 가이드라인 영역 계산 (CSS와 동일한 비율 적용)
-        const guidelineWidthRatio = 0.7;  // CSS: width: 70%
-        const a4AspectRatio = 1.414;      // CSS: aspect-ratio: 1/1.414
+        // A4 가이드라인 영역 크롭
+        const guidelineWidthRatio = 0.7;
+        const a4AspectRatio = 1.414;
 
         const videoWidth = video.videoWidth;
         const videoHeight = video.videoHeight;
 
-        // 가이드라인의 실제 크기 계산
         let cropWidth = videoWidth * guidelineWidthRatio;
         let cropHeight = cropWidth * a4AspectRatio;
 
-        // 비디오 높이가 가이드라인 높이보다 작은 경우 조정
         if (cropHeight > videoHeight * 0.95) {
             cropHeight = videoHeight * 0.95;
             cropWidth = cropHeight / a4AspectRatio;
         }
 
-        // 중앙 정렬된 가이드라인의 좌상단 좌표
         const cropX = (videoWidth - cropWidth) / 2;
         const cropY = (videoHeight - cropHeight) / 2;
 
-        // 크롭된 영역을 캔버스에 그리기
         const canvas = document.createElement('canvas');
         canvas.width = cropWidth;
         canvas.height = cropHeight;
 
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(video,
-            cropX, cropY, cropWidth, cropHeight,  // 소스 영역 (크롭)
-            0, 0, cropWidth, cropHeight           // 대상 영역
-        );
+        ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
-        // Base64로 변환
         const imageBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-
-        // pHash 계산
         const pHash = await this.calculatePHash(canvas);
 
-        this.capturedImages.push({
-            imageBase64,
-            pHash,
-            preview: canvas.toDataURL('image/jpeg', 0.3)
-        });
-
         this.closeCameraModal();
-        this.updateCapturedImagesPreview();
+        await this.submitSinglePage(this.currentPageNumber, imageBase64, pHash);
     }
 
     /**
-     * 파일 선택 처리
+     * 파일 선택으로 단일 페이지 제출
      */
-    async handleFileSelect(event) {
-        const files = event.target.files;
-        if (!files || files.length === 0) return;
+    async handlePageFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file || !file.type.startsWith('image/') || !this.currentPageNumber) return;
 
-        for (const file of files) {
-            if (!file.type.startsWith('image/')) continue;
+        const pageNumber = this.currentPageNumber;
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const img = new Image();
-                img.onload = async () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const img = new Image();
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
 
-                    const imageBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-                    const pHash = await this.calculatePHash(canvas);
+                const imageBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                const pHash = await this.calculatePHash(canvas);
 
-                    this.capturedImages.push({
-                        imageBase64,
-                        pHash,
-                        preview: canvas.toDataURL('image/jpeg', 0.3)
-                    });
-
-                    this.updateCapturedImagesPreview();
-                };
-                img.src = e.target.result;
+                this.closeCameraModal();
+                await this.submitSinglePage(pageNumber, imageBase64, pHash);
             };
-            reader.readAsDataURL(file);
-        }
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
 
         event.target.value = '';
     }
 
     /**
-     * 촬영 이미지 미리보기 업데이트
+     * 단일 페이지 제출 API 호출 및 UI 갱신
      */
-    updateCapturedImagesPreview() {
-        const previewSection = document.getElementById('capturedImagesPreview');
-        const listContainer = document.getElementById('capturedImagesList');
-        if (!previewSection || !listContainer) return;
+    async submitSinglePage(pageNumber, imageBase64, pHash) {
+        if (!this.selectedAssignment) return;
 
-        if (this.capturedImages.length === 0) {
-            previewSection.style.display = 'none';
-            return;
+        try {
+            this.showUploadOverlay(`${pageNumber}페이지 업로드 중...`, 50);
+
+            await apiClient.submitSingleAssignmentPage(
+                this.selectedAssignment.id,
+                pageNumber,
+                imageBase64,
+                pHash
+            );
+
+            this.updateUploadOverlay('업로드 완료!', 100);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            this.hideUploadOverlay();
+
+            // 상세 화면 새로고침
+            await this.selectAssignment(this.selectedAssignment.id);
+
+        } catch (error) {
+            console.error('Single page submit failed:', error);
+            this.hideUploadOverlay();
+            this.showError('제출에 실패했습니다: ' + error.message);
         }
-
-        previewSection.style.display = 'block';
-        listContainer.innerHTML = this.capturedImages.map((img, idx) => `
-            <div class="captured-image-item">
-                <img src="${img.preview}" alt="Image ${idx + 1}">
-                <button class="remove-btn" onclick="studentAssignments.removeCapturedImage(${idx})">&times;</button>
-            </div>
-        `).join('');
-    }
-
-    /**
-     * 촬영 이미지 제거
-     */
-    removeCapturedImage(index) {
-        this.capturedImages.splice(index, 1);
-        this.updateCapturedImagesPreview();
-    }
-
-    /**
-     * 촬영 이미지 초기화
-     */
-    clearCapturedImages() {
-        this.capturedImages = [];
-        this.updateCapturedImagesPreview();
     }
 
     /**
      * 업로드 진행 오버레이 표시
      */
     showUploadOverlay(message = '업로드 중...', progress = null) {
-        // 기존 오버레이 제거
         this.hideUploadOverlay();
 
         const progressBar = progress !== null
@@ -448,80 +407,9 @@ class StudentAssignments {
     }
 
     /**
-     * 이미지 제출
-     */
-    async submitImages() {
-        if (this.capturedImages.length === 0) {
-            this.showError('제출할 이미지를 선택해주세요.');
-            return;
-        }
-
-        if (!this.selectedAssignment) return;
-
-        try {
-            const submitBtn = document.querySelector('.submit-actions .btn-primary');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = '제출 중...';
-            }
-
-            // 업로드 오버레이 표시
-            this.showUploadOverlay('이미지 준비 중...', 0);
-
-            const images = this.capturedImages.map(img => ({
-                imageBase64: img.imageBase64,
-                pHash: img.pHash
-            }));
-
-            // 업로드 진행 표시
-            this.updateUploadOverlay(`이미지 업로드 중... (${images.length}개)`, 30);
-
-            const result = await apiClient.submitAssignmentPages(this.selectedAssignment.id, images);
-
-            this.updateUploadOverlay('처리 완료!', 100);
-
-            // 잠시 대기 후 오버레이 숨기기
-            await new Promise(resolve => setTimeout(resolve, 500));
-            this.hideUploadOverlay();
-
-            // 결과 표시
-            const matchedCount = result.summary?.matched || 0;
-            const notMatchedCount = result.summary?.notMatched || 0;
-
-            let message = `제출 완료!\n\n`;
-            message += `매칭된 페이지: ${matchedCount}개\n`;
-            if (notMatchedCount > 0) {
-                message += `매칭되지 않은 이미지: ${notMatchedCount}개\n`;
-            }
-            message += `\n총 진행률: ${result.summary?.totalPassedCount}/${result.summary?.totalPages} 페이지`;
-
-            if (result.summary?.isComplete) {
-                message += '\n\n과제를 모두 완료했습니다!';
-            }
-
-            alert(message);
-
-            this.capturedImages = [];
-            await this.selectAssignment(this.selectedAssignment.id);
-
-        } catch (error) {
-            console.error('Submit failed:', error);
-            this.hideUploadOverlay();
-            this.showError('제출에 실패했습니다: ' + error.message);
-        } finally {
-            const submitBtn = document.querySelector('.submit-actions .btn-primary');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '제출하기';
-            }
-        }
-    }
-
-    /**
      * pHash 계산
      */
     async calculatePHash(canvas) {
-        // 8x8로 리사이즈
         const smallCanvas = document.createElement('canvas');
         smallCanvas.width = 8;
         smallCanvas.height = 8;
@@ -531,7 +419,6 @@ class StudentAssignments {
         const imageData = ctx.getImageData(0, 0, 8, 8);
         const pixels = imageData.data;
 
-        // 그레이스케일 변환 및 평균 계산
         const grayPixels = [];
         let sum = 0;
 
@@ -543,13 +430,11 @@ class StudentAssignments {
 
         const avg = sum / 64;
 
-        // 해시 생성
         let hash = '';
         for (const gray of grayPixels) {
             hash += gray > avg ? '1' : '0';
         }
 
-        // 16진수로 변환
         let hexHash = '';
         for (let i = 0; i < hash.length; i += 4) {
             hexHash += parseInt(hash.substr(i, 4), 2).toString(16);

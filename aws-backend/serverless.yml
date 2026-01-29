@@ -730,6 +730,18 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: !Ref ApiGatewayAuthorizer
 
+  checkSubmissionSimilarity:
+    handler: src/handlers/assignments/checkSimilarity.handler
+    timeout: 30
+    events:
+      - http:
+          path: /api/v1/assignments/{assignmentId}/submissions/{studentId}/check-similarity
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
   # Student Assignments (학생용 과제 API)
   getMyAssignments:
     handler: src/handlers/student-assignments/getMyAssignments.handler

@@ -1288,12 +1288,36 @@ class ApiClient {
     }
 
     /**
-     * 과제 페이지 제출 (학생용)
+     * 과제 페이지 제출 (학생용, 배치 모드 - 레거시)
      * @param {string} assignmentId - 과제 ID
      * @param {Array} images - 이미지 배열 [{ imageBase64, pHash }]
      */
     async submitAssignmentPages(assignmentId, images) {
         return await this.request('POST', `/student/assignments/${assignmentId}/submit`, { images });
+    }
+
+    /**
+     * 단일 페이지 제출 (학생용)
+     * @param {string} assignmentId - 과제 ID
+     * @param {number} pageNumber - 페이지 번호
+     * @param {string} imageBase64 - 이미지 Base64
+     * @param {string} pHash - 이미지 pHash
+     */
+    async submitSingleAssignmentPage(assignmentId, pageNumber, imageBase64, pHash) {
+        return await this.request('POST', `/student/assignments/${assignmentId}/submit`, {
+            pageNumber,
+            imageBase64,
+            pHash
+        });
+    }
+
+    /**
+     * 제출물 이미지 유사도 검사 (관리자용)
+     * @param {string} assignmentId - 과제 ID
+     * @param {string} studentId - 학생 ID
+     */
+    async checkSubmissionSimilarity(assignmentId, studentId) {
+        return await this.request('POST', `/assignments/${assignmentId}/submissions/${studentId}/check-similarity`);
     }
 }
 

@@ -369,6 +369,15 @@ class AssignmentManager {
                                                 <polyline points="21 15 16 10 5 21"></polyline>
                                             </svg>
                                         </button>
+                                        <button class="btn-icon ${hasSubmissions ? '' : 'disabled'}"
+                                                onclick="${hasSubmissions ? `assignmentManager.checkSimilarity('${s.student.id}')` : ''}"
+                                                title="${hasSubmissions ? '이미지 유사도 검사' : '제출된 이미지 없음'}"
+                                                ${hasSubmissions ? '' : 'disabled'}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        </button>
                                         <button class="btn-icon ${s.teacherComment ? 'has-comment' : ''}"
                                                 onclick="assignmentManager.showCommentModal('${s.student.id}', '${this.escapeHtml(s.student.name)}', '${this.escapeHtml(s.teacherComment || '')}')"
                                                 title="${s.teacherComment ? '코멘트 수정' : '코멘트 작성'}">
@@ -751,6 +760,7 @@ class AssignmentManager {
                 <div class="modal-content modal-large">
                     <div class="modal-header">
                         <h3>${this.escapeHtml(submission.student.name)} - 제출 이미지</h3>
+                        <button class="btn btn-sm btn-secondary" style="margin-right: 0.5rem;" onclick="assignmentManager.checkSimilarity('${submission.student.id}')">유사도 검사</button>
                         <button class="modal-close" onclick="assignmentManager.closeStudentSubmissionModal()">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -889,6 +899,83 @@ class AssignmentManager {
             console.error('Failed to update page status:', error);
             alert('상태 업데이트에 실패했습니다: ' + error.message);
         }
+    }
+
+    /**
+     * 이미지 유사도 검사 실행
+     */
+    async checkSimilarity(studentId) {
+        if (!this.selectedAssignment) return;
+
+        try {
+            const result = await storage.checkSubmissionSimilarity(
+                this.selectedAssignment.id,
+                studentId
+            );
+
+            // 결과 모달 표시
+            const resultsHtml = result.results.map(r => {
+                const simText = r.similarity !== null ? `${r.similarity.toFixed(1)}%` : '-';
+                const statusText = r.passed ? '통과' : '미통과';
+                const statusClass = r.passed ? 'status-active' : 'status-draft';
+                const manualBadge = r.manuallyReviewed ? ' <span class="manual-badge">수동</span>' : '';
+                return `
+                    <tr>
+                        <td>${r.pageNumber}페이지</td>
+                        <td>${simText}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span>${manualBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const modalHtml = `
+                <div id="similarityResultModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>유사도 검사 결과</h3>
+                            <button class="modal-close" onclick="assignmentManager.closeSimilarityResultModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>통과:</strong> ${result.passedCount} / ${result.totalSubmitted}페이지 (전체 ${result.totalPages}페이지)</p>
+                            <table class="data-table" style="width: 100%; margin-top: 1rem;">
+                                <thead>
+                                    <tr>
+                                        <th>페이지</th>
+                                        <th>유사도</th>
+                                        <th>결과</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${resultsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="assignmentManager.closeSimilarityResultModal()">닫기</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('similarityResultModal');
+            if (existingModal) existingModal.remove();
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // 제출 현황 테이블 새로고침
+            await this.loadSubmissions();
+
+        } catch (error) {
+            console.error('Failed to check similarity:', error);
+            alert('유사도 검사에 실패했습니다: ' + error.message);
+        }
+    }
+
+    /**
+     * 유사도 결과 모달 닫기
+     */
+    closeSimilarityResultModal() {
+        const modal = document.getElementById('similarityResultModal');
+        if (modal) modal.remove();
     }
 
     /**

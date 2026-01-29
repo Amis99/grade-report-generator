@@ -1570,6 +1570,45 @@
     color: #ef4444;
 }
 
+.page-item .status-text.submitted {
+    color: #f59e0b;
+}
+
+/* Clickable page items */
+.page-item.clickable {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.page-item.clickable:hover {
+    transform: translateY(-4px);
+}
+
+.page-item.clickable:hover .page-thumbnail {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Submitted (pending review) page */
+.page-item.submitted .page-thumbnail {
+    border-color: #f59e0b;
+}
+
+.page-item .check-overlay.submitted {
+    background: rgba(245, 158, 11, 0.9);
+}
+
+/* Pages instruction text */
+.pages-instruction {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: #f0f9ff;
+    border-left: 3px solid #3b82f6;
+    border-radius: 4px;
+}
+
 /* 제출 섹션 */
 .submission-section {
     margin-top: 2rem;

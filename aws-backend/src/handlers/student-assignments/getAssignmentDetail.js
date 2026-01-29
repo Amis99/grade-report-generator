@@ -118,14 +118,25 @@ exports.handler = async (event) => {
                         }
                     }
 
+                    // Determine rejection status:
+                    // rejected = submitted && !passed && (similarity checked or manually reviewed)
+                    // pendingReview = submitted && !passed && no similarity check && not manually reviewed
+                    const isSubmitted = !!submittedPage;
+                    const isPassed = submittedPage?.passed || false;
+                    const hasSimilarity = submittedPage?.similarity !== null && submittedPage?.similarity !== undefined;
+                    const isManuallyReviewed = submittedPage?.manuallyReviewed || false;
+                    const isRejected = isSubmitted && !isPassed && (hasSimilarity || isManuallyReviewed);
+                    const isPendingReview = isSubmitted && !isPassed && !hasSimilarity && !isManuallyReviewed;
+
                     return {
                         pageNumber: p.pageNumber,
                         thumbnailUrl,
                         pHash: p.pHash,
-                        submitted: !!submittedPage,
-                        passed: submittedPage?.passed || false,
-                        rejected: submittedPage && !submittedPage.passed,
-                        manuallyReviewed: submittedPage?.manuallyReviewed || false,
+                        submitted: isSubmitted,
+                        passed: isPassed,
+                        rejected: isRejected,
+                        pendingReview: isPendingReview,
+                        manuallyReviewed: isManuallyReviewed,
                         similarity: submittedPage?.similarity || null,
                         submittedAt: submittedPage?.submittedAt || null,
                         submittedImageUrl
