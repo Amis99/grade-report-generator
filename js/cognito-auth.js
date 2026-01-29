@@ -36,10 +36,21 @@ class CognitoAuth {
             try {
                 this.session = await this.getSession();
                 console.log('Session restored');
+
+                // ID 토큰에서 사용자 정보를 파싱하여 localStorage 세션 동기화
+                const idToken = this.session.getIdToken().getJwtToken();
+                const userInfo = this.parseIdToken(idToken);
+                this.saveLocalSession(userInfo);
+                console.log('Local session synced with Cognito:', userInfo.role);
             } catch (error) {
                 console.log('No valid session');
                 this.currentUser = null;
+                // Cognito 세션이 유효하지 않으면 localStorage도 클리어
+                localStorage.removeItem('gradeapp_session');
             }
+        } else {
+            // Cognito 사용자가 없으면 localStorage 세션도 클리어
+            localStorage.removeItem('gradeapp_session');
         }
 
         this.initialized = true;
@@ -71,8 +82,8 @@ class CognitoAuth {
                     this.currentUser = cognitoUser;
                     this.session = result;
 
-                    // 사용자 속성 가져오기
-                    const userInfo = await this.getUserAttributes();
+                    // ID 토큰에서 사용자 정보 파싱 (더 안정적)
+                    const userInfo = this.parseIdToken(result.getIdToken().getJwtToken());
 
                     // 세션 저장 (기존 SessionManager 호환)
                     this.saveLocalSession(userInfo);
@@ -129,7 +140,8 @@ class CognitoAuth {
                     this.currentUser = cognitoUser;
                     this.session = result;
 
-                    const userInfo = await this.getUserAttributes();
+                    // ID 토큰에서 사용자 정보 파싱
+                    const userInfo = this.parseIdToken(result.getIdToken().getJwtToken());
                     this.saveLocalSession(userInfo);
 
                     resolve({ success: true, user: userInfo });
@@ -252,6 +264,47 @@ class CognitoAuth {
                 resolve(userInfo);
             });
         });
+    }
+
+    /**
+     * ID 토큰에서 사용자 정보 파싱
+     * JWT 토큰의 payload에서 직접 사용자 속성을 읽어옴
+     */
+    parseIdToken(idToken) {
+        try {
+            // JWT는 header.payload.signature 형식
+            const payload = idToken.split('.')[1];
+            // Base64 URL → UTF-8 디코딩 (한글 등 멀티바이트 문자 지원)
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const binary = atob(base64);
+            const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+            const decoded = new TextDecoder('utf-8').decode(bytes);
+            const claims = JSON.parse(decoded);
+
+            console.log('ID Token claims:', claims);
+
+            return {
+                sub: claims.sub || '',
+                email: claims.email || '',
+                username: claims.email || claims['cognito:username'] || '',
+                name: claims.name || '',
+                organization: claims['custom:organization'] || '',
+                role: claims['custom:role'] || 'org_admin',
+                studentId: claims['custom:studentId'] || null
+            };
+        } catch (error) {
+            console.error('Failed to parse ID token:', error);
+            // 파싱 실패 시 기본값 반환
+            return {
+                sub: '',
+                email: '',
+                username: '',
+                name: '',
+                organization: '',
+                role: 'org_admin',
+                studentId: null
+            };
+        }
     }
 
     /**
@@ -420,7 +473,8 @@ class CognitoAuth {
     async refreshSession() {
         try {
             const session = await this.getSession();
-            const userInfo = await this.getUserAttributes();
+            const idToken = session.getIdToken().getJwtToken();
+            const userInfo = this.parseIdToken(idToken);
             this.saveLocalSession(userInfo);
             return true;
         } catch (error) {

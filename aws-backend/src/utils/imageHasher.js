@@ -101,76 +101,134 @@ function findBestMatch(imageHash, pages, threshold = 0.7) {
 }
 
 /**
- * Match multiple images to pages
+ * Match multiple images to pages (sequential + pHash hybrid approach)
  * @param {Array} imageHashes - Array of { hash, originalIndex } objects
  * @param {Array} pages - Array of page objects with pHash property
  * @param {number} threshold - Minimum similarity threshold (default 0.7)
+ * @param {Object} options - Optional settings { useSequential: true, startPage: 1 }
  * @returns {Array} - Array of match results
  */
-function matchImagesToPages(imageHashes, pages, threshold = 0.7) {
+function matchImagesToPages(imageHashes, pages, threshold = 0.7, options = {}) {
     if (!imageHashes || !pages) {
         return [];
     }
 
+    const { useSequential = true, startPage = 1 } = options;
     const results = [];
     const matchedPages = new Set();
 
-    // Sort images by their best possible match to handle conflicts
-    const imageMatchScores = imageHashes.map((img, idx) => {
-        let bestScore = 0;
-        let bestPage = null;
+    // Sort pages by page number
+    const sortedPages = [...pages].sort((a, b) => a.pageNumber - b.pageNumber);
 
-        for (const page of pages) {
-            if (!page.pHash) continue;
-            const similarity = calculateSimilarity(img.hash, page.pHash);
-            if (similarity > bestScore) {
-                bestScore = similarity;
-                bestPage = page.pageNumber;
-            }
-        }
+    // Get available pages (not yet submitted, >= startPage)
+    const availablePages = sortedPages.filter(p => p.pageNumber >= startPage);
 
-        return { ...img, originalIndex: idx, bestScore, bestPage };
-    });
+    if (useSequential && availablePages.length > 0) {
+        // Sequential matching: match images in order to available pages in order
+        for (let i = 0; i < imageHashes.length; i++) {
+            const img = imageHashes[i];
 
-    // Sort by best score descending
-    imageMatchScores.sort((a, b) => b.bestScore - a.bestScore);
+            // Find next available unmatched page
+            let matchedPage = null;
+            for (const page of availablePages) {
+                if (matchedPages.has(page.pageNumber)) continue;
 
-    // Match each image to its best available page
-    for (const img of imageMatchScores) {
-        let bestMatch = null;
-        let bestSimilarity = 0;
+                // Use pHash similarity as validation (with lower threshold for sequential)
+                const similarity = page.pHash ? calculateSimilarity(img.hash, page.pHash) : 0;
+                const sequentialThreshold = 0.5; // Lower threshold for sequential matching
 
-        for (const page of pages) {
-            if (!page.pHash || matchedPages.has(page.pageNumber)) continue;
-
-            const similarity = calculateSimilarity(img.hash, page.pHash);
-
-            if (similarity > bestSimilarity) {
-                bestSimilarity = similarity;
-                if (similarity >= threshold) {
-                    bestMatch = {
+                // Accept the match if similarity is above sequential threshold
+                // or if we don't have a pHash (trust sequential order)
+                if (!page.pHash || similarity >= sequentialThreshold) {
+                    matchedPage = {
                         pageNumber: page.pageNumber,
-                        similarity,
+                        similarity: similarity || 1.0,
                         passed: true
                     };
+                    matchedPages.add(page.pageNumber);
+                    break;
+                }
+            }
+
+            if (matchedPage) {
+                results.push({
+                    originalIndex: img.originalIndex !== undefined ? img.originalIndex : i,
+                    ...matchedPage
+                });
+            } else {
+                // No sequential match, try to find best pHash match from remaining pages
+                const fallbackMatch = findBestMatchFromRemaining(img, pages, matchedPages, threshold);
+                if (fallbackMatch) {
+                    matchedPages.add(fallbackMatch.pageNumber);
+                    results.push({
+                        originalIndex: img.originalIndex !== undefined ? img.originalIndex : i,
+                        ...fallbackMatch
+                    });
+                } else {
+                    results.push({
+                        originalIndex: img.originalIndex !== undefined ? img.originalIndex : i,
+                        pageNumber: null,
+                        similarity: 0,
+                        passed: false
+                    });
                 }
             }
         }
+    } else {
+        // Original pHash-based matching (fallback)
+        const imageMatchScores = imageHashes.map((img, idx) => {
+            let bestScore = 0;
+            let bestPage = null;
 
-        if (bestMatch) {
-            matchedPages.add(bestMatch.pageNumber);
-            results.push({
-                originalIndex: img.originalIndex,
-                ...bestMatch
-            });
-        } else {
-            // No match found
-            results.push({
-                originalIndex: img.originalIndex,
-                pageNumber: null,
-                similarity: bestSimilarity,
-                passed: false
-            });
+            for (const page of pages) {
+                if (!page.pHash) continue;
+                const similarity = calculateSimilarity(img.hash, page.pHash);
+                if (similarity > bestScore) {
+                    bestScore = similarity;
+                    bestPage = page.pageNumber;
+                }
+            }
+
+            return { ...img, originalIndex: idx, bestScore, bestPage };
+        });
+
+        imageMatchScores.sort((a, b) => b.bestScore - a.bestScore);
+
+        for (const img of imageMatchScores) {
+            let bestMatch = null;
+            let bestSimilarity = 0;
+
+            for (const page of pages) {
+                if (!page.pHash || matchedPages.has(page.pageNumber)) continue;
+
+                const similarity = calculateSimilarity(img.hash, page.pHash);
+
+                if (similarity > bestSimilarity) {
+                    bestSimilarity = similarity;
+                    if (similarity >= threshold) {
+                        bestMatch = {
+                            pageNumber: page.pageNumber,
+                            similarity,
+                            passed: true
+                        };
+                    }
+                }
+            }
+
+            if (bestMatch) {
+                matchedPages.add(bestMatch.pageNumber);
+                results.push({
+                    originalIndex: img.originalIndex,
+                    ...bestMatch
+                });
+            } else {
+                results.push({
+                    originalIndex: img.originalIndex,
+                    pageNumber: null,
+                    similarity: bestSimilarity,
+                    passed: false
+                });
+            }
         }
     }
 
@@ -178,6 +236,31 @@ function matchImagesToPages(imageHashes, pages, threshold = 0.7) {
     results.sort((a, b) => a.originalIndex - b.originalIndex);
 
     return results;
+}
+
+/**
+ * Helper function to find best match from remaining unmatched pages
+ */
+function findBestMatchFromRemaining(img, pages, matchedPages, threshold) {
+    let bestMatch = null;
+    let bestSimilarity = 0;
+
+    for (const page of pages) {
+        if (!page.pHash || matchedPages.has(page.pageNumber)) continue;
+
+        const similarity = calculateSimilarity(img.hash, page.pHash);
+
+        if (similarity > bestSimilarity && similarity >= threshold) {
+            bestSimilarity = similarity;
+            bestMatch = {
+                pageNumber: page.pageNumber,
+                similarity,
+                passed: true
+            };
+        }
+    }
+
+    return bestMatch;
 }
 
 // Similarity threshold constant

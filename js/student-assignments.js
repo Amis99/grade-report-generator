@@ -167,6 +167,11 @@ class StudentAssignments {
 
             <div class="submission-section">
                 <h3>과제 제출</h3>
+                <div class="submission-notice">
+                    <strong>📋 제출 안내</strong>
+                    <p>과제 페이지를 <em>1페이지부터 순서대로</em> 촬영해 주세요.</p>
+                    <p>여러 장을 선택할 경우, 페이지 순서대로 선택해야 정확하게 매칭됩니다.</p>
+                </div>
                 <div class="submission-actions">
                     <button class="btn btn-primary" onclick="studentAssignments.openCamera()">
                         카메라로 촬영
@@ -389,6 +394,60 @@ class StudentAssignments {
     }
 
     /**
+     * 업로드 진행 오버레이 표시
+     */
+    showUploadOverlay(message = '업로드 중...', progress = null) {
+        // 기존 오버레이 제거
+        this.hideUploadOverlay();
+
+        const progressBar = progress !== null
+            ? `<div class="upload-progress-bar">
+                   <div class="upload-progress-fill" style="width: ${progress}%"></div>
+               </div>
+               <div class="upload-progress-text">${progress}%</div>`
+            : '<div class="upload-spinner"></div>';
+
+        const overlayHtml = `
+            <div id="uploadOverlay" class="upload-overlay">
+                <div class="upload-overlay-content">
+                    ${progressBar}
+                    <div class="upload-message">${message}</div>
+                    <div class="upload-warning">화면을 닫지 마세요!</div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', overlayHtml);
+    }
+
+    /**
+     * 업로드 진행 오버레이 업데이트
+     */
+    updateUploadOverlay(message, progress) {
+        const overlay = document.getElementById('uploadOverlay');
+        if (!overlay) {
+            this.showUploadOverlay(message, progress);
+            return;
+        }
+
+        const messageEl = overlay.querySelector('.upload-message');
+        const progressFill = overlay.querySelector('.upload-progress-fill');
+        const progressText = overlay.querySelector('.upload-progress-text');
+
+        if (messageEl) messageEl.textContent = message;
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        if (progressText) progressText.textContent = `${progress}%`;
+    }
+
+    /**
+     * 업로드 진행 오버레이 숨기기
+     */
+    hideUploadOverlay() {
+        const overlay = document.getElementById('uploadOverlay');
+        if (overlay) overlay.remove();
+    }
+
+    /**
      * 이미지 제출
      */
     async submitImages() {
@@ -406,12 +465,24 @@ class StudentAssignments {
                 submitBtn.textContent = '제출 중...';
             }
 
+            // 업로드 오버레이 표시
+            this.showUploadOverlay('이미지 준비 중...', 0);
+
             const images = this.capturedImages.map(img => ({
                 imageBase64: img.imageBase64,
                 pHash: img.pHash
             }));
 
+            // 업로드 진행 표시
+            this.updateUploadOverlay(`이미지 업로드 중... (${images.length}개)`, 30);
+
             const result = await apiClient.submitAssignmentPages(this.selectedAssignment.id, images);
+
+            this.updateUploadOverlay('처리 완료!', 100);
+
+            // 잠시 대기 후 오버레이 숨기기
+            await new Promise(resolve => setTimeout(resolve, 500));
+            this.hideUploadOverlay();
 
             // 결과 표시
             const matchedCount = result.summary?.matched || 0;
@@ -435,6 +506,7 @@ class StudentAssignments {
 
         } catch (error) {
             console.error('Submit failed:', error);
+            this.hideUploadOverlay();
             this.showError('제출에 실패했습니다: ' + error.message);
         } finally {
             const submitBtn = document.querySelector('.submit-actions .btn-primary');

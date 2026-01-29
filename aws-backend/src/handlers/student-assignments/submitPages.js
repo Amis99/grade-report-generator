@@ -100,8 +100,27 @@ exports.handler = async (event) => {
             originalIndex: idx
         }));
 
-        // Match images to pages
-        const matchResults = matchImagesToPages(imageHashes, pageData, SIMILARITY_THRESHOLD);
+        // Determine start page for sequential matching (first unsubmitted page)
+        let startPage = 1;
+        if (existingSubmission?.submittedPages) {
+            const submittedPageNumbers = existingSubmission.submittedPages
+                .filter(p => p.passed)
+                .map(p => p.pageNumber);
+
+            // Find first page not yet submitted
+            for (let i = 1; i <= (assignment.totalPages || 100); i++) {
+                if (!submittedPageNumbers.includes(i)) {
+                    startPage = i;
+                    break;
+                }
+            }
+        }
+
+        // Match images to pages using sequential matching
+        const matchResults = matchImagesToPages(imageHashes, pageData, SIMILARITY_THRESHOLD, {
+            useSequential: true,
+            startPage: startPage
+        });
 
         const now = new Date().toISOString();
         const newSubmittedPages = [];
