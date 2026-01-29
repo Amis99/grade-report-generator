@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국어농장 성적표 생성 프로그램 - 본사 관리자용 매뉴얼</title>
+<style>
+/* ===== 기본 설정 ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--main:#10b981;--main-light:#d1fae5;--main-dark:#065f46;--blue:#3b82f6;--blue-light:#dbeafe;--yellow:#f59e0b;--yellow-light:#fef3c7;--red:#ef4444;--red-light:#fee2e2;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-500:#64748b;--gray-700:#334155;--gray-800:#1e293b;--gray-900:#0f172a}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--gray-800);line-height:1.7;font-size:13px;counter-reset:page-num;background:#f1f5f9}
+h1{font-size:28px;color:var(--gray-900);margin-bottom:16px}
+h2{font-size:22px;color:var(--main-dark);margin-bottom:12px;padding:8px 0 8px 16px;border-left:4px solid var(--main)}
+h3{font-size:17px;color:var(--gray-800);margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--gray-200)}
+h4{font-size:15px;color:var(--gray-700);margin:14px 0 8px}
+p{margin-bottom:10px}
+ul,ol{margin:8px 0 12px 24px}
+li{margin-bottom:4px}
+a{color:var(--blue);text-decoration:none}
+code{background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px;font-family:'Consolas',monospace}
+strong{color:var(--gray-900)}
+
+/* ===== 페이지 시스템 ===== */
+.page{width:210mm;min-height:297mm;margin:8mm auto;padding:18mm 15mm;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.08);position:relative;page-break-after:always;overflow:hidden}
+.page::after{counter-increment:page-num;content:counter(page-num);position:absolute;bottom:8mm;left:0;right:0;text-align:center;font-size:.75rem;color:#94a3b8}
+.page-cover::after{display:none}
+@page{size:A4;margin:18mm 15mm}
+@media print{
+  body{background:#fff;font-family:'Batang',serif;font-size:11pt;line-height:1.6}
+  .page{box-shadow:none;margin:0;page-break-after:always}
+  .ui-diagram{box-shadow:none}
+  .admin-only{border:2px solid #000}
+  .info-box{border-left-width:3px}
+  .no-print{display:none}
+}
+
+/* ===== 표지 ===== */
+.cover-content{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240mm;text-align:center}
+.cover-bar{width:120px;height:6px;background:var(--main);border-radius:3px;margin-bottom:40px}
+.cover-title{font-size:36px;font-weight:800;color:var(--gray-900);margin-bottom:12px}
+.cover-subtitle{font-size:20px;color:var(--main);font-weight:600;margin-bottom:32px}
+.cover-badge{display:inline-block;background:var(--main);color:#fff;padding:6px 20px;border-radius:20px;font-size:14px;font-weight:600;margin-bottom:8px}
+.cover-meta{color:var(--gray-500);font-size:14px;margin-top:8px}
+
+/* ===== 목차 ===== */
+.toc-list{list-style:none;margin:0;padding:0}
+.toc-list li{padding:6px 0;border-bottom:1px dotted var(--gray-300);display:flex;justify-content:space-between}
+.toc-list li.toc-main{font-weight:700;font-size:15px;margin-top:8px;color:var(--main-dark)}
+.toc-list li.toc-sub{padding-left:24px;font-size:13px;color:var(--gray-700)}
+
+/* ===== UI 다이어그램 ===== */
+.ui-diagram{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:16px;margin:12px 0 16px;page-break-inside:avoid}
+@media print{.ui-diagram{box-shadow:none;border:1px solid #ccc}}
+.ui-diagram .ui-title{font-size:12px;color:var(--gray-500);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.ui-box{border:1.5px solid var(--gray-300);border-radius:6px;padding:10px;margin:6px 0;background:#fff;font-size:13px}
+.ui-box.green{border-color:var(--main);background:var(--main-light)}
+.ui-box.blue{border-color:var(--blue);background:var(--blue-light)}
+.ui-box.red{border-color:var(--red);background:var(--red-light)}
+.ui-header{background:var(--gray-100);border-bottom:1.5px solid var(--gray-300);padding:8px 10px;border-radius:6px 6px 0 0;font-weight:600;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.ui-sidebar{display:inline-block;width:180px;vertical-align:top;border:1.5px solid var(--gray-300);border-radius:6px;padding:8px;margin-right:10px;background:#fff;font-size:12px}
+.ui-main-area{display:inline-block;width:calc(100% - 200px);vertical-align:top;border:1.5px solid var(--gray-300);border-radius:6px;padding:8px;background:#fff;font-size:12px}
+.ui-row{display:flex;gap:8px;margin:4px 0}
+.ui-cell{flex:1;border:1px solid var(--gray-200);border-radius:4px;padding:6px 8px;background:#fff;font-size:12px;text-align:center}
+.ui-btn{display:inline-block;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:600;margin:2px}
+.ui-btn.primary{background:var(--main);color:#fff}
+.ui-btn.secondary{background:var(--gray-200);color:var(--gray-700)}
+.ui-btn.danger{background:var(--red);color:#fff}
+.ui-btn.blue{background:var(--blue);color:#fff}
+.ui-input{border:1.5px solid var(--gray-300);border-radius:4px;padding:5px 8px;font-size:12px;background:#fff;display:inline-block;min-width:120px}
+.ui-label{font-size:11px;color:var(--gray-500);margin-bottom:2px;display:block}
+.ui-nav-item{padding:6px 10px;margin:2px 0;border-radius:4px;font-size:12px;cursor:pointer}
+.ui-nav-item.active{background:var(--main);color:#fff;font-weight:600}
+.ui-nav-item:not(.active){background:transparent}
+.ui-nav-section{font-size:10px;color:var(--gray-400);text-transform:uppercase;margin:8px 0 4px;font-weight:600}
+.ui-split{display:flex;gap:10px}
+.ui-split>div{flex:1}
+.ui-card{border:1px solid var(--gray-200);border-radius:6px;padding:8px;margin:4px 0;background:#fff;font-size:12px}
+.ui-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.ui-badge.green{background:var(--main-light);color:var(--main-dark)}
+.ui-badge.yellow{background:var(--yellow-light);color:#92400e}
+.ui-badge.red{background:var(--red-light);color:#991b1b}
+.ui-badge.blue{background:var(--blue-light);color:#1e40af}
+.ui-grid{display:grid;gap:8px;margin:6px 0}
+.ui-grid.cols-2{grid-template-columns:1fr 1fr}
+.ui-grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+.ui-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.ui-stat{text-align:center;padding:10px;border:1px solid var(--gray-200);border-radius:6px;background:#fff}
+.ui-stat .num{font-size:22px;font-weight:800;color:var(--main)}
+.ui-stat .label{font-size:11px;color:var(--gray-500)}
+.ui-table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+.ui-table th{background:var(--main);color:#fff;padding:6px 8px;text-align:left;font-weight:600}
+.ui-table td{padding:5px 8px;border-bottom:1px solid var(--gray-200)}
+.ui-table tr:nth-child(even) td{background:var(--gray-50)}
+
+/* ===== 정보 박스 ===== */
+.info-box{border-radius:6px;padding:12px 16px;margin:12px 0;border-left:4px solid;font-size:13px;page-break-inside:avoid}
+.info-box.tip{border-color:var(--blue);background:var(--blue-light)}
+.info-box.warn{border-color:var(--yellow);background:var(--yellow-light)}
+.info-box.danger{border-color:var(--red);background:var(--red-light)}
+.info-box.success{border-color:var(--main);background:var(--main-light)}
+.info-box .info-title{font-weight:700;margin-bottom:4px}
+
+/* ===== 단계 ===== */
+.steps{margin:12px 0;padding:0;list-style:none;counter-reset:step}
+.steps li{position:relative;padding:8px 0 8px 40px;margin-bottom:6px;counter-increment:step}
+.steps li::before{content:counter(step);position:absolute;left:0;top:6px;width:28px;height:28px;background:var(--main);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+
+/* ===== 표 ===== */
+table.data-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;page-break-inside:avoid}
+table.data-table th{background:var(--main);color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+table.data-table td{padding:7px 10px;border-bottom:1px solid var(--gray-200)}
+table.data-table tr:nth-child(even) td{background:var(--gray-50)}
+
+/* ===== 관리자 전용 ===== */
+.admin-only{border:2px solid var(--red);border-radius:8px;padding:16px;margin:16px 0;background:#fff5f5;page-break-inside:avoid}
+.admin-only-badge{display:inline-block;background:var(--red);color:#fff;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:700;margin-bottom:8px}
+
+/* ===== FAQ ===== */
+.faq-item{margin:10px 0;padding:10px 14px;border:1px solid var(--gray-200);border-radius:6px;page-break-inside:avoid}
+.faq-q{font-weight:700;color:var(--main-dark);margin-bottom:4px}
+.faq-a{color:var(--gray-700);padding-left:8px;border-left:3px solid var(--main-light)}
+
+/* ===== 푸터 ===== */
+.doc-footer{text-align:center;padding:20px 0;margin-top:40px;border-top:1px solid var(--gray-200);color:var(--gray-500);font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ==================== 표지 ==================== -->
+<div class="page page-cover">
+  <div class="cover-content">
+    <div class="cover-bar"></div>
+    <div class="cover-title">국어농장 성적표 생성 프로그램</div>
+    <div class="cover-subtitle">본사 관리자용 매뉴얼</div>
+    <div style="margin:20px 0">
+      <span class="cover-badge">ADMINISTRATOR GUIDE</span>
+    </div>
+    <div class="cover-meta">Version 1.0 | 2025년 1월</div>
+    <div class="cover-meta" style="margin-top:60px;color:var(--gray-400)">본 문서는 본사 관리자(admin) 전용 매뉴얼입니다.<br>모든 기관의 데이터 관리, 사용자 관리, 가입 승인 등 관리자 전용 기능을 포함합니다.</div>
+  </div>
+</div>
+
+<!-- ==================== 목차 ==================== -->
+<div class="page">
+  <h2 style="border-left:none;text-align:center;font-size:24px;margin-bottom:24px">목 차</h2>
+  <ul class="toc-list">
+    <li class="toc-main"><span>1. 시작하기</span></li>
+    <li class="toc-sub"><span>1.1 로그인</span></li>
+    <li class="toc-sub"><span>1.2 화면 구성</span></li>
+    <li class="toc-sub"><span>1.3 비밀번호 변경</span></li>
+    <li class="toc-main"><span>2. 대시보드</span></li>
+    <li class="toc-main"><span>3. 시험 관리</span></li>
+    <li class="toc-sub"><span>3.1 시험 목록 / 3.2 시험 생성</span></li>
+    <li class="toc-sub"><span>3.3 문제 추가 / 3.4 CSV 가져오기 및 내보내기</span></li>
+    <li class="toc-main"><span>4. 답안 입력</span></li>
+    <li class="toc-main"><span>5. 채점 및 분석</span></li>
+    <li class="toc-main"><span>6. 성적표 생성</span></li>
+    <li class="toc-main"><span>7. 오답 노트</span></li>
+    <li class="toc-main"><span>8. 학생 관리</span></li>
+    <li class="toc-sub"><span>8.1 학생 목록 / 8.2 학생 추가.수정.삭제</span></li>
+    <li class="toc-sub"><span>8.3 계정 관리 / 8.4 중복 학생 찾기 및 병합</span></li>
+    <li class="toc-main"><span>9. 수강반 관리</span></li>
+    <li class="toc-main"><span>10. 과제 관리</span></li>
+    <li class="toc-sub"><span>10.1 과제 생성 / 10.2 PDF 업로드</span></li>
+    <li class="toc-sub"><span>10.3 제출 현황 / 10.4 유사도 검사</span></li>
+    <li class="toc-main"><span>11. 설정 (관리자 전용 포함)</span></li>
+    <li class="toc-sub"><span>11.1 데이터 백업 및 복원</span></li>
+    <li class="toc-sub"><span>11.2 관리자 메뉴 - 가입 승인 대기</span></li>
+    <li class="toc-sub"><span>11.3 관리자 메뉴 - 사용자 관리</span></li>
+    <li class="toc-main"><span>12. 부록</span></li>
+    <li class="toc-sub"><span>12.1 FAQ / 12.2 문제 해결</span></li>
+  </ul>
+</div>
+
+<!-- ==================== 1. 시작하기 (1/2) ==================== -->
+<div class="page">
+<h2>1. 시작하기</h2>
+
+<h3>1.1 로그인</h3>
+<p>본사 관리자는 메인 포털(<code>index.html</code>)을 통해 로그인합니다. 관리자 계정의 아이디와 비밀번호를 입력하여 접속합니다.</p>
+
+<ol class="steps">
+  <li>웹 브라우저에서 프로그램 URL에 접속합니다.</li>
+  <li>아이디(사용자명)와 비밀번호를 입력합니다.</li>
+  <li><strong>로그인</strong> 버튼을 클릭합니다.</li>
+  <li>인증이 완료되면 대시보드로 이동합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">로그인 화면</div>
+  <div style="max-width:320px;margin:0 auto;text-align:center">
+    <div style="font-size:24px;margin-bottom:4px">🌾</div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:16px">국어<span style="color:var(--main)">농장</span> 성적표 생성 프로그램</div>
+    <div style="margin-bottom:8px">
+      <span class="ui-label">아이디</span>
+      <div class="ui-input" style="width:100%;text-align:left;color:var(--gray-400)">아이디를 입력하세요</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <span class="ui-label">비밀번호</span>
+      <div class="ui-input" style="width:100%;text-align:left;color:var(--gray-400)">********</div>
+    </div>
+    <div class="ui-btn primary" style="width:100%;padding:8px;text-align:center">로그인</div>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:10px">계정이 없으신가요? <span style="color:var(--blue)">회원가입</span></div>
+  </div>
+</div>
+
+<div class="info-box tip">
+  <div class="info-title">💡 팁</div>
+  본사 관리자 계정은 시스템 최초 설정 시 생성됩니다. 기관 관리자(org_admin)와 달리 모든 기관의 데이터에 접근할 수 있습니다.
+</div>
+</div>
+
+<!-- ==================== 1. 시작하기 (2/2) ==================== -->
+<div class="page">
+<h3>1.2 화면 구성</h3>
+<p>로그인 후 메인 화면은 <strong>사이드바 + 헤더 + 콘텐츠 영역</strong>으로 구성됩니다. 본사 관리자는 설정 메뉴를 포함한 모든 기능에 접근할 수 있습니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">관리자 화면 전체 레이아웃</div>
+  <div style="display:flex;gap:0;border:2px solid var(--gray-300);border-radius:8px;overflow:hidden;min-height:340px">
+    <!-- 사이드바 -->
+    <div style="width:200px;background:var(--gray-900);color:#fff;padding:12px;font-size:11px;flex-shrink:0">
+      <div style="font-weight:700;font-size:14px;margin-bottom:12px">🌾 국어<span style="color:var(--main)">농장</span></div>
+      <div class="ui-nav-section" style="color:var(--gray-400)">메인</div>
+      <div class="ui-nav-item active">🏠 대시보드</div>
+      <div class="ui-nav-section" style="color:var(--gray-400)">시험 관리</div>
+      <div class="ui-nav-item" style="color:#ccc">📝 시험 관리</div>
+      <div class="ui-nav-item" style="color:#ccc">✏️ 답안 입력</div>
+      <div class="ui-nav-item" style="color:#ccc">📊 채점 및 분석</div>
+      <div class="ui-nav-section" style="color:var(--gray-400)">학생 &amp; 수강반</div>
+      <div class="ui-nav-item" style="color:#ccc">👥 학생 관리</div>
+      <div class="ui-nav-item" style="color:#ccc">📚 수강반 관리</div>
+      <div class="ui-nav-section" style="color:var(--gray-400)">과제 &amp; 성적</div>
+      <div class="ui-nav-item" style="color:#ccc">📋 과제 관리</div>
+      <div class="ui-nav-item" style="color:#ccc">📄 성적표 생성</div>
+      <div class="ui-nav-item" style="color:#ccc">📓 오답 노트</div>
+      <div class="ui-nav-section" style="color:var(--gray-400)">설정</div>
+      <div class="ui-nav-item" style="color:#ccc">⚙️ 설정</div>
+      <div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--gray-700);font-size:10px">
+        <div>👤 관리자</div>
+        <div style="color:var(--gray-400)">국어농장 본사</div>
+      </div>
+    </div>
+    <!-- 메인 영역 -->
+    <div style="flex:1;display:flex;flex-direction:column">
+      <!-- 헤더 -->
+      <div style="background:#fff;border-bottom:1px solid var(--gray-200);padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;font-size:15px">📌 대시보드</div>
+        <div style="font-size:12px;color:var(--gray-500)">☰ 메뉴</div>
+      </div>
+      <!-- 콘텐츠 -->
+      <div style="flex:1;background:var(--gray-50);padding:16px">
+        <div style="font-size:12px;color:var(--gray-500);text-align:center;padding-top:40px">
+          [콘텐츠 영역]<br>선택한 메뉴에 따라 내용이 변경됩니다
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-500);margin-top:6px">
+    ◀ 사이드바: 전체 메뉴 네비게이션 &nbsp;|&nbsp; ▲ 헤더: 현재 페이지 제목 + 메뉴 &nbsp;|&nbsp; 콘텐츠: 각 기능 화면
+  </div>
+</div>
+
+<div class="info-box warn">
+  <div class="info-title">⚠️ 관리자 vs 기관 관리자</div>
+  본사 관리자(admin)는 설정 페이지에서 <strong>관리자 메뉴</strong>(가입 승인, 사용자 관리)가 추가로 표시됩니다. 기관 관리자(org_admin)에게는 이 메뉴가 보이지 않습니다.
+</div>
+
+<h3>1.3 비밀번호 변경</h3>
+<p>설정 페이지 또는 사이드바 하단 사용자 메뉴에서 비밀번호를 변경할 수 있습니다.</p>
+<ol class="steps">
+  <li>사이드바에서 <strong>⚙️ 설정</strong>을 클릭합니다.</li>
+  <li><strong>비밀번호 변경</strong> 섹션에서 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인을 입력합니다.</li>
+  <li><strong>변경</strong> 버튼을 클릭합니다.</li>
+</ol>
+</div>
+
+<!-- ==================== 2. 대시보드 ==================== -->
+<div class="page">
+<h2>2. 대시보드</h2>
+<p>로그인 후 가장 먼저 표시되는 화면으로, 현재 상태를 한눈에 파악할 수 있습니다.</p>
+
+<h4>주요 구성</h4>
+<ul>
+  <li><strong>환영 인사</strong>: 관리자 이름, 소속, 현재 날짜를 표시</li>
+  <li><strong>할 일 피드</strong>: 진행중인 과제 수, 답안 미입력 시험 수, 미제출 과제 등</li>
+  <li><strong>최근 활동 타임라인</strong>: 시험 생성, 학생 추가, 채점 활동 등 최근 이벤트</li>
+</ul>
+
+<div class="ui-diagram">
+  <div class="ui-title">대시보드 화면</div>
+  <!-- 환영 카드 -->
+  <div class="ui-box green" style="text-align:center;padding:16px">
+    <div style="font-size:16px;font-weight:700">👋 안녕하세요, 관리자님!</div>
+    <div style="font-size:12px;color:var(--main-dark)">2025년 1월 15일 수요일 | 국어농장 본사</div>
+  </div>
+  <!-- 할 일 / 활동 -->
+  <div class="ui-split" style="margin-top:10px">
+    <div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:6px">📋 할 일</div>
+      <div class="ui-card">
+        <div>📋 진행중인 과제: <strong style="color:var(--blue)">3개</strong></div>
+      </div>
+      <div class="ui-card">
+        <div>📝 답안 미입력 시험: <strong style="color:var(--yellow)">2개</strong></div>
+      </div>
+      <div class="ui-card">
+        <div>👥 미제출 학생: <strong style="color:var(--red)">5명</strong></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:6px">🕐 최근 활동</div>
+      <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">10분 전</span> &middot; 시험 "1월 모의고사" 생성됨</div>
+      <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">1시간 전</span> &middot; 학생 3명 추가됨</div>
+      <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">2시간 전</span> &middot; "12월 시험" 채점 완료</div>
+      <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">어제</span> &middot; 과제 "독해 연습" 마감됨</div>
+    </div>
+  </div>
+</div>
+
+<div class="info-box tip">
+  <div class="info-title">💡 팁</div>
+  할 일 항목을 클릭하면 해당 기능 페이지로 바로 이동합니다. 예를 들어 "진행중인 과제"를 클릭하면 과제 관리 페이지로 이동합니다.
+</div>
+</div>
+
+<!-- ==================== 3. 시험 관리 (1/3) ==================== -->
+<div class="page">
+<h2>3. 시험 관리</h2>
+<p>시험의 생성, 수정, 삭제 및 문제 관리를 수행하는 핵심 기능입니다. 본사 관리자는 <strong>모든 기관의 시험</strong>을 조회하고 관리할 수 있습니다.</p>
+
+<h3>3.1 시험 목록</h3>
+<p>사이드바에서 <strong>📝 시험 관리</strong>를 클릭하면 시험 목록이 표시됩니다. 시행일 기준 최신순으로 정렬됩니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">시험 목록 화면</div>
+  <div class="ui-header">
+    <span>📝 시험 관리</span>
+    <span class="ui-btn primary">+ 새 시험 만들기</span>
+  </div>
+  <div style="padding:10px">
+    <div class="ui-input" style="width:100%;margin-bottom:8px;color:var(--gray-400)">🔍 시험명 검색...</div>
+    <div class="ui-card" style="border-left:3px solid var(--main)">
+      <div style="display:flex;justify-content:space-between">
+        <strong>1월 정기 모의고사</strong>
+        <span class="ui-badge green">25문제</span>
+      </div>
+      <div style="font-size:11px;color:var(--gray-500)">시행일: 2025-01-15 | 서울지점</div>
+    </div>
+    <div class="ui-card">
+      <div style="display:flex;justify-content:space-between">
+        <strong>12월 월말 시험</strong>
+        <span class="ui-badge blue">30문제</span>
+      </div>
+      <div style="font-size:11px;color:var(--gray-500)">시행일: 2024-12-20 | 부산지점</div>
+    </div>
+    <div class="ui-card">
+      <div style="display:flex;justify-content:space-between">
+        <strong>11월 중간고사</strong>
+        <span class="ui-badge blue">20문제</span>
+      </div>
+      <div style="font-size:11px;color:var(--gray-500)">시행일: 2024-11-10 | 서울지점</div>
+    </div>
+  </div>
+</div>
+
+<h3>3.2 시험 생성</h3>
+<ol class="steps">
+  <li>시험 관리 화면에서 <strong>새 시험 만들기</strong> 버튼을 클릭합니다.</li>
+  <li>시험명, 시행일, 설명을 입력합니다.</li>
+  <li><strong>저장</strong>을 클릭하여 시험을 생성합니다.</li>
+  <li>생성된 시험을 클릭하여 문제를 추가합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">시험 생성 폼</div>
+  <div class="ui-box" style="max-width:400px;margin:0 auto">
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px;text-align:center">새 시험 만들기</div>
+    <div style="margin-bottom:8px">
+      <span class="ui-label">시험명 *</span>
+      <div class="ui-input" style="width:100%">예: 1월 정기 모의고사</div>
+    </div>
+    <div style="margin-bottom:8px">
+      <span class="ui-label">시행일 *</span>
+      <div class="ui-input" style="width:100%">2025-01-15</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <span class="ui-label">설명</span>
+      <div class="ui-input" style="width:100%;min-height:40px">시험에 대한 간단한 설명</div>
+    </div>
+    <div style="text-align:right">
+      <span class="ui-btn secondary">취소</span>
+      <span class="ui-btn primary">저장</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 3. 시험 관리 (2/3) ==================== -->
+<div class="page">
+<h3>3.3 시험 수정 및 삭제</h3>
+<ul>
+  <li><strong>수정</strong>: 시험 목록에서 시험을 선택한 후 시험명, 시행일, 설명을 변경할 수 있습니다.</li>
+  <li><strong>삭제</strong>: 시험 상세 화면에서 <strong>시험 삭제</strong> 버튼을 클릭합니다. 확인 대화상자가 표시됩니다.</li>
+</ul>
+<div class="info-box danger">
+  <div class="info-title">🚨 주의</div>
+  시험을 삭제하면 해당 시험의 모든 문제, 답안, 성적 데이터가 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+</div>
+
+<h3>3.4 문제 추가</h3>
+<p>시험을 선택한 후 <strong>문제 추가</strong> 버튼을 클릭하면 문제 편집 모달이 나타납니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">문제 추가 모달</div>
+  <div class="ui-box" style="max-width:440px;margin:0 auto">
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px;text-align:center">문제 추가</div>
+    <div class="ui-grid cols-2">
+      <div><span class="ui-label">문제 번호</span><div class="ui-input" style="width:100%">1 (자동)</div></div>
+      <div><span class="ui-label">문제 유형</span><div class="ui-input" style="width:100%">객관식 ▼</div></div>
+    </div>
+    <div class="ui-grid cols-2" style="margin-top:6px">
+      <div><span class="ui-label">배점</span><div class="ui-input" style="width:100%">4</div></div>
+      <div><span class="ui-label">지문</span><div class="ui-input" style="width:100%">가</div></div>
+    </div>
+    <div class="ui-grid cols-2" style="margin-top:6px">
+      <div><span class="ui-label">영역</span><div class="ui-input" style="width:100%">독서 ▼</div></div>
+      <div><span class="ui-label">하위영역</span><div class="ui-input" style="width:100%">사실적 이해</div></div>
+    </div>
+    <div style="margin-top:8px">
+      <span class="ui-label">정답 (객관식)</span>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">1</span>
+        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">2</span>
+        <span class="ui-btn primary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">3</span>
+        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">4</span>
+        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">5</span>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:12px">
+      <span class="ui-btn secondary">취소</span>
+      <span class="ui-btn primary">저장</span>
+    </div>
+  </div>
+</div>
+
+<table class="data-table">
+  <tr><th>필드</th><th>설명</th><th>필수</th></tr>
+  <tr><td>문제 번호</td><td>자동 증가. 수동 입력도 가능</td><td>예</td></tr>
+  <tr><td>문제 유형</td><td>객관식(1~5번 선택) 또는 서술형(텍스트 입력)</td><td>예</td></tr>
+  <tr><td>배점</td><td>해당 문제의 점수</td><td>예</td></tr>
+  <tr><td>영역</td><td>문법, 독서, 문학 등 대분류</td><td>아니오</td></tr>
+  <tr><td>하위영역</td><td>사실적 이해, 추론적 이해 등 소분류</td><td>아니오</td></tr>
+  <tr><td>지문</td><td>해당 문제가 참조하는 지문 기호 (가, 나, 다 등)</td><td>아니오</td></tr>
+  <tr><td>정답</td><td>객관식: 1~5 선택 / 서술형: 텍스트 입력</td><td>예</td></tr>
+</table>
+</div>
+
+<!-- ==================== 3. 시험 관리 (3/3) ==================== -->
+<div class="page">
+<h3>3.5 CSV 가져오기 및 내보내기</h3>
+<p>문제를 CSV 파일로 일괄 등록하거나 내보낼 수 있습니다.</p>
+
+<h4>CSV 가져오기</h4>
+<ol class="steps">
+  <li>시험 상세 화면에서 <strong>CSV 가져오기</strong> 버튼을 클릭합니다.</li>
+  <li>준비된 CSV 파일을 선택합니다.</li>
+  <li>미리보기를 확인한 후 <strong>가져오기</strong>를 클릭합니다.</li>
+</ol>
+
+<div class="info-box tip">
+  <div class="info-title">💡 CSV 파일 형식</div>
+  <code>번호,유형,배점,영역,하위영역,지문,정답</code><br>
+  예시: <code>1,객관식,4,독서,사실적 이해,가,3</code><br>
+  인코딩은 반드시 <strong>UTF-8</strong>을 사용하세요.
+</div>
+
+<h4>CSV 내보내기</h4>
+<p>시험 상세 화면에서 <strong>CSV 내보내기</strong> 버튼을 클릭하면 현재 문제 목록이 CSV 파일로 다운로드됩니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">시험 상세 - 문제 시트</div>
+  <div class="ui-header">
+    <span>1월 정기 모의고사</span>
+    <div>
+      <span class="ui-btn blue">CSV 가져오기</span>
+      <span class="ui-btn secondary">CSV 내보내기</span>
+      <span class="ui-btn danger">시험 삭제</span>
+    </div>
+  </div>
+  <table class="ui-table" style="margin-top:0">
+    <tr><th>번호</th><th>유형</th><th>배점</th><th>영역</th><th>하위영역</th><th>지문</th><th>정답</th><th>관리</th></tr>
+    <tr><td>1</td><td>객관식</td><td>4</td><td>독서</td><td>사실적 이해</td><td>가</td><td>3</td><td>✏️ 🗑️</td></tr>
+    <tr><td>2</td><td>객관식</td><td>4</td><td>문법</td><td>음운</td><td>-</td><td>2</td><td>✏️ 🗑️</td></tr>
+    <tr><td>3</td><td>서술형</td><td>8</td><td>문학</td><td>감상</td><td>나</td><td>(텍스트)</td><td>✏️ 🗑️</td></tr>
+  </table>
+  <div style="padding:8px;text-align:center">
+    <span class="ui-btn primary">+ 문제 추가</span>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 4. 답안 입력 ==================== -->
+<div class="page">
+<h2>4. 답안 입력</h2>
+<p>학생들의 시험 답안을 입력하는 화면입니다. 스프레드시트 형식으로 한 화면에서 여러 학생의 답안을 입력할 수 있습니다.</p>
+
+<h3>4.1 답안 입력 방법</h3>
+<ol class="steps">
+  <li>사이드바에서 <strong>✏️ 답안 입력</strong>을 클릭합니다.</li>
+  <li>상단 드롭다운에서 <strong>시험을 선택</strong>합니다.</li>
+  <li>답안 시트에서 학생명 셀을 클릭하면 학생 선택 모달이 열립니다.</li>
+  <li>각 문제 번호 열에 해당 학생의 답안을 입력합니다.
+    <ul>
+      <li><strong>객관식</strong>: 1~5 숫자를 클릭하여 선택</li>
+      <li><strong>서술형</strong>: 답안 텍스트 입력 후 점수 부여</li>
+    </ul>
+  </li>
+  <li><strong>저장하기</strong> 버튼을 클릭하여 답안을 저장합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">답안 입력 시트</div>
+  <div class="ui-header">
+    <span>✏️ 답안 입력</span>
+    <div>
+      <span class="ui-btn blue">CSV 업로드</span>
+      <span class="ui-btn secondary">CSV 내보내기</span>
+    </div>
+  </div>
+  <div style="padding:8px">
+    <div class="ui-input" style="width:250px;margin-bottom:8px">📋 시험 선택: 1월 정기 모의고사 ▼</div>
+    <div style="overflow-x:auto">
+      <table class="ui-table">
+        <tr><th></th><th>학생명</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>...</th><th>점수</th><th>관리</th></tr>
+        <tr>
+          <td>1</td><td style="color:var(--blue);font-weight:600">홍길동</td>
+          <td><span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px">3</span></td>
+          <td><span style="background:var(--red);color:#fff;padding:1px 6px;border-radius:3px">1</span></td>
+          <td><span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px">2</span></td>
+          <td><span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px">4</span></td>
+          <td>-</td><td>...</td>
+          <td><strong>85</strong></td><td>🗑️</td>
+        </tr>
+        <tr>
+          <td>2</td><td style="color:var(--blue);font-weight:600">김철수</td>
+          <td><span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px">3</span></td>
+          <td><span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px">2</span></td>
+          <td><span style="background:var(--red);color:#fff;padding:1px 6px;border-radius:3px">4</span></td>
+          <td>-</td><td>-</td><td>...</td>
+          <td><strong>72</strong></td><td>🗑️</td>
+        </tr>
+        <tr><td colspan="10" style="text-align:center;color:var(--gray-400)">+ 행 추가 (클릭하여 학생 선택)</td></tr>
+      </table>
+    </div>
+    <div style="text-align:right;margin-top:8px">
+      <span class="ui-btn primary" style="padding:8px 24px">💾 저장하기</span>
+    </div>
+  </div>
+</div>
+
+<div class="info-box tip">
+  <div class="info-title">💡 색상 의미</div>
+  정답인 경우 <span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px;font-size:12px">초록</span>, 오답인 경우 <span style="background:var(--red);color:#fff;padding:1px 6px;border-radius:3px;font-size:12px">빨강</span>으로 표시됩니다.
+</div>
+
+<h3>4.2 CSV 일괄 업로드</h3>
+<p>여러 학생의 답안을 CSV 파일로 한번에 업로드할 수 있습니다.</p>
+<div class="info-box tip">
+  <div class="info-title">💡 답안 CSV 형식</div>
+  첫 행은 헤더: <code>학생명,1,2,3,4,5,...</code><br>
+  데이터 행: <code>홍길동,3,2,1,4,5,...</code><br>
+  서술형 문제는 점수를 직접 입력합니다.
+</div>
+</div>
+
+<!-- ==================== 5. 채점 및 분석 (1/2) ==================== -->
+<div class="page">
+<h2>5. 채점 및 분석</h2>
+<p>시험별 채점 현황과 문제별 통계를 확인할 수 있습니다.</p>
+
+<h3>5.1 채점 현황</h3>
+<ol class="steps">
+  <li>사이드바에서 <strong>📊 채점 및 분석</strong>을 클릭합니다.</li>
+  <li>상단 드롭다운에서 시험을 선택합니다.</li>
+  <li>요약 카드(평균, 최고, 최저, 응시인원)를 확인합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">채점 현황 - 요약 카드</div>
+  <div class="ui-grid cols-4">
+    <div class="ui-stat"><div class="num">78.5</div><div class="label">평균 점수</div></div>
+    <div class="ui-stat"><div class="num" style="color:var(--blue)">98</div><div class="label">최고 점수</div></div>
+    <div class="ui-stat"><div class="num" style="color:var(--red)">42</div><div class="label">최저 점수</div></div>
+    <div class="ui-stat"><div class="num" style="color:var(--gray-700)">25</div><div class="label">응시 인원</div></div>
+  </div>
+</div>
+
+<h3>5.2 학생별 성적 테이블</h3>
+<div class="ui-diagram">
+  <div class="ui-title">학생별 성적</div>
+  <table class="ui-table">
+    <tr><th>순위</th><th>이름</th><th>학교</th><th>점수</th><th>정답률</th></tr>
+    <tr><td>1</td><td>이영희</td><td>서울중</td><td><strong>98</strong></td><td>98%</td></tr>
+    <tr><td>2</td><td>홍길동</td><td>한국중</td><td><strong>85</strong></td><td>85%</td></tr>
+    <tr><td>3</td><td>김철수</td><td>서울중</td><td><strong>72</strong></td><td>72%</td></tr>
+  </table>
+</div>
+
+<h3>5.3 서술형 채점</h3>
+<p>서술형 문제가 포함된 시험의 경우, 각 학생의 서술형 답안에 대해 수동으로 점수를 부여해야 합니다.</p>
+
+<h3>5.4 문제별 분석</h3>
+<p>각 문제를 클릭하면 상세 분석 모달이 나타납니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">문제별 분석 모달</div>
+  <div class="ui-box" style="max-width:400px;margin:0 auto">
+    <div style="font-weight:700;text-align:center;margin-bottom:8px">문제 1번 분석</div>
+    <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">영역: 독서 | 배점: 4점 | 정답: 3번</div>
+    <div style="margin-bottom:6px">
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">1번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:8%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">8%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">2번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:12%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">12%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px;font-weight:700;color:var(--main)">3번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:72%;background:var(--main);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px;font-weight:700">72%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">4번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:4%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">4%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">5번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:4%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">4%</span></div>
+    </div>
+    <div style="text-align:center;font-size:13px;color:var(--main);font-weight:600">정답률: 72%</div>
+  </div>
+</div>
+
+<h3>5.5 성적 CSV 내보내기</h3>
+<p>채점 결과 전체를 CSV 파일로 내보내어 외부에서 활용할 수 있습니다.</p>
+</div>
+
+<!-- ==================== 6. 성적표 생성 ==================== -->
+<div class="page">
+<h2>6. 성적표 생성</h2>
+<p>학생별 성적표를 생성하고 PDF로 저장하거나 인쇄할 수 있습니다.</p>
+
+<ol class="steps">
+  <li>사이드바에서 <strong>📄 성적표 생성</strong>을 클릭합니다.</li>
+  <li>시험을 선택합니다.</li>
+  <li>학생을 검색하여 선택합니다.</li>
+  <li>성적표 미리보기를 확인합니다.</li>
+  <li><strong>PDF 다운로드</strong> 또는 <strong>인쇄</strong> 버튼을 클릭합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">성적표 미리보기</div>
+  <div class="ui-box" style="max-width:480px;margin:0 auto">
+    <div style="text-align:center;border-bottom:2px solid var(--main);padding-bottom:8px;margin-bottom:10px">
+      <div style="font-size:16px;font-weight:800">국어농장 성적표</div>
+      <div style="font-size:12px;color:var(--gray-500)">1월 정기 모의고사</div>
+    </div>
+    <div class="ui-grid cols-2" style="font-size:12px;margin-bottom:10px">
+      <div><strong>이름:</strong> 홍길동</div>
+      <div><strong>학교:</strong> 서울중학교 2학년</div>
+      <div><strong>총점:</strong> <span style="color:var(--main);font-weight:700">85 / 100</span></div>
+      <div><strong>순위:</strong> 2등 / 25명</div>
+    </div>
+    <div style="font-weight:600;font-size:12px;margin-bottom:4px">영역별 분석</div>
+    <table class="ui-table" style="font-size:11px">
+      <tr><th>영역</th><th>맞은 수</th><th>총 문제</th><th>정답률</th></tr>
+      <tr><td>독서</td><td>8</td><td>10</td><td>80%</td></tr>
+      <tr><td>문학</td><td>7</td><td>8</td><td>88%</td></tr>
+      <tr><td>문법</td><td>6</td><td>7</td><td>86%</td></tr>
+    </table>
+    <div style="font-weight:600;font-size:12px;margin:8px 0 4px">문제별 정오표</div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px;font-size:11px">
+      <span style="background:var(--main);color:#fff;padding:2px 6px;border-radius:3px">1.O</span>
+      <span style="background:var(--red);color:#fff;padding:2px 6px;border-radius:3px">2.X</span>
+      <span style="background:var(--main);color:#fff;padding:2px 6px;border-radius:3px">3.O</span>
+      <span style="background:var(--main);color:#fff;padding:2px 6px;border-radius:3px">4.O</span>
+      <span style="background:var(--red);color:#fff;padding:2px 6px;border-radius:3px">5.X</span>
+      <span style="background:var(--main);color:#fff;padding:2px 6px;border-radius:3px">6.O</span>
+      <span>...</span>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <span class="ui-btn primary">📥 PDF 다운로드</span>
+    <span class="ui-btn secondary">🖨️ 인쇄</span>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 7. 오답 노트 ==================== -->
+<div class="page">
+<h2>7. 오답 노트</h2>
+<p>학생이 틀린 문제를 모아 영역별로 분석한 오답 노트를 생성합니다.</p>
+
+<ol class="steps">
+  <li>사이드바에서 <strong>📓 오답 노트</strong>를 클릭합니다.</li>
+  <li>학생을 검색하여 선택합니다.</li>
+  <li>포함할 시험을 하나 이상 선택합니다 (전체 선택 가능).</li>
+  <li><strong>오답 노트 생성</strong> 버튼을 클릭합니다.</li>
+  <li>미리보기를 확인한 후 <strong>PDF 다운로드</strong>를 클릭합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">오답 노트 미리보기</div>
+  <div class="ui-box" style="max-width:480px;margin:0 auto">
+    <div style="text-align:center;border-bottom:2px solid var(--main);padding-bottom:8px;margin-bottom:10px">
+      <div style="font-size:16px;font-weight:800">오답 노트</div>
+      <div style="font-size:12px;color:var(--gray-500)">홍길동 | 1월 정기 모의고사</div>
+    </div>
+    <div style="font-weight:600;font-size:12px;margin-bottom:6px">영역별 정답률 요약</div>
+    <div style="display:flex;align-items:center;margin:3px 0;font-size:12px"><span style="width:50px">독서</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:80%;background:var(--main);height:100%"></div></div><span style="width:35px;text-align:right">80%</span></div>
+    <div style="display:flex;align-items:center;margin:3px 0;font-size:12px"><span style="width:50px">문학</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:88%;background:var(--main);height:100%"></div></div><span style="width:35px;text-align:right">88%</span></div>
+    <div style="display:flex;align-items:center;margin:3px 0;font-size:12px"><span style="width:50px">문법</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:57%;background:var(--yellow);height:100%"></div></div><span style="width:35px;text-align:right">57%</span></div>
+    <div style="margin-top:10px;font-weight:600;font-size:12px;margin-bottom:4px">오답 상세</div>
+    <div class="ui-card">
+      <div style="font-weight:600">문제 2번 <span class="ui-badge red">오답</span></div>
+      <div style="font-size:11px;color:var(--gray-500)">영역: 독서 | 배점: 4점</div>
+      <div style="font-size:12px;margin-top:4px">내 답: <span style="color:var(--red);font-weight:600">1번</span> &rarr; 정답: <span style="color:var(--main);font-weight:600">2번</span></div>
+    </div>
+    <div class="ui-card">
+      <div style="font-weight:600">문제 5번 <span class="ui-badge red">오답</span></div>
+      <div style="font-size:11px;color:var(--gray-500)">영역: 문법 | 배점: 3점</div>
+      <div style="font-size:12px;margin-top:4px">내 답: <span style="color:var(--red);font-weight:600">3번</span> &rarr; 정답: <span style="color:var(--main);font-weight:600">5번</span></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <span class="ui-btn primary">📥 PDF 다운로드</span>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 8. 학생 관리 (1/2) ==================== -->
+<div class="page">
+<h2>8. 학생 관리</h2>
+<p>학생 정보의 등록, 수정, 삭제 및 학생 계정 관리를 수행합니다. 본사 관리자는 <strong>모든 기관의 학생</strong>을 관리할 수 있습니다.</p>
+
+<h3>8.1 학생 목록</h3>
+<p>이름 검색, 수강반 필터링이 가능하며, 체크박스로 여러 학생을 선택하여 일괄 작업을 수행할 수 있습니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">학생 관리 화면</div>
+  <div class="ui-header">
+    <span>👥 학생 관리</span>
+    <div>
+      <span class="ui-btn secondary">🔍 중복 학생 찾기</span>
+      <span class="ui-btn secondary">🔄 모두 자동 병합</span>
+    </div>
+  </div>
+  <div style="padding:8px">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div class="ui-input" style="flex:1">🔍 이름으로 검색...</div>
+      <div class="ui-input" style="width:150px">수강반 필터 ▼</div>
+    </div>
+    <table class="ui-table">
+      <tr><th>☐</th><th>이름</th><th>학교</th><th>학년</th><th>반</th><th>번호</th><th>수강반</th><th>관리</th></tr>
+      <tr><td>☐</td><td>홍길동</td><td>서울중</td><td>2</td><td>3</td><td>15</td><td>A반</td><td>✏️ 🗑️</td></tr>
+      <tr><td>☐</td><td>김철수</td><td>한국중</td><td>2</td><td>1</td><td>8</td><td>B반</td><td>✏️ 🗑️</td></tr>
+      <tr><td>☐</td><td>이영희</td><td>서울중</td><td>3</td><td>2</td><td>12</td><td>A반</td><td>✏️ 🗑️</td></tr>
+    </table>
+    <div style="margin-top:6px;display:flex;gap:6px">
+      <span class="ui-btn primary">+ 학생 추가</span>
+      <span class="ui-btn blue">📚 수강반 일괄 등록</span>
+    </div>
+  </div>
+</div>
+
+<h3>8.2 학생 추가, 수정, 삭제</h3>
+<h4>학생 추가</h4>
+<ol class="steps">
+  <li><strong>+ 학생 추가</strong> 버튼을 클릭합니다.</li>
+  <li>이름, 학교, 학년, 반, 번호를 입력합니다.</li>
+  <li><strong>저장</strong>을 클릭합니다.</li>
+</ol>
+
+<h4>학생 수정</h4>
+<p>학생 목록에서 ✏️ (편집) 아이콘을 클릭하면 학생 수정 모달이 열립니다.</p>
+
+<h4>학생 삭제</h4>
+<p>🗑️ (삭제) 아이콘을 클릭하면 확인 대화상자가 나타납니다.</p>
+
+<div class="info-box danger">
+  <div class="info-title">🚨 주의</div>
+  학생을 삭제하면 해당 학생의 모든 시험 답안, 성적 데이터가 함께 삭제됩니다.
+</div>
+</div>
+
+<!-- ==================== 8. 학생 관리 (2/2) ==================== -->
+<div class="page">
+<h3>8.3 계정 관리</h3>
+<p>학생이 학생 포털(<code>student.html</code>)에 로그인할 수 있도록 계정을 생성하고 관리합니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">학생 계정 생성 모달</div>
+  <div class="ui-box" style="max-width:360px;margin:0 auto">
+    <div style="font-weight:700;text-align:center;margin-bottom:10px">학생 계정 생성</div>
+    <div style="margin-bottom:6px"><span class="ui-label">학생 선택</span><div class="ui-input" style="width:100%">홍길동 (서울중 2-3)</div></div>
+    <div style="margin-bottom:6px"><span class="ui-label">아이디 *</span><div class="ui-input" style="width:100%">hong2025</div></div>
+    <div style="margin-bottom:6px"><span class="ui-label">비밀번호 *</span><div class="ui-input" style="width:100%">********</div></div>
+    <div style="margin-bottom:8px"><span class="ui-label">비밀번호 확인 *</span><div class="ui-input" style="width:100%">********</div></div>
+    <div style="text-align:right">
+      <span class="ui-btn secondary">취소</span>
+      <span class="ui-btn primary">생성</span>
+    </div>
+  </div>
+</div>
+
+<p>기존 계정의 수정 및 삭제도 계정 관리 탭에서 수행할 수 있습니다.</p>
+
+<h3>8.4 중복 학생 찾기 및 병합</h3>
+<p>동일한 학생이 중복 등록된 경우를 찾아 병합합니다.</p>
+
+<ol class="steps">
+  <li><strong>중복 학생 찾기</strong> 버튼을 클릭합니다.</li>
+  <li>시스템이 이름, 학교, 학년 등을 기준으로 중복 가능성이 있는 학생을 표시합니다.</li>
+  <li>각 중복 그룹을 확인하고 <strong>병합</strong>을 클릭합니다.</li>
+  <li>병합된 학생은 모든 시험 기록을 유지합니다.</li>
+</ol>
+
+<h4>자동 병합</h4>
+<p><strong>모두 자동 병합</strong> 버튼을 클릭하면 이름, 학교, 학년이 정확히 일치하는 학생들을 자동으로 병합합니다.</p>
+
+<div class="info-box warn">
+  <div class="info-title">⚠️ 주의</div>
+  자동 병합은 정확히 일치하는 경우에만 동작합니다. 병합 후에는 되돌릴 수 없으니 신중하게 사용하세요.
+</div>
+
+<h3>8.5 수강반 일괄 등록</h3>
+<p>학생 목록에서 체크박스로 여러 학생을 선택한 후, <strong>수강반 일괄 등록</strong> 버튼을 클릭하여 한번에 수강반에 배정할 수 있습니다.</p>
+</div>
+
+<!-- ==================== 9. 수강반 관리 ==================== -->
+<div class="page">
+<h2>9. 수강반 관리</h2>
+<p>수강반의 생성, 수정, 삭제 및 학생 배정을 관리합니다. 좌우 분할 화면으로 구성되어 있습니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">수강반 관리 - 분할 화면</div>
+  <div class="ui-header">
+    <span>📚 수강반 관리</span>
+    <span class="ui-btn primary">+ 새 수강반 만들기</span>
+  </div>
+  <div class="ui-split" style="min-height:200px">
+    <!-- 좌측: 목록 -->
+    <div style="border-right:1px solid var(--gray-200);padding:8px">
+      <div style="font-weight:600;font-size:12px;margin-bottom:6px">수강반 목록</div>
+      <div class="ui-card" style="border-left:3px solid var(--main);background:var(--main-light)">
+        <strong>A반</strong><br><span style="font-size:11px;color:var(--gray-500)">12명 등록</span>
+      </div>
+      <div class="ui-card">
+        <strong>B반</strong><br><span style="font-size:11px;color:var(--gray-500)">8명 등록</span>
+      </div>
+      <div class="ui-card">
+        <strong>C반</strong><br><span style="font-size:11px;color:var(--gray-500)">15명 등록</span>
+      </div>
+    </div>
+    <!-- 우측: 상세 -->
+    <div style="padding:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <strong style="font-size:15px">A반</strong>
+          <div style="font-size:11px;color:var(--gray-500)">중등 2학년 기초반</div>
+        </div>
+        <div>
+          <span class="ui-btn secondary">✏️ 수정</span>
+          <span class="ui-btn danger">🗑️ 삭제</span>
+        </div>
+      </div>
+      <div style="font-weight:600;font-size:12px;margin-bottom:4px">수강생 목록 (12명)</div>
+      <div class="ui-card" style="display:flex;justify-content:space-between"><span>홍길동 (서울중 2-3)</span><span class="ui-btn danger" style="font-size:10px;padding:2px 6px">제거</span></div>
+      <div class="ui-card" style="display:flex;justify-content:space-between"><span>이영희 (서울중 3-2)</span><span class="ui-btn danger" style="font-size:10px;padding:2px 6px">제거</span></div>
+      <div style="text-align:center;margin-top:8px">
+        <span class="ui-btn primary">+ 학생 추가</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h4>수강반 생성</h4>
+<ol class="steps">
+  <li><strong>새 수강반 만들기</strong> 버튼을 클릭합니다.</li>
+  <li>수강반 이름과 설명을 입력합니다.</li>
+  <li><strong>저장</strong>을 클릭합니다.</li>
+</ol>
+
+<h4>학생 등록/제거</h4>
+<ul>
+  <li><strong>학생 추가</strong>: 우측 패널에서 "학생 추가" 버튼 클릭 후 학생을 검색하여 선택</li>
+  <li><strong>학생 제거</strong>: 학생 옆의 "제거" 버튼 클릭</li>
+</ul>
+</div>
+
+<!-- ==================== 10. 과제 관리 (1/3) ==================== -->
+<div class="page">
+<h2>10. 과제 관리</h2>
+<p>과제의 생성, PDF 업로드, 학생 제출물 관리 및 유사도 검사를 수행합니다.</p>
+
+<h3>10.1 과제 생성</h3>
+<ol class="steps">
+  <li>사이드바에서 <strong>📋 과제 관리</strong>를 클릭합니다.</li>
+  <li>좌측 목록 패널에서 <strong>+ 새 과제</strong>를 클릭합니다.</li>
+  <li>과제명, 설명, 대상 수강반, 마감일을 입력합니다.</li>
+  <li><strong>저장</strong>을 클릭합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">과제 관리 - 분할 화면</div>
+  <div class="ui-split">
+    <!-- 좌측: 과제 목록 -->
+    <div style="border-right:1px solid var(--gray-200);padding:8px;min-width:180px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:13px">과제 목록</strong>
+        <span class="ui-btn primary" style="font-size:10px">+ 새 과제</span>
+      </div>
+      <div class="ui-input" style="width:100%;margin-bottom:6px;font-size:11px">🔍 검색...</div>
+      <div class="ui-card" style="border-left:3px solid var(--main)">
+        <strong>독해 연습 1</strong><br>
+        <span class="ui-badge green">진행 중</span>
+        <span style="font-size:10px;color:var(--gray-400)">마감: 1/20</span>
+      </div>
+      <div class="ui-card">
+        <strong>문법 과제</strong><br>
+        <span class="ui-badge yellow">초안</span>
+        <span style="font-size:10px;color:var(--gray-400)">마감: 1/25</span>
+      </div>
+      <div class="ui-card">
+        <strong>작문 과제</strong><br>
+        <span class="ui-badge red">마감</span>
+        <span style="font-size:10px;color:var(--gray-400)">마감: 1/10</span>
+      </div>
+    </div>
+    <!-- 우측: 과제 상세 -->
+    <div style="padding:8px;flex:1">
+      <div class="ui-box green" style="padding:10px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong style="font-size:15px">독해 연습 1</strong>
+            <span class="ui-badge green">진행 중</span>
+            <div style="font-size:11px;color:var(--main-dark)">A반 | 마감: 2025-01-20</div>
+          </div>
+          <div>
+            <span class="ui-btn secondary" style="font-size:10px">✏️ 수정</span>
+            <span class="ui-btn danger" style="font-size:10px">🗑️ 삭제</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;margin-bottom:8px">
+        <span class="ui-btn secondary" style="font-size:10px">초안으로</span>
+        <span class="ui-btn primary" style="font-size:10px">진행 중</span>
+        <span class="ui-btn danger" style="font-size:10px">마감</span>
+      </div>
+      <!-- PDF -->
+      <div class="ui-card">
+        <div style="font-weight:600;font-size:12px;margin-bottom:4px">📎 PDF 파일</div>
+        <span class="ui-btn blue" style="font-size:10px">PDF 업로드</span>
+        <span class="ui-btn secondary" style="font-size:10px">페이지 미리보기</span>
+      </div>
+      <!-- 제출 현황 -->
+      <div class="ui-card">
+        <div style="font-weight:600;font-size:12px;margin-bottom:4px">📊 제출 현황</div>
+        <div style="font-size:11px;color:var(--gray-500)">제출 현황은 아래에 이어집니다</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>10.2 PDF 업로드 및 페이지 관리</h3>
+<ol class="steps">
+  <li>과제 상세에서 <strong>PDF 업로드</strong> 버튼을 클릭합니다.</li>
+  <li>과제 PDF 파일을 선택합니다.</li>
+  <li>업로드가 완료되면 PDF의 각 페이지가 썸네일로 표시됩니다.</li>
+  <li>학생들은 이 페이지 순서에 맞춰 과제를 제출합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">페이지 미리보기</div>
+  <div class="ui-grid cols-4">
+    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">1페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">2페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">3페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">4페이지</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 10. 과제 관리 (2/3) ==================== -->
+<div class="page">
+<h3>10.3 상태 변경</h3>
+<table class="data-table">
+  <tr><th>상태</th><th>설명</th><th>학생에게 보임</th></tr>
+  <tr><td><span class="ui-badge yellow">초안</span></td><td>과제 작성 중. PDF 업로드, 내용 수정 가능</td><td>아니오</td></tr>
+  <tr><td><span class="ui-badge green">진행 중</span></td><td>학생에게 공개됨. 제출 가능</td><td>예</td></tr>
+  <tr><td><span class="ui-badge red">마감</span></td><td>마감됨. 추가 제출 불가</td><td>예 (읽기 전용)</td></tr>
+</table>
+
+<h3>10.4 제출 현황</h3>
+<p>학생별 제출 현황을 페이지 매트릭스로 확인할 수 있습니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">제출 현황 매트릭스</div>
+  <table class="ui-table">
+    <tr><th>학생</th><th>1p</th><th>2p</th><th>3p</th><th>4p</th><th>진행률</th><th>관리</th></tr>
+    <tr>
+      <td>홍길동</td>
+      <td><span style="color:var(--main)">✅</span></td>
+      <td><span style="color:var(--main)">✅</span></td>
+      <td><span style="color:var(--main)">✅</span></td>
+      <td><span style="color:var(--main)">✅</span></td>
+      <td><strong>100%</strong></td>
+      <td><span class="ui-btn secondary" style="font-size:10px">확인</span> <span class="ui-btn secondary" style="font-size:10px">코멘트</span></td>
+    </tr>
+    <tr>
+      <td>김철수</td>
+      <td><span style="color:var(--main)">✅</span></td>
+      <td><span style="color:var(--main)">✅</span></td>
+      <td><span style="color:var(--gray-400)">-</span></td>
+      <td><span style="color:var(--gray-400)">-</span></td>
+      <td><strong>50%</strong></td>
+      <td><span class="ui-btn secondary" style="font-size:10px">확인</span> <span class="ui-btn secondary" style="font-size:10px">코멘트</span></td>
+    </tr>
+    <tr>
+      <td>이영희</td>
+      <td><span style="color:var(--red)">❌</span></td>
+      <td><span style="color:var(--gray-400)">-</span></td>
+      <td><span style="color:var(--gray-400)">-</span></td>
+      <td><span style="color:var(--gray-400)">-</span></td>
+      <td><strong>0%</strong></td>
+      <td><span class="ui-btn secondary" style="font-size:10px">확인</span> <span class="ui-btn secondary" style="font-size:10px">코멘트</span></td>
+    </tr>
+  </table>
+  <div style="font-size:11px;color:var(--gray-500);margin-top:4px">✅ 제출됨 &nbsp; ❌ 거부됨 &nbsp; - 미제출</div>
+</div>
+
+<h4>학생 제출물 확인</h4>
+<p>제출 현황에서 <strong>확인</strong> 버튼을 클릭하면 해당 학생이 제출한 이미지를 페이지별로 확인할 수 있습니다. 이미지를 클릭하면 확대하여 볼 수 있습니다.</p>
+
+<h4>수동 통과/미통과</h4>
+<p>제출물 확인 모달에서 각 페이지를 <strong>통과</strong> 또는 <strong>미통과(거부)</strong> 처리할 수 있습니다.</p>
+
+<h4>선생님 코멘트</h4>
+<p><strong>코멘트</strong> 버튼을 클릭하여 학생에게 피드백을 작성할 수 있습니다. 학생은 자신의 과제 화면에서 코멘트를 확인할 수 있습니다.</p>
+</div>
+
+<!-- ==================== 10. 과제 관리 (3/3) ==================== -->
+<div class="page">
+<h3>10.5 유사도 검사</h3>
+<p>AI 기반(Amazon Bedrock)으로 학생 제출물 간 유사도를 검사합니다.</p>
+
+<ol class="steps">
+  <li>과제 상세에서 <strong>유사도 검사</strong> 버튼을 클릭합니다.</li>
+  <li>시스템이 학생 제출 이미지를 분석합니다.</li>
+  <li>유사도 결과가 표시됩니다 (퍼센트 기반).</li>
+  <li>높은 유사도를 보이는 제출물을 확인합니다.</li>
+</ol>
+
+<div class="ui-diagram">
+  <div class="ui-title">유사도 검사 결과</div>
+  <div class="ui-card" style="border-left:3px solid var(--red)">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>홍길동</strong> vs <strong>김철수</strong>
+        <div style="font-size:11px;color:var(--gray-500)">3페이지</div>
+      </div>
+      <div style="font-size:18px;font-weight:800;color:var(--red)">92%</div>
+    </div>
+    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:4px;overflow:hidden"><div style="width:92%;background:var(--red);height:100%"></div></div>
+  </div>
+  <div class="ui-card" style="border-left:3px solid var(--yellow)">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>박지민</strong> vs <strong>이영희</strong>
+        <div style="font-size:11px;color:var(--gray-500)">1페이지</div>
+      </div>
+      <div style="font-size:18px;font-weight:800;color:var(--yellow)">65%</div>
+    </div>
+    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:4px;overflow:hidden"><div style="width:65%;background:var(--yellow);height:100%"></div></div>
+  </div>
+  <div class="ui-card" style="border-left:3px solid var(--main)">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>최민수</strong> vs <strong>정다은</strong>
+        <div style="font-size:11px;color:var(--gray-500)">2페이지</div>
+      </div>
+      <div style="font-size:18px;font-weight:800;color:var(--main)">28%</div>
+    </div>
+    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:4px;overflow:hidden"><div style="width:28%;background:var(--main);height:100%"></div></div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-500);margin-top:6px">🔴 80% 이상: 매우 유사 (의심) &nbsp; 🟡 50~80%: 주의 &nbsp; 🟢 50% 미만: 정상</div>
+</div>
+</div>
+
+<!-- ==================== 11. 설정 (1/3) ==================== -->
+<div class="page">
+<h2>11. 설정</h2>
+<p>시스템 설정, 데이터 관리, 그리고 <strong>본사 관리자 전용 메뉴</strong>를 포함합니다.</p>
+
+<h3>11.1 데이터 백업 및 복원</h3>
+
+<h4>데이터 백업</h4>
+<ol class="steps">
+  <li>사이드바에서 <strong>⚙️ 설정</strong>을 클릭합니다.</li>
+  <li><strong>데이터 백업</strong> 버튼을 클릭합니다.</li>
+  <li>시스템 데이터가 JSON 파일로 다운로드됩니다.</li>
+</ol>
+
+<h4>데이터 복원</h4>
+<ol class="steps">
+  <li>설정 페이지에서 <strong>데이터 복원</strong> 버튼을 클릭합니다.</li>
+  <li>이전에 백업한 JSON 파일을 선택합니다.</li>
+  <li>확인 대화상자에서 <strong>복원</strong>을 클릭합니다.</li>
+</ol>
+
+<div class="info-box danger">
+  <div class="info-title">🚨 주의</div>
+  데이터 복원은 현재 데이터를 덮어씁니다. 복원 전에 현재 데이터를 먼저 백업하는 것을 권장합니다.
+</div>
+
+<h3>11.2 비밀번호 변경</h3>
+<p>현재 비밀번호, 새 비밀번호, 새 비밀번호 확인을 입력하여 비밀번호를 변경합니다.</p>
+
+<!-- ===== 관리자 전용 섹션 ===== -->
+<div class="admin-only">
+<span class="admin-only-badge">⭐ 본사 관리자(ADMIN) 전용</span>
+<h3 style="border-bottom:2px solid var(--red);color:var(--red)">11.3 관리자 메뉴</h3>
+<p>아래 기능은 <strong>본사 관리자(admin) 역할에게만</strong> 표시됩니다. 기관 관리자(org_admin) 및 학생(student) 역할에서는 접근할 수 없습니다.</p>
+
+<h4>11.3.1 가입 승인 대기</h4>
+<p>새로운 사용자가 회원가입을 하면 가입 승인 대기 목록에 표시됩니다. 관리자가 승인해야 해당 사용자가 시스템을 사용할 수 있습니다.</p>
+
+<ol class="steps">
+  <li>설정 > 관리자 메뉴를 엽니다.</li>
+  <li><strong>가입 승인 대기</strong> 섹션에서 대기 중인 요청을 확인합니다.</li>
+  <li>각 요청의 사용자명, 이메일, 소속 기관을 검토합니다.</li>
+  <li><strong>승인</strong> 또는 <strong>거절</strong> 버튼을 클릭합니다.</li>
+  <li>승인된 사용자에게는 <code>org_admin</code> 역할이 부여됩니다.</li>
+</ol>
+</div><!-- /admin-only -->
+</div>
+
+<!-- ==================== 11. 설정 (2/3) ==================== -->
+<div class="page">
+<div class="admin-only">
+<span class="admin-only-badge">⭐ 본사 관리자(ADMIN) 전용</span>
+
+<div class="ui-diagram">
+  <div class="ui-title">가입 승인 대기 목록</div>
+  <div style="font-weight:600;font-size:13px;margin-bottom:6px">가입 승인 대기 (3건)</div>
+  <div class="ui-card" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <strong>park_teacher</strong><br>
+      <span style="font-size:11px;color:var(--gray-500)">park@example.com | 서울지점</span>
+    </div>
+    <div>
+      <span class="ui-btn primary">✅ 승인</span>
+      <span class="ui-btn danger">❌ 거절</span>
+    </div>
+  </div>
+  <div class="ui-card" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <strong>kim_admin</strong><br>
+      <span style="font-size:11px;color:var(--gray-500)">kim@example.com | 부산지점</span>
+    </div>
+    <div>
+      <span class="ui-btn primary">✅ 승인</span>
+      <span class="ui-btn danger">❌ 거절</span>
+    </div>
+  </div>
+  <div class="ui-card" style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <strong>lee_teacher</strong><br>
+      <span style="font-size:11px;color:var(--gray-500)">lee@example.com | 대전지점</span>
+    </div>
+    <div>
+      <span class="ui-btn primary">✅ 승인</span>
+      <span class="ui-btn danger">❌ 거절</span>
+    </div>
+  </div>
+</div>
+
+<div class="info-box success">
+  <div class="info-title">✅ 승인 후 역할</div>
+  승인된 사용자에게는 기본적으로 <code>org_admin</code>(기관 관리자) 역할이 부여됩니다. 필요시 아래 사용자 관리에서 역할을 변경할 수 있습니다.
+</div>
+
+<h4>11.3.2 사용자 관리</h4>
+<p>시스템에 등록된 모든 사용자를 관리합니다.</p>
+
+<div class="ui-diagram">
+  <div class="ui-title">사용자 관리 테이블</div>
+  <div style="font-weight:600;font-size:13px;margin-bottom:6px">사용자 관리 (15명)</div>
+  <table class="ui-table">
+    <tr><th>사용자명</th><th>역할</th><th>소속 기관</th><th>상태</th><th>관리</th></tr>
+    <tr>
+      <td><strong>admin</strong></td>
+      <td><span class="ui-badge red">admin</span></td>
+      <td>본사</td>
+      <td><span class="ui-badge green">활성</span></td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td><strong>park_teacher</strong></td>
+      <td><span class="ui-badge blue">org_admin</span></td>
+      <td>서울지점</td>
+      <td><span class="ui-badge green">활성</span></td>
+      <td>
+        <span class="ui-btn secondary" style="font-size:10px">역할 변경</span>
+        <span class="ui-btn secondary" style="font-size:10px">비활성화</span>
+        <span class="ui-btn secondary" style="font-size:10px">PW 초기화</span>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>student_hong</strong></td>
+      <td><span class="ui-badge yellow">student</span></td>
+      <td>서울지점</td>
+      <td><span class="ui-badge green">활성</span></td>
+      <td>
+        <span class="ui-btn secondary" style="font-size:10px">역할 변경</span>
+        <span class="ui-btn secondary" style="font-size:10px">비활성화</span>
+        <span class="ui-btn secondary" style="font-size:10px">PW 초기화</span>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>kim_admin</strong></td>
+      <td><span class="ui-badge blue">org_admin</span></td>
+      <td>부산지점</td>
+      <td><span style="color:var(--gray-400);font-size:11px">비활성</span></td>
+      <td>
+        <span class="ui-btn secondary" style="font-size:10px">역할 변경</span>
+        <span class="ui-btn primary" style="font-size:10px">활성화</span>
+        <span class="ui-btn secondary" style="font-size:10px">PW 초기화</span>
+      </td>
+    </tr>
+  </table>
+</div>
+</div><!-- /admin-only -->
+</div>
+
+<!-- ==================== 11. 설정 (3/3) ==================== -->
+<div class="page">
+<div class="admin-only">
+<span class="admin-only-badge">⭐ 본사 관리자(ADMIN) 전용</span>
+
+<h4>사용자 관리 기능 상세</h4>
+<table class="data-table">
+  <tr><th>기능</th><th>설명</th></tr>
+  <tr><td><strong>역할 변경</strong></td><td>사용자의 역할을 admin, org_admin, student 중 하나로 변경합니다.</td></tr>
+  <tr><td><strong>활성화/비활성화</strong></td><td>계정을 활성화하거나 비활성화합니다. 비활성화된 사용자는 로그인할 수 없습니다.</td></tr>
+  <tr><td><strong>비밀번호 초기화</strong></td><td>사용자 비밀번호를 임시 비밀번호로 초기화합니다. 사용자에게 임시 비밀번호를 전달해야 합니다.</td></tr>
+</table>
+
+<table class="data-table">
+  <tr><th>역할</th><th>영문 코드</th><th>권한</th></tr>
+  <tr><td>본사 관리자</td><td>admin</td><td>모든 기능 + 가입 승인 + 사용자 관리. 전체 기관 데이터 접근</td></tr>
+  <tr><td>기관 관리자</td><td>org_admin</td><td>자기 기관의 데이터에 대한 모든 기능. 가입 승인/사용자 관리 불가</td></tr>
+  <tr><td>학생</td><td>student</td><td>학생 포털만 접근 가능. 성적 조회, 과제 제출</td></tr>
+</table>
+</div><!-- /admin-only -->
+</div>
+
+<!-- ==================== 12. 부록 (1/2) ==================== -->
+<div class="page">
+<h2>12. 부록</h2>
+
+<h3>12.1 자주 묻는 질문 (FAQ)</h3>
+
+<div class="faq-item">
+  <div class="faq-q">Q: 기관 관리자와 본사 관리자의 차이점은 무엇인가요?</div>
+  <div class="faq-a">A: 본사 관리자(admin)는 모든 기관의 데이터를 조회하고 관리할 수 있으며, 가입 승인과 사용자 관리 기능을 사용할 수 있습니다. 기관 관리자(org_admin)는 자신이 소속된 기관의 데이터만 관리할 수 있습니다.</div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q">Q: 가입 승인을 하면 어떤 역할이 부여되나요?</div>
+  <div class="faq-a">A: 기본적으로 org_admin(기관 관리자) 역할이 부여됩니다. 승인 후 필요에 따라 설정 > 관리자 메뉴 > 사용자 관리에서 역할을 변경할 수 있습니다.</div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q">Q: 삭제한 데이터를 복구할 수 있나요?</div>
+  <div class="faq-a">A: 이전에 생성한 백업 파일이 있으면 설정 > 데이터 복원을 통해 복구할 수 있습니다. 백업이 없는 경우 복구가 불가능하므로 정기적인 백업을 권장합니다.</div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q">Q: CSV 파일 형식은 어떻게 되나요?</div>
+  <div class="faq-a">A: UTF-8 인코딩의 CSV 파일을 사용합니다. 첫 행은 반드시 헤더(열 이름)여야 합니다. Excel에서 저장 시 "CSV UTF-8 (쉼표로 분리)"를 선택하세요.</div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q">Q: 유사도 검사는 어떻게 작동하나요?</div>
+  <div class="faq-a">A: Amazon Bedrock AI 서비스를 사용하여 학생 제출 이미지를 분석합니다. 이미지의 내용과 구조를 비교하여 유사도를 퍼센트로 산출합니다. 80% 이상이면 의심 대상으로 분류됩니다.</div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q">Q: 학생 계정 비밀번호를 잊었을 때 어떻게 하나요?</div>
+  <div class="faq-a">A: 설정 > 관리자 메뉴 > 사용자 관리에서 해당 학생 계정의 "PW 초기화" 버튼을 클릭하여 임시 비밀번호로 재설정할 수 있습니다. 재설정된 임시 비밀번호를 학생에게 전달하세요.</div>
+</div>
+</div>
+
+<!-- ==================== 12. 부록 (2/2) ==================== -->
+<div class="page">
+<h3>12.2 문제 해결</h3>
+
+<table class="data-table">
+  <tr><th>문제</th><th>원인</th><th>해결 방법</th></tr>
+  <tr>
+    <td><strong>로그인 실패</strong></td>
+    <td>잘못된 아이디/비밀번호, 비활성화된 계정, 미승인 계정</td>
+    <td>아이디와 비밀번호를 확인하세요. 계정이 승인/활성화되어 있는지 관리자에게 문의하세요.</td>
+  </tr>
+  <tr>
+    <td><strong>데이터 로딩 오류</strong></td>
+    <td>네트워크 연결 문제, 서버 오류</td>
+    <td>인터넷 연결을 확인하고 페이지를 새로고침하세요. 문제가 지속되면 브라우저 캐시를 삭제하세요.</td>
+  </tr>
+  <tr>
+    <td><strong>CSV 업로드 실패</strong></td>
+    <td>잘못된 인코딩 (EUC-KR 등), 잘못된 형식</td>
+    <td>CSV 파일이 UTF-8로 인코딩되어 있는지 확인하세요. 헤더 행의 열 이름이 올바른지 확인하세요.</td>
+  </tr>
+  <tr>
+    <td><strong>PDF 생성 오류</strong></td>
+    <td>데이터 부족, 브라우저 호환성</td>
+    <td>시험 데이터와 답안이 모두 입력되어 있는지 확인하세요. Chrome 브라우저 사용을 권장합니다.</td>
+  </tr>
+  <tr>
+    <td><strong>유사도 검사 실패</strong></td>
+    <td>AI 서비스 연결 오류, 이미지 크기 초과</td>
+    <td>잠시 후 다시 시도하세요. 학생 제출 이미지가 너무 큰 경우 자동 압축이 적용됩니다.</td>
+  </tr>
+</table>
+
+<div class="info-box tip">
+  <div class="info-title">💡 추가 도움</div>
+  위 문제 해결로 해결되지 않는 경우, 시스템 개발팀에 문의하세요. 문의 시 오류 메시지, 발생 시점, 사용 중인 브라우저 정보를 함께 전달해주시면 빠른 해결에 도움이 됩니다.
+</div>
+
+<!-- ==================== 푸터 ==================== -->
+<div class="doc-footer">
+  <p>국어농장 성적표 생성 프로그램 - 본사 관리자용 매뉴얼 v1.0</p>
+  <p>2025년 1월 | 본 문서는 시스템 업데이트에 따라 변경될 수 있습니다.</p>
+</div>
+</div>
+
+</body>
+</html>

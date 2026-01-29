@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국어농장 성적표 생성 프로그램 - 학생용 매뉴얼 v1.0</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'Segoe UI','맑은 고딕',system-ui,sans-serif;color:#1f2937;line-height:1.7;background:#f1f5f9;counter-reset:page-num}
+.page{width:210mm;min-height:297mm;margin:8mm auto;padding:18mm 15mm;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.08);position:relative;page-break-after:always;overflow:hidden}
+.page::after{counter-increment:page-num;content:counter(page-num);position:absolute;bottom:8mm;left:0;right:0;text-align:center;font-size:.75rem;color:#94a3b8}
+.page-cover::after{display:none}
+@page{size:A4;margin:18mm 15mm}
+@media print{
+html{font-size:13px}
+body{background:#fff}
+.page{box-shadow:none;margin:0;page-break-after:always}
+}
+
+/* headings */
+h1{font-size:1.8rem;color:#1f2937;margin-bottom:.5em}
+h2{font-size:1.35rem;color:#1f2937;margin-bottom:.6em;padding-bottom:.35em;border-bottom:2.5px solid #10b981}
+h3{font-size:1.1rem;color:#1f2937;margin:1em 0 .4em}
+h4{font-size:.95rem;color:#374151;margin:.7em 0 .3em}
+p{margin-bottom:.5em;font-size:.88rem}
+ul,ol{margin:.3em 0 .6em 1.4em;font-size:.88rem}
+li{margin-bottom:.25em}
+
+/* utils */
+.accent{color:#10b981;font-weight:700}
+.pink{color:#ec4899}
+.green{color:#4a7c59}
+.blue{color:#2563eb}
+.red{color:#ef4444}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.tag-green{background:#d1fae5;color:#065f46}
+.tag-pink{background:#fce7f3;color:#9d174d}
+.tag-blue{background:#dbeafe;color:#1e40af}
+.tag-yellow{background:#fef3c7;color:#92400e}
+.tag-red{background:#fee2e2;color:#991b1b}
+.note{background:#f0fdf4;border-left:3px solid #10b981;padding:8px 12px;border-radius:0 6px 6px 0;margin:.6em 0;font-size:.82rem}
+.warn{background:#fffbeb;border-left:3px solid #f59e0b;padding:8px 12px;border-radius:0 6px 6px 0;margin:.6em 0;font-size:.82rem}
+.step-list{list-style:none;margin-left:0;padding:0;counter-reset:step}
+.step-list li{counter-increment:step;padding:4px 0 4px 32px;position:relative;font-size:.85rem}
+.step-list li::before{content:counter(step);position:absolute;left:0;top:4px;width:22px;height:22px;background:#10b981;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.72rem;font-weight:700}
+.two-col{display:flex;gap:14px;align-items:flex-start}
+.two-col>*{flex:1;min-width:0}
+table.info{width:100%;border-collapse:collapse;font-size:.82rem;margin:.5em 0}
+table.info th,table.info td{border:1px solid #e5e7eb;padding:5px 8px;text-align:left}
+table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowrap}
+
+/* ========== PHONE MOCKUP ========== */
+.phone{width:180px;margin:8px auto;border:2px solid #374151;border-radius:18px;background:#fafafa;overflow:hidden;font-size:7.5px;line-height:1.45;position:relative}
+.phone *{box-sizing:border-box}
+.phone-status{height:14px;background:#1f2937;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:5.5px}
+.phone-header{height:28px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:0 8px;gap:6px}
+.phone-header .hamburger{font-size:10px;color:#374151;cursor:pointer}
+.phone-header .title{font-weight:700;font-size:8px;color:#1f2937}
+.phone-header .avatar{margin-left:auto;width:16px;height:16px;border-radius:50%;background:#f9a8d4;display:flex;align-items:center;justify-content:center;font-size:6px;color:#9d174d;font-weight:700}
+.phone-body{padding:6px;min-height:180px;background:#fafafa}
+
+/* phone sidebar overlay */
+.phone-sidebar-overlay{position:relative;width:180px;margin:8px auto;border:2px solid #374151;border-radius:18px;overflow:hidden;font-size:7.5px;line-height:1.45;display:flex;height:280px}
+.phone-sidebar-overlay .sidebar{width:110px;background:#fff;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;padding:6px 0;flex-shrink:0}
+.phone-sidebar-overlay .sidebar .logo-area{display:flex;align-items:center;gap:4px;padding:4px 8px 8px;border-bottom:1px solid #e5e7eb;margin-bottom:4px}
+.phone-sidebar-overlay .sidebar .logo-icon{width:16px;height:16px;background:#f9a8d4;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:7px}
+.phone-sidebar-overlay .sidebar .logo-text{font-weight:700;font-size:7.5px;color:#1f2937}
+.phone-sidebar-overlay .sidebar .nav-group{padding:2px 0}
+.phone-sidebar-overlay .sidebar .nav-label{font-size:5.5px;color:#6b7280;padding:2px 8px;text-transform:uppercase;font-weight:600}
+.phone-sidebar-overlay .sidebar .nav-item{padding:3px 8px;display:flex;align-items:center;gap:4px;cursor:pointer;border-left:2px solid transparent;font-size:6.5px;color:#374151}
+.phone-sidebar-overlay .sidebar .nav-item.active{background:#fdf2f8;color:#db2777;border-left-color:#ec4899;font-weight:600}
+.phone-sidebar-overlay .sidebar .sidebar-footer{margin-top:auto;padding:6px 8px;border-top:1px solid #e5e7eb;display:flex;align-items:center;gap:4px}
+.phone-sidebar-overlay .sidebar .sidebar-footer .user-av{width:14px;height:14px;background:#f9a8d4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:5.5px;color:#9d174d;font-weight:700}
+.phone-sidebar-overlay .backdrop{flex:1;background:rgba(0,0,0,.4)}
+
+/* phone inner UI cards */
+.ph-welcome{background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:6px;border-top:2px solid #f9a8d4;position:relative}
+.ph-welcome .name{font-weight:700;color:#db2777;font-size:8px}
+.ph-welcome .sub{color:#6b7280;font-size:6.5px}
+.ph-feed-title{font-weight:700;font-size:7.5px;margin:4px 0 3px;display:flex;align-items:center;gap:3px}
+.ph-card{background:#fff;border-radius:5px;padding:5px 6px;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.ph-card .icon-box{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0}
+.ph-card .card-text{font-size:6px;color:#374151;line-height:1.3}
+.ph-card .card-text .card-tag{font-size:5px;font-weight:600;margin-bottom:1px}
+.ph-card .card-text .card-title{font-weight:600;font-size:6.5px}
+
+/* phone exam cards */
+.ph-exam-card{background:#fff;border-radius:4px;padding:5px 7px;margin-bottom:4px;border:1px solid #e5e7eb}
+.ph-exam-card.selected{border-color:#4a7c59;background:#f0fdf4}
+.ph-exam-card .exam-name{font-weight:600;font-size:7px}
+.ph-exam-card .exam-date{font-size:5.5px;color:#6b7280}
+
+/* phone score cards */
+.ph-scores{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:4px 0}
+.ph-score-card{border-radius:4px;padding:5px;text-align:center}
+.ph-score-card.primary{background:linear-gradient(135deg,#4a7c59,#3d6b4a);color:#fff}
+.ph-score-card.secondary{background:#fff;border:1px solid #e5e7eb}
+.ph-score-card .label{font-size:5px;opacity:.85}
+.ph-score-card .val{font-size:10px;font-weight:700}
+
+/* phone wrong answer items */
+.ph-wrong{border-left:2px solid #ef4444;padding:3px 6px;margin-bottom:3px;background:#fff;border-radius:0 4px 4px 0}
+.ph-wrong .q-num{font-weight:700;font-size:6.5px;color:#ef4444}
+.ph-wrong .q-detail{font-size:5.5px;color:#6b7280}
+
+/* phone assignment */
+.ph-assign-card{background:#fff;border-radius:5px;padding:6px 7px;margin-bottom:4px;border:1px solid #e5e7eb}
+.ph-assign-card .assign-name{font-weight:600;font-size:7px}
+.ph-assign-card .assign-badge{display:inline-block;padding:0 4px;border-radius:6px;font-size:5px;font-weight:600}
+.ph-assign-card .progress-bar{height:4px;background:#e5e7eb;border-radius:2px;margin:3px 0;overflow:hidden}
+.ph-assign-card .progress-fill{height:100%;background:#10b981;border-radius:2px}
+.ph-assign-card .assign-meta{font-size:5.5px;color:#6b7280}
+.ph-assign-card.completed{border-color:#10b981}
+.ph-assign-card.overdue{border-color:#ef4444}
+
+/* phone page grid */
+.ph-page-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:4px 0}
+.ph-page-item{aspect-ratio:1/1.414;border:1.5px solid #e5e7eb;border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:5px;position:relative;background:#fff}
+.ph-page-item.done{border-color:#10b981}
+.ph-page-item.done::after{content:'✓';position:absolute;top:1px;right:2px;color:#10b981;font-size:7px;font-weight:700}
+.ph-page-item.rejected{border-color:#ef4444}
+.ph-page-item.rejected::after{content:'✕';position:absolute;top:1px;right:2px;color:#ef4444;font-size:7px;font-weight:700}
+.ph-page-item.submitted{border-color:#f59e0b}
+.ph-page-item.submitted::after{content:'◷';position:absolute;top:1px;right:2px;color:#f59e0b;font-size:7px}
+.ph-page-item .pg-num{font-weight:700;font-size:7px;color:#374151}
+
+/* phone camera */
+.ph-camera{background:#111;border-radius:5px;padding:8px;text-align:center;margin:4px 0}
+.ph-camera .viewfinder{width:60%;aspect-ratio:1/1.414;border:1px dashed rgba(255,255,255,.6);margin:6px auto;border-radius:2px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:5px}
+.ph-camera .capture-btn{width:22px;height:22px;background:#fff;border-radius:50%;margin:6px auto 2px;border:2px solid #ccc}
+.ph-camera .file-link{color:#93c5fd;font-size:5.5px;margin-top:2px}
+
+/* phone charts placeholder */
+.ph-chart{background:#fff;border-radius:5px;padding:6px;margin-bottom:5px;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center}
+.ph-chart .chart-placeholder{color:#9ca3af;font-size:6px}
+
+/* phone settings */
+.ph-setting-card{background:#fff;border-radius:5px;padding:8px;margin-bottom:5px}
+.ph-setting-card .setting-title{font-weight:700;font-size:7.5px;margin-bottom:4px}
+.ph-btn-secondary{display:inline-block;padding:3px 8px;border:1px solid #e5e7eb;border-radius:4px;font-size:6px;color:#374151;background:#fff}
+.ph-btn-primary{display:inline-block;padding:3px 8px;border:none;border-radius:4px;font-size:6px;color:#fff;background:#4a7c59}
+
+/* phone modal */
+.ph-modal{background:#fff;border-radius:6px;padding:8px;margin:20px 8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ph-modal .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px}
+.ph-modal .modal-header .modal-title{font-weight:700;font-size:7.5px}
+.ph-modal .modal-header .close-btn{font-size:9px;color:#6b7280;cursor:pointer}
+.ph-modal .modal-input{width:100%;padding:3px 6px;border:1px solid #e5e7eb;border-radius:3px;font-size:6px;margin-bottom:4px;background:#f9fafb}
+.ph-modal .modal-label{font-size:5.5px;color:#374151;margin-bottom:1px;font-weight:600}
+.ph-modal .modal-footer{display:flex;justify-content:flex-end;gap:4px;margin-top:6px}
+
+/* phone login */
+.ph-login-bg{background:#BDD4EA;padding:0}
+.ph-login-illust{height:55px;background:linear-gradient(135deg,#BDD4EA 60%,#a3c4e0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.ph-login-form{background:#f8fafc;padding:8px 10px;border-radius:10px 10px 0 0}
+.ph-login-form .login-logo{text-align:center;margin-bottom:3px}
+.ph-login-form .login-logo .logo-img{width:28px;height:28px;background:#f9a8d4;border-radius:8px;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ph-login-form .login-title{text-align:center;font-weight:700;font-size:8px;color:#334155;margin-bottom:6px}
+.ph-login-form .login-input{width:100%;padding:4px 8px;background:#e2e8f0;border:none;border-radius:20px;font-size:6px;margin-bottom:4px;outline:none}
+.ph-login-form .login-btn{width:100%;padding:5px;background:#2563eb;color:#fff;border:none;border-radius:20px;font-size:7px;font-weight:600;text-align:center;margin-top:2px;cursor:pointer}
+.ph-login-form .login-footer{text-align:center;margin-top:4px;font-size:5.5px}
+.ph-login-form .login-footer a{color:#2563eb;text-decoration:none}
+.ph-login-form .login-error{background:#fee;color:#c00;font-size:5.5px;padding:2px 6px;border-radius:3px;margin-bottom:3px;text-align:center}
+
+/* annotation arrow/label */
+.diagram-wrap{position:relative;display:inline-block}
+.annotation{position:absolute;font-size:6.5px;color:#10b981;font-weight:600;white-space:nowrap}
+.annotation::before{content:'';position:absolute}
+
+/* cover page */
+.cover-content{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240mm;text-align:center}
+.cover-logo{width:80px;height:80px;background:linear-gradient(135deg,#f9a8d4,#ec4899);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:16px;color:#fff;box-shadow:0 4px 20px rgba(236,72,153,.3)}
+.cover-title{font-size:2.2rem;font-weight:800;color:#1f2937;margin-bottom:8px}
+.cover-subtitle{font-size:1.3rem;color:#4a7c59;font-weight:600;margin-bottom:24px}
+.cover-badge{display:inline-block;padding:6px 20px;background:#f0fdf4;border:1.5px solid #10b981;border-radius:20px;color:#065f46;font-weight:600;font-size:.9rem;margin-bottom:6px}
+.cover-ver{color:#6b7280;font-size:.85rem;margin-top:8px}
+
+/* toc */
+.toc-item{display:flex;align-items:baseline;padding:5px 0;border-bottom:1px dotted #e5e7eb;font-size:.88rem}
+.toc-item .toc-num{font-weight:700;color:#10b981;min-width:28px}
+.toc-item .toc-title{flex:1}
+.toc-item .toc-page{color:#6b7280;font-size:.8rem;text-align:right}
+.toc-sub{padding-left:28px;font-size:.82rem;padding-top:2px;padding-bottom:2px;border-bottom:none;color:#374151}
+
+/* section number */
+.sec-num{display:inline-block;background:#10b981;color:#fff;width:28px;height:28px;border-radius:50%;text-align:center;line-height:28px;font-weight:700;font-size:.9rem;margin-right:6px;vertical-align:middle}
+
+/* status table for assignments */
+.status-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:.5em 0}
+.status-table th,.status-table td{padding:5px 8px;border:1px solid #e5e7eb;text-align:center}
+.status-table th{background:#f8fafc;font-weight:600}
+.status-sample{display:inline-block;width:14px;height:18px;border-radius:2px;border:2px solid;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<!-- ==================== 표지 (PAGE 1) ==================== -->
+<div class="page page-cover">
+<div class="cover-content">
+<div class="cover-logo">🌾</div>
+<div class="cover-title">국어농장</div>
+<div class="cover-title" style="font-size:1.5rem;margin-bottom:4px">성적표 생성 프로그램</div>
+<div class="cover-subtitle">학생용 매뉴얼</div>
+<div class="cover-badge">📱 모바일 사용 가이드</div>
+<div class="cover-ver">Version 1.0 &middot; 2025년 1월</div>
+</div>
+</div>
+
+<!-- ==================== 목차 (PAGE 2) ==================== -->
+<div class="page">
+<h2 style="border-bottom-color:#10b981">📑 목차</h2>
+<div style="margin-top:10px">
+<div class="toc-item"><span class="toc-num">1</span><span class="toc-title"><b>시작하기</b></span><span class="toc-page">3</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">1.1 로그인 방법</span><span class="toc-page">3</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">1.2 첫 로그인 (임시 비밀번호 변경)</span><span class="toc-page">4</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">1.3 화면 구성</span><span class="toc-page">5</span></div>
+
+<div class="toc-item"><span class="toc-num">2</span><span class="toc-title"><b>대시보드</b></span><span class="toc-page">6</span></div>
+
+<div class="toc-item"><span class="toc-num">3</span><span class="toc-title"><b>내 성적표</b></span><span class="toc-page">8</span></div>
+
+<div class="toc-item"><span class="toc-num">4</span><span class="toc-title"><b>내 과제</b></span><span class="toc-page">10</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">4.1 과제 목록</span><span class="toc-page">10</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">4.2 과제 상세 및 페이지 제출</span><span class="toc-page">11</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">4.3 카메라 촬영</span><span class="toc-page">12</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">4.4 페이지 상태 설명</span><span class="toc-page">13</span></div>
+
+<div class="toc-item"><span class="toc-num">5</span><span class="toc-title"><b>오답 노트</b></span><span class="toc-page">14</span></div>
+
+<div class="toc-item"><span class="toc-num">6</span><span class="toc-title"><b>성적 추이</b></span><span class="toc-page">16</span></div>
+
+<div class="toc-item"><span class="toc-num">7</span><span class="toc-title"><b>설정</b></span><span class="toc-page">17</span></div>
+
+<div class="toc-item"><span class="toc-num">8</span><span class="toc-title"><b>부록</b></span><span class="toc-page">18</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">자주 묻는 질문 (FAQ)</span><span class="toc-page">18</span></div>
+<div class="toc-item toc-sub"><span class="toc-title">문제 해결</span><span class="toc-page">19</span></div>
+</div>
+</div>
+
+<!-- ==================== 1. 시작하기 (PAGE 3) ==================== -->
+<div class="page">
+<h2><span class="sec-num">1</span> 시작하기</h2>
+
+<h3>1.1 로그인 방법</h3>
+<p>선생님께서 안내해 주신 주소로 접속하면 로그인 화면이 나타납니다. 학원에서 부여받은 <b>아이디</b>와 <b>비밀번호</b>를 입력하세요.</p>
+
+<div class="two-col">
+<div>
+<ol class="step-list">
+<li>브라우저 주소창에 접속 주소를 입력합니다.</li>
+<li>아이디(이름 또는 학원 ID)를 입력합니다.</li>
+<li>비밀번호를 입력합니다.</li>
+<li><b>로그인</b> 버튼을 누릅니다.</li>
+</ol>
+<div class="note">
+💡 <b>팁:</b> 아이디나 비밀번호를 모를 때는 선생님께 문의하세요.
+</div>
+<div class="warn">
+⚠️ 비밀번호를 여러 번 잘못 입력하면 빨간 오류 메시지가 표시됩니다.
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Login Screen -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="ph-login-bg">
+<div class="ph-login-illust">🌾</div>
+<div class="ph-login-form">
+<div class="login-logo">
+<div class="logo-img">🌾</div>
+</div>
+<div class="login-title">성적표 생성 프로그램</div>
+<div class="login-input" style="color:#94a3b8">아이디</div>
+<div class="login-input" style="color:#94a3b8">비밀번호</div>
+<div class="login-btn">로그인</div>
+<div class="login-footer"><a>회원가입</a></div>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 로그인 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 1.2 첫 로그인 (PAGE 4) ==================== -->
+<div class="page">
+<h3>1.2 첫 로그인 — 임시 비밀번호 변경</h3>
+<p>처음 로그인할 때는 선생님이 설정한 <b>임시 비밀번호</b>를 사용합니다. 로그인 후 반드시 본인만의 비밀번호로 변경해 주세요.</p>
+
+<ol class="step-list">
+<li>선생님께 받은 임시 비밀번호로 로그인합니다.</li>
+<li>좌측 메뉴에서 <b>⚙️ 설정</b>을 누릅니다.</li>
+<li><b>🔑 비밀번호 변경</b> 버튼을 누릅니다.</li>
+<li><b>현재 비밀번호</b>에 임시 비밀번호를 입력합니다.</li>
+<li><b>새 비밀번호</b>를 입력합니다.</li>
+<li><b>새 비밀번호 확인</b>에 동일하게 다시 입력합니다.</li>
+<li><b>변경</b> 버튼을 누르면 완료됩니다.</li>
+</ol>
+
+<div class="warn" style="margin-top:8px">
+⚠️ <b>주의:</b> 비밀번호는 본인만 알 수 있도록 관리하세요. 다른 사람에게 알려주지 마세요.
+</div>
+
+<div class="note">
+💡 비밀번호를 잊어버린 경우, 선생님께 비밀번호 초기화를 요청하세요.
+</div>
+
+<h3 style="margin-top:14px">비밀번호 변경 규칙</h3>
+<table class="info">
+<tr><th>항목</th><th>조건</th></tr>
+<tr><td>최소 길이</td><td>4자 이상</td></tr>
+<tr><td>새 비밀번호 확인</td><td>새 비밀번호와 동일해야 함</td></tr>
+<tr><td>현재 비밀번호</td><td>기존 비밀번호와 일치해야 함</td></tr>
+</table>
+</div>
+
+<!-- ==================== 1.3 화면 구성 (PAGE 5) ==================== -->
+<div class="page">
+<h3>1.3 화면 구성 — 모바일 레이아웃</h3>
+<p>모바일 환경에서는 사이드바가 숨겨져 있고, 좌측 상단의 <b>☰ 햄버거 버튼</b>을 누르면 메뉴가 나타납니다.</p>
+
+<div class="two-col">
+<div>
+<h4>헤더 영역</h4>
+<ul>
+<li><b>☰ 햄버거 버튼</b> — 메뉴 열기</li>
+<li><b>페이지 제목</b> — 현재 페이지 이름</li>
+<li><b>아바타</b> — 이름 첫 글자 (분홍 원)</li>
+</ul>
+
+<h4>사이드바 메뉴</h4>
+<table class="info">
+<tr><th>그룹</th><th>메뉴</th><th>아이콘</th></tr>
+<tr><td rowspan="1">메인</td><td>대시보드</td><td>🏠</td></tr>
+<tr><td rowspan="4">학습</td><td>내 성적표</td><td>📄</td></tr>
+<tr><td>내 과제</td><td>📋</td></tr>
+<tr><td>오답 노트</td><td>📓</td></tr>
+<tr><td>성적 추이</td><td>📈</td></tr>
+<tr><td>설정</td><td>설정</td><td>⚙️</td></tr>
+</table>
+
+<div class="note">
+💡 메뉴 바깥의 어두운 영역을 누르면 사이드바가 닫힙니다.
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Sidebar Overlay -->
+<div class="phone-sidebar-overlay">
+<div class="sidebar">
+<div class="logo-area">
+<div class="logo-icon">🌾</div>
+<div class="logo-text">국어농장</div>
+</div>
+<div class="nav-group">
+<div class="nav-label">메인</div>
+<div class="nav-item active">🏠 대시보드</div>
+</div>
+<div class="nav-group">
+<div class="nav-label">학습</div>
+<div class="nav-item">📄 내 성적표</div>
+<div class="nav-item">📋 내 과제</div>
+<div class="nav-item">📓 오답 노트</div>
+<div class="nav-item">📈 성적 추이</div>
+</div>
+<div class="nav-group">
+<div class="nav-label">설정</div>
+<div class="nav-item">⚙️ 설정</div>
+</div>
+<div class="sidebar-footer">
+<div class="user-av">김</div>
+<span style="font-size:5.5px;color:#374151">김학생 · 국어농장</span>
+</div>
+</div>
+<div class="backdrop"></div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 사이드바 열림 상태 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 2. 대시보드 (PAGE 6) ==================== -->
+<div class="page">
+<h2><span class="sec-num">2</span> 대시보드</h2>
+<p>로그인하면 가장 먼저 보이는 화면입니다. 오늘의 할 일, 최근 성적, 선생님 코멘트를 한눈에 확인할 수 있습니다.</p>
+
+<div class="two-col" style="align-items:flex-start">
+<div>
+<h4>① 환영 메시지</h4>
+<p>상단에 <span class="pink">"안녕하세요, [이름]님!"</span> 메시지와 오늘 날짜가 표시됩니다. 상단 분홍색 바로 꾸며진 카드입니다.</p>
+
+<h4>② 📌 해야 할 것</h4>
+<p>아직 완료하지 않은 과제나 확인해야 할 성적표가 표시됩니다. 항목을 누르면 해당 페이지로 이동합니다.</p>
+
+<h4>③ 📊 최근 성적</h4>
+<p>가장 최근에 본 시험의 점수와 정보가 요약되어 카드로 나타납니다.</p>
+
+<h4>④ 💬 선생님 코멘트</h4>
+<p>선생님이 성적표에 남긴 코멘트를 확인할 수 있습니다.</p>
+
+<div class="note">
+💡 각 피드 항목을 탭하면 해당 상세 페이지로 바로 이동합니다.
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Dashboard -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="phone-header">
+<span class="hamburger">☰</span>
+<span class="title">대시보드</span>
+<span class="avatar">김</span>
+</div>
+<div class="phone-body">
+<div class="ph-welcome">
+<div>안녕하세요, <span class="name">김학생</span>님!</div>
+<div class="sub">오늘도 열심히 공부해봐요!</div>
+<div class="sub">📅 2025년 1월 15일 수요일</div>
+</div>
+<div class="ph-feed-title">📌 해야 할 것</div>
+<div class="ph-card">
+<div class="icon-box" style="background:#dbeafe">📋</div>
+<div class="card-text">
+<div class="card-tag" style="color:#2563eb">과제</div>
+<div class="card-title">1월 2주차 어휘 과제</div>
+</div>
+</div>
+<div class="ph-feed-title">📊 최근 성적</div>
+<div class="ph-card">
+<div class="icon-box" style="background:#d1fae5">📄</div>
+<div class="card-text">
+<div class="card-tag" style="color:#059669">성적표</div>
+<div class="card-title">1월 모의고사 — 82점</div>
+</div>
+</div>
+<div class="ph-feed-title">💬 선생님 코멘트</div>
+<div class="ph-card">
+<div class="icon-box" style="background:#fce7f3">💬</div>
+<div class="card-text">
+<div class="card-tag" style="color:#db2777">코멘트</div>
+<div class="card-title">독해력이 많이 좋아졌어요!</div>
+</div>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 대시보드 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 2 대시보드 계속 (PAGE 7) ==================== -->
+<div class="page">
+<h3>대시보드 피드 항목 상세</h3>
+
+<h4>피드 카드 구성</h4>
+<p>각 피드 카드에는 다음 요소가 포함됩니다:</p>
+<table class="info">
+<tr><th>요소</th><th>설명</th></tr>
+<tr><td>아이콘</td><td>항목 유형에 맞는 배경색 아이콘 (파란색=과제, 초록색=성적, 분홍색=코멘트)</td></tr>
+<tr><td>태그</td><td>항목 유형 표시 (과제, 성적표, 코멘트 등)</td></tr>
+<tr><td>제목</td><td>항목의 주요 내용 요약</td></tr>
+<tr><td>설명</td><td>추가 상세 정보 (날짜, 점수 등)</td></tr>
+</table>
+
+<h4 style="margin-top:10px">피드 유형별 색상</h4>
+<table class="info">
+<tr><th>유형</th><th>아이콘 배경</th><th>태그 색상</th></tr>
+<tr><td>📌 해야 할 것</td><td style="background:#dbeafe">파란색 계열</td><td><span class="tag tag-blue">과제</span></td></tr>
+<tr><td>📊 최근 성적</td><td style="background:#d1fae5">초록색 계열</td><td><span class="tag tag-green">성적표</span></td></tr>
+<tr><td>💬 코멘트</td><td style="background:#fce7f3">분홍색 계열</td><td><span class="tag tag-pink">코멘트</span></td></tr>
+</table>
+
+<h4 style="margin-top:10px">대시보드 활용 팁</h4>
+<ul>
+<li><b>매일 확인:</b> 로그인하면 대시보드에서 오늘 해야 할 일을 먼저 확인하세요.</li>
+<li><b>빠른 이동:</b> 피드 카드를 누르면 해당 페이지로 바로 이동합니다.</li>
+<li><b>선생님 피드백:</b> 코멘트 카드에서 선생님의 조언을 꼭 읽어보세요.</li>
+<li><b>새로운 항목:</b> 새로 등록된 시험 결과나 과제가 있으면 상단에 표시됩니다.</li>
+</ul>
+</div>
+
+<!-- ==================== 3. 내 성적표 (PAGE 8) ==================== -->
+<div class="page">
+<h2><span class="sec-num">3</span> 내 성적표</h2>
+<p>응시한 시험의 성적표를 확인하고 PDF로 다운로드할 수 있습니다.</p>
+
+<h3>시험 선택 및 성적표 보기</h3>
+<ol class="step-list">
+<li>사이드바에서 <b>📄 내 성적표</b>를 누릅니다.</li>
+<li>시험 목록에서 확인할 시험을 선택합니다 (선택된 시험은 <span class="green">초록색 테두리</span>로 표시).</li>
+<li>성적표가 아래에 표시됩니다.</li>
+<li>필요시 <b>PDF 다운로드</b> 버튼으로 저장합니다.</li>
+</ol>
+
+<div class="two-col" style="margin-top:8px">
+<div>
+<h4>성적표 구성 요소</h4>
+<table class="info">
+<tr><th>영역</th><th>내용</th></tr>
+<tr><td>점수 카드</td><td>총점, 평균, 석차 등 주요 점수 (초록색 그라데이션 카드)</td></tr>
+<tr><td>영역별 분석</td><td>도넛 차트 + 영역별 정답률 표</td></tr>
+<tr><td>오답 목록</td><td>틀린 문제 번호, 정답, 선택한 답 (빨간 왼쪽 테두리)</td></tr>
+<tr><td>선생님 코멘트</td><td>선생님이 작성한 피드백 내용</td></tr>
+</table>
+
+<div class="note" style="margin-top:6px">
+💡 <b>PDF 다운로드:</b> 성적표 하단의 버튼을 누르면 A4 크기의 깔끔한 PDF가 저장됩니다.
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Report Card -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="phone-header">
+<span class="hamburger">☰</span>
+<span class="title">내 성적표</span>
+<span class="avatar">김</span>
+</div>
+<div class="phone-body">
+<div style="font-weight:700;font-size:8px;border-bottom:1.5px solid #4a7c59;padding-bottom:2px;margin-bottom:4px">내 성적표</div>
+<div class="ph-exam-card selected">
+<div class="exam-name">1월 모의고사</div>
+<div class="exam-date">2025.01.10 · 100점 만점</div>
+</div>
+<div class="ph-exam-card">
+<div class="exam-name">12월 정기시험</div>
+<div class="exam-date">2024.12.15 · 100점 만점</div>
+</div>
+<div class="ph-scores">
+<div class="ph-score-card primary"><div class="label">총점</div><div class="val">82</div></div>
+<div class="ph-score-card secondary"><div class="label">평균</div><div class="val">75.3</div></div>
+<div class="ph-score-card secondary"><div class="label">석차</div><div class="val">3/15</div></div>
+<div class="ph-score-card secondary"><div class="label">정답률</div><div class="val">82%</div></div>
+</div>
+<div class="ph-wrong"><span class="q-num">3번</span> <span class="q-detail">정답: ② &nbsp; 내 답: ④</span></div>
+<div class="ph-wrong"><span class="q-num">7번</span> <span class="q-detail">정답: ③ &nbsp; 내 답: ①</span></div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 성적표 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 3 성적표 계속 (PAGE 9) ==================== -->
+<div class="page">
+<h3>성적표 상세 항목 설명</h3>
+
+<h4>점수 카드 읽기</h4>
+<p>성적표 상단에는 2열 그리드로 점수 카드가 표시됩니다.</p>
+<table class="info">
+<tr><th>카드</th><th>스타일</th><th>설명</th></tr>
+<tr><td><b>총점</b></td><td><span style="background:linear-gradient(135deg,#4a7c59,#3d6b4a);color:#fff;padding:1px 6px;border-radius:3px">초록 그라데이션</span></td><td>시험에서 받은 총점</td></tr>
+<tr><td>평균</td><td>흰색 카드</td><td>반 전체 평균 점수</td></tr>
+<tr><td>석차</td><td>흰색 카드</td><td>반 내 순위</td></tr>
+<tr><td>정답률</td><td>흰색 카드</td><td>전체 문제 중 맞은 비율</td></tr>
+</table>
+
+<h4 style="margin-top:8px">영역별 분석</h4>
+<p>국어 시험의 각 영역(어휘, 문법, 독해, 문학 등)별 정답률이 도넛 차트와 표로 표시됩니다. 부족한 영역을 파악하여 집중 학습에 활용하세요.</p>
+
+<h4 style="margin-top:8px">오답 목록</h4>
+<p>틀린 문제는 <span style="display:inline-block;width:4px;height:14px;background:#ef4444;border-radius:1px;vertical-align:middle"></span> <span class="red">빨간색 왼쪽 테두리</span>로 강조됩니다. 각 항목에서 문제 번호, 정답, 내가 선택한 답을 확인할 수 있습니다.</p>
+
+<h4 style="margin-top:8px">PDF 다운로드</h4>
+<p>성적표 하단에 있는 <span class="ph-btn-primary" style="font-size:.8rem">PDF 다운로드</span> 버튼을 누르면 성적표가 깔끔한 A4 형식으로 저장됩니다. 부모님께 보여드리거나 인쇄할 때 유용합니다.</p>
+
+<div class="warn">
+⚠️ PDF 다운로드는 성적표가 완전히 로딩된 후에 눌러주세요. 로딩 중에 누르면 빈 PDF가 생성될 수 있습니다.
+</div>
+</div>
+
+<!-- ==================== 4. 내 과제 (PAGE 10) ==================== -->
+<div class="page">
+<h2><span class="sec-num">4</span> 내 과제</h2>
+<p>선생님이 내준 과제를 확인하고, 페이지별로 사진을 찍어 제출할 수 있습니다.</p>
+
+<h3>4.1 과제 목록</h3>
+<p>사이드바에서 <b>📋 내 과제</b>를 누르면 배정된 과제 목록이 나타납니다.</p>
+
+<div class="two-col">
+<div>
+<h4>과제 카드 구성</h4>
+<ul>
+<li><b>과제 이름</b> — 과제 제목</li>
+<li><b>상태 뱃지</b> — 진행중/완료/기한초과</li>
+<li><b>설명</b> — 과제에 대한 안내</li>
+<li><b>진행률 바</b> — 제출 완료된 페이지 비율 (초록색)</li>
+<li><b>마감일</b> — 제출 기한</li>
+</ul>
+
+<h4>과제 카드 테두리 색상</h4>
+<table class="info">
+<tr><th>상태</th><th>테두리</th></tr>
+<tr><td>진행중</td><td>기본 회색</td></tr>
+<tr><td>완료</td><td><span style="color:#10b981">■</span> 초록색</td></tr>
+<tr><td>기한초과</td><td><span class="red">■</span> 빨간색</td></tr>
+</table>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Assignment List -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="phone-header">
+<span class="hamburger">☰</span>
+<span class="title">내 과제</span>
+<span class="avatar">김</span>
+</div>
+<div class="phone-body">
+<div class="ph-assign-card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="assign-name">1월 2주차 어휘</span>
+<span class="assign-badge" style="background:#dbeafe;color:#1e40af">진행중</span>
+</div>
+<div style="font-size:5.5px;color:#6b7280;margin:2px 0">교재 42~45쪽 촬영 제출</div>
+<div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+<div class="assign-meta">마감: 2025.01.20 · 2/4 완료</div>
+</div>
+<div class="ph-assign-card completed">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="assign-name">1월 1주차 문법</span>
+<span class="assign-badge" style="background:#d1fae5;color:#065f46">완료</span>
+</div>
+<div style="font-size:5.5px;color:#6b7280;margin:2px 0">교재 38~41쪽 촬영 제출</div>
+<div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+<div class="assign-meta">마감: 2025.01.13 · 4/4 완료</div>
+</div>
+<div class="ph-assign-card overdue">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="assign-name">12월 독해 숙제</span>
+<span class="assign-badge" style="background:#fee2e2;color:#991b1b">기한초과</span>
+</div>
+<div style="font-size:5.5px;color:#6b7280;margin:2px 0">교재 30~33쪽 촬영 제출</div>
+<div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+<div class="assign-meta">마감: 2024.12.30 · 1/4 완료</div>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 과제 목록 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 4.2 과제 상세 (PAGE 11) ==================== -->
+<div class="page">
+<h3>4.2 과제 상세 및 페이지 제출</h3>
+<p>과제 카드를 누르면 상세 화면이 나타납니다. 각 페이지를 사진으로 찍어 제출합니다.</p>
+
+<ol class="step-list">
+<li>과제 목록에서 과제를 누릅니다.</li>
+<li>페이지 그리드에서 제출할 페이지를 선택합니다.</li>
+<li>카메라가 열리면 A4 가이드라인에 맞춰 촬영합니다.</li>
+<li>촬영된 사진을 확인하고 <b>제출</b>을 누릅니다.</li>
+<li>모든 페이지를 제출하면 과제가 완료됩니다.</li>
+</ol>
+
+<div class="two-col" style="margin-top:6px">
+<div>
+<h4>페이지 그리드</h4>
+<p>각 페이지는 A4 비율(1:1.414)의 작은 카드로 표시됩니다. 카드 상태에 따라 테두리 색이 다릅니다.</p>
+
+<div style="background:#eff6ff;border-left:3px solid #3b82f6;padding:6px 10px;border-radius:0 5px 5px 0;margin:6px 0;font-size:.82rem">
+📘 <b>안내:</b> 페이지를 눌러 촬영하거나 파일을 선택하세요. 한 번에 한 페이지씩 제출합니다.
+</div>
+
+<h4>뒤로 가기</h4>
+<p>상세 화면 상단의 <b>← 뒤로</b> 버튼으로 과제 목록으로 돌아갈 수 있습니다.</p>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Page Grid -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="phone-header">
+<span class="hamburger">☰</span>
+<span class="title">과제 상세</span>
+<span class="avatar">김</span>
+</div>
+<div class="phone-body">
+<div style="font-size:6.5px;color:#3b82f6;margin-bottom:3px;font-weight:600">← 뒤로</div>
+<div style="font-weight:700;font-size:8px;margin-bottom:2px">1월 2주차 어휘</div>
+<div style="font-size:5.5px;color:#6b7280;margin-bottom:4px">교재 42~45쪽을 촬영하여 제출하세요</div>
+<div style="background:#eff6ff;border-left:2px solid #3b82f6;padding:3px 5px;border-radius:0 3px 3px 0;margin-bottom:5px;font-size:5.5px;color:#1e40af">
+📘 페이지를 눌러 촬영해 주세요
+</div>
+<div class="ph-page-grid">
+<div class="ph-page-item done"><span class="pg-num">42</span><span style="font-size:4px;color:#10b981">완료</span></div>
+<div class="ph-page-item done"><span class="pg-num">43</span><span style="font-size:4px;color:#10b981">완료</span></div>
+<div class="ph-page-item submitted"><span class="pg-num">44</span><span style="font-size:4px;color:#f59e0b">제출됨</span></div>
+<div class="ph-page-item"><span class="pg-num">45</span><span style="font-size:4px;color:#6b7280">미제출</span></div>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 페이지 그리드 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 4.3 카메라 촬영 (PAGE 12) ==================== -->
+<div class="page">
+<h3>4.3 카메라 촬영</h3>
+<p>페이지를 누르면 카메라 모달이 열립니다. 교재 페이지를 A4 가이드라인에 맞춰 촬영해 주세요.</p>
+
+<div class="two-col">
+<div>
+<h4>촬영 방법</h4>
+<ol class="step-list">
+<li>카메라 화면의 <b>점선 사각형</b>(A4 가이드라인)에 교재를 맞춥니다.</li>
+<li>밝은 곳에서 흔들리지 않게 촬영합니다.</li>
+<li>하단의 <b>흰색 원형 버튼</b>을 눌러 촬영합니다.</li>
+<li>촬영된 이미지를 확인하고 제출합니다.</li>
+</ol>
+
+<h4>파일 선택 옵션</h4>
+<p>카메라 대신 갤러리에서 이미 찍어둔 사진을 선택할 수도 있습니다. 카메라 하단의 <span class="blue">"파일 선택"</span> 링크를 누르세요.</p>
+
+<div class="warn">
+⚠️ <b>촬영 팁:</b>
+<ul style="margin-top:4px">
+<li>밝은 조명 아래에서 촬영하세요</li>
+<li>그림자가 지지 않도록 주의하세요</li>
+<li>글씨가 선명하게 보이도록 초점을 맞추세요</li>
+<li>가이드라인 안에 교재가 모두 들어오게 하세요</li>
+</ul>
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Camera Modal -->
+<div class="phone" style="background:#000">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div style="padding:6px">
+<div style="text-align:right;margin-bottom:2px"><span style="color:#fff;font-size:8px;cursor:pointer">✕</span></div>
+<div style="font-size:7px;color:#fff;text-align:center;font-weight:600;margin-bottom:4px">페이지 44 촬영</div>
+<div class="ph-camera">
+<div class="viewfinder">A4 가이드라인<br>여기에 맞추세요</div>
+<div class="capture-btn"></div>
+<div class="file-link">📁 파일 선택</div>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 카메라 촬영 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 4.4 페이지 상태 (PAGE 13) ==================== -->
+<div class="page">
+<h3>4.4 페이지 상태 설명</h3>
+<p>과제의 각 페이지는 제출 및 검토 상태에 따라 다른 색상으로 표시됩니다.</p>
+
+<table class="status-table">
+<tr>
+<th>상태</th>
+<th>테두리 색</th>
+<th>아이콘</th>
+<th>설명</th>
+</tr>
+<tr>
+<td><b>미제출</b></td>
+<td><span class="status-sample" style="border-color:#e5e7eb"></span></td>
+<td>—</td>
+<td>아직 제출하지 않은 페이지. 눌러서 촬영할 수 있습니다.</td>
+</tr>
+<tr>
+<td><b>제출됨</b></td>
+<td><span class="status-sample" style="border-color:#f59e0b"></span></td>
+<td style="color:#f59e0b;font-size:1.1rem">◷</td>
+<td>제출했지만 아직 선생님이 확인하지 않은 상태입니다.</td>
+</tr>
+<tr>
+<td><b>완료</b></td>
+<td><span class="status-sample" style="border-color:#10b981"></span></td>
+<td style="color:#10b981;font-size:1.1rem">✓</td>
+<td>선생님이 확인하여 승인한 페이지입니다.</td>
+</tr>
+<tr>
+<td><b>거부됨</b></td>
+<td><span class="status-sample" style="border-color:#ef4444"></span></td>
+<td style="color:#ef4444;font-size:1.1rem">✕</td>
+<td>사진이 불량하여 재촬영이 필요한 페이지입니다. 다시 제출하세요.</td>
+</tr>
+</table>
+
+<div class="note" style="margin-top:8px">
+💡 <b>거부된 페이지:</b> 페이지를 다시 눌러 재촬영 후 제출하면 됩니다. 선생님의 피드백을 확인하고 더 선명하게 촬영해 보세요.
+</div>
+
+<h4 style="margin-top:12px">과제 제출 흐름 요약</h4>
+<div style="text-align:center;margin:10px 0">
+<div style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;flex-wrap:wrap;justify-content:center">
+<span class="tag tag-yellow" style="font-size:.78rem">미제출</span>
+<span>→ 촬영 →</span>
+<span class="tag tag-yellow" style="font-size:.78rem;background:#fef3c7">제출됨</span>
+<span>→ 검토 →</span>
+<span class="tag tag-green" style="font-size:.78rem">완료 ✓</span>
+</div>
+<div style="margin-top:4px;font-size:.78rem;color:#6b7280">
+또는: 제출됨 → 검토 → <span class="tag tag-red" style="font-size:.75rem">거부됨 ✕</span> → 재촬영 → 제출됨 → 검토 → <span class="tag tag-green" style="font-size:.75rem">완료 ✓</span>
+</div>
+</div>
+
+<h4 style="margin-top:12px">진행률 바</h4>
+<p>과제 카드의 진행률 바는 <b>완료</b> 상태인 페이지의 비율을 나타냅니다. 모든 페이지가 완료되면 100%가 됩니다.</p>
+<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+<div style="flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden"><div style="width:75%;height:100%;background:#10b981;border-radius:5px"></div></div>
+<span style="font-size:.8rem;font-weight:600;color:#065f46">75%</span>
+</div>
+</div>
+
+<!-- ==================== 5. 오답 노트 (PAGE 14) ==================== -->
+<div class="page">
+<h2><span class="sec-num">5</span> 오답 노트</h2>
+<p>여러 시험에서 틀린 문제를 모아서 <b>오답 노트</b>를 생성할 수 있습니다. 복습에 매우 유용한 기능입니다.</p>
+
+<h3>오답 노트 생성 방법</h3>
+<ol class="step-list">
+<li>사이드바에서 <b>📓 오답 노트</b>를 누릅니다.</li>
+<li>시험 목록에서 오답을 모을 시험을 <b>체크박스</b>로 선택합니다.</li>
+<li>여러 시험을 선택하려면 <b>"모두 선택"</b> 버튼을 누릅니다.</li>
+<li><b>"오답 노트 생성"</b> 버튼을 누릅니다.</li>
+<li>생성된 오답 노트를 확인하고 PDF로 다운로드합니다.</li>
+</ol>
+
+<div class="two-col" style="margin-top:6px">
+<div>
+<h4>오답 노트 구성</h4>
+<table class="info">
+<tr><th>영역</th><th>내용</th></tr>
+<tr><td>헤더</td><td>제목 + 초록색 하단 테두리</td></tr>
+<tr><td>요약 카드</td><td>총 오답 수, 시험 수 등 (초록색 강조)</td></tr>
+<tr><td>오답 목록</td><td>문제 번호(초록 원), 시험명 뱃지, 정답/선택 답</td></tr>
+</table>
+
+<div class="note" style="margin-top:6px">
+💡 오답 노트를 PDF로 저장하여 인쇄하면 효과적으로 복습할 수 있습니다.
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Wrong Note -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="phone-header">
+<span class="hamburger">☰</span>
+<span class="title">오답 노트</span>
+<span class="avatar">김</span>
+</div>
+<div class="phone-body">
+<div style="font-weight:700;font-size:8px;border-bottom:1.5px solid #4a7c59;padding-bottom:2px;margin-bottom:4px">오답 노트</div>
+<div style="display:flex;gap:3px;margin-bottom:5px">
+<div style="flex:1;background:#fff;border-radius:4px;padding:4px;text-align:center;border:1px solid #e5e7eb">
+<div style="font-size:5px;color:#6b7280">총 오답</div>
+<div style="font-size:10px;font-weight:700;color:#4a7c59">12</div>
+</div>
+<div style="flex:1;background:#fff;border-radius:4px;padding:4px;text-align:center;border:1px solid #e5e7eb">
+<div style="font-size:5px;color:#6b7280">시험 수</div>
+<div style="font-size:10px;font-weight:700;color:#4a7c59">3</div>
+</div>
+</div>
+<div style="background:#fff;border-radius:4px;padding:4px 5px;margin-bottom:3px;display:flex;align-items:center;gap:4px">
+<div style="width:14px;height:14px;background:#4a7c59;color:#fff;border-radius:50%;text-align:center;line-height:14px;font-size:6px;font-weight:700;flex-shrink:0">3</div>
+<div style="font-size:5.5px"><span style="background:#f0fdf4;padding:0 3px;border-radius:3px;font-size:5px;color:#065f46">1월 모의</span> 정답: ② 내 답: ④</div>
+</div>
+<div style="background:#fff;border-radius:4px;padding:4px 5px;margin-bottom:3px;display:flex;align-items:center;gap:4px">
+<div style="width:14px;height:14px;background:#4a7c59;color:#fff;border-radius:50%;text-align:center;line-height:14px;font-size:6px;font-weight:700;flex-shrink:0">7</div>
+<div style="font-size:5.5px"><span style="background:#f0fdf4;padding:0 3px;border-radius:3px;font-size:5px;color:#065f46">1월 모의</span> 정답: ③ 내 답: ①</div>
+</div>
+<div style="background:#fff;border-radius:4px;padding:4px 5px;margin-bottom:3px;display:flex;align-items:center;gap:4px">
+<div style="width:14px;height:14px;background:#4a7c59;color:#fff;border-radius:50%;text-align:center;line-height:14px;font-size:6px;font-weight:700;flex-shrink:0">15</div>
+<div style="font-size:5.5px"><span style="background:#fef3c7;padding:0 3px;border-radius:3px;font-size:5px;color:#92400e">12월 정기</span> 정답: ① 내 답: ③</div>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 오답 노트 화면 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 5 오답 노트 계속 (PAGE 15) ==================== -->
+<div class="page">
+<h3>오답 노트 활용법</h3>
+
+<h4>시험 선택 화면</h4>
+<p>오답 노트 생성 전에 시험 목록이 체크박스와 함께 표시됩니다. 원하는 시험을 선택한 후 생성 버튼을 누르세요.</p>
+
+<table class="info">
+<tr><th>버튼</th><th>기능</th></tr>
+<tr><td><span class="ph-btn-secondary" style="font-size:.8rem">모두 선택</span></td><td>모든 시험을 한 번에 선택합니다</td></tr>
+<tr><td><span class="ph-btn-primary" style="font-size:.8rem">오답 노트 생성</span></td><td>선택한 시험들의 오답을 모아 노트를 생성합니다</td></tr>
+</table>
+
+<h4 style="margin-top:10px">오답 항목 구성</h4>
+<p>각 오답 항목에는 다음 정보가 표시됩니다:</p>
+<ul>
+<li><b>문제 번호</b> — 초록색 원 안에 번호 표시</li>
+<li><b>시험명 뱃지</b> — 어떤 시험에서 틀린 문제인지 표시</li>
+<li><b>정답</b> — 실제 정답 번호</li>
+<li><b>내 답</b> — 내가 선택한 답 번호</li>
+</ul>
+
+<h4 style="margin-top:10px">효과적인 오답 노트 활용 팁</h4>
+<ol>
+<li><b>정기적으로 생성:</b> 시험을 볼 때마다 오답 노트를 생성하여 틀린 문제를 관리하세요.</li>
+<li><b>누적 복습:</b> 여러 시험을 함께 선택하면 누적 오답을 한눈에 볼 수 있습니다.</li>
+<li><b>PDF 인쇄:</b> 오답 노트를 PDF로 다운로드하여 인쇄하면 언제든 복습할 수 있습니다.</li>
+<li><b>약점 파악:</b> 같은 유형의 문제가 반복적으로 나타나면 해당 영역을 집중 학습하세요.</li>
+</ol>
+
+<div class="note" style="margin-top:8px">
+💡 <b>추천 학습법:</b> 오답 노트를 인쇄한 뒤, 틀린 문제를 다시 풀어보고 맞았으면 체크(✓)로 표시하세요. 반복해서 맞출 때까지 계속 풀어보는 것이 가장 효과적입니다.
+</div>
+</div>
+
+<!-- ==================== 6. 성적 추이 (PAGE 16) ==================== -->
+<div class="page">
+<h2><span class="sec-num">6</span> 성적 추이</h2>
+<p>시간에 따른 성적 변화를 차트로 확인할 수 있습니다. 사이드바에서 <b>📈 성적 추이</b>를 누르세요.</p>
+
+<div class="two-col">
+<div>
+<h4>📊 점수 추이 (꺾은선 차트)</h4>
+<p>시험별 총점의 변화를 시간 순서대로 보여줍니다. 점수가 오르고 있는지, 떨어지고 있는지 한눈에 파악할 수 있습니다.</p>
+
+<h4>🕸️ 영역별 정답률 (방사형 차트)</h4>
+<p>각 영역(어휘, 문법, 독해, 문학 등)의 정답률을 방사형 차트로 보여줍니다. 강한 영역과 약한 영역을 시각적으로 비교할 수 있습니다.</p>
+
+<h4>추이 분석 요약</h4>
+<p>차트 아래에 간략한 분석 요약이 표시됩니다:</p>
+<ul>
+<li>최고/최저 점수 및 해당 시험</li>
+<li>평균 점수 변화 추세</li>
+<li>가장 강한/약한 영역</li>
+</ul>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Trend Charts -->
+<div class="phone">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="phone-header">
+<span class="hamburger">☰</span>
+<span class="title">성적 추이</span>
+<span class="avatar">김</span>
+</div>
+<div class="phone-body">
+<div class="ph-chart" style="min-height:70px;flex-direction:column">
+<div style="font-weight:700;font-size:7px;margin-bottom:4px">📊 점수 추이</div>
+<svg width="120" height="45" viewBox="0 0 120 45">
+<polyline points="10,35 35,28 60,32 85,20 110,15" fill="none" stroke="#4a7c59" stroke-width="1.5"/>
+<circle cx="10" cy="35" r="2" fill="#4a7c59"/>
+<circle cx="35" cy="28" r="2" fill="#4a7c59"/>
+<circle cx="60" cy="32" r="2" fill="#4a7c59"/>
+<circle cx="85" cy="20" r="2" fill="#4a7c59"/>
+<circle cx="110" cy="15" r="2" fill="#4a7c59"/>
+<text x="10" y="43" font-size="4" fill="#6b7280" text-anchor="middle">9월</text>
+<text x="35" y="43" font-size="4" fill="#6b7280" text-anchor="middle">10월</text>
+<text x="60" y="43" font-size="4" fill="#6b7280" text-anchor="middle">11월</text>
+<text x="85" y="43" font-size="4" fill="#6b7280" text-anchor="middle">12월</text>
+<text x="110" y="43" font-size="4" fill="#6b7280" text-anchor="middle">1월</text>
+</svg>
+</div>
+<div class="ph-chart" style="min-height:65px;flex-direction:column">
+<div style="font-weight:700;font-size:7px;margin-bottom:4px">🕸️ 영역별 정답률</div>
+<svg width="70" height="50" viewBox="0 0 70 50">
+<polygon points="35,5 60,18 55,42 15,42 10,18" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+<polygon points="35,12 52,20 48,38 22,38 18,20" fill="rgba(74,124,89,0.2)" stroke="#4a7c59" stroke-width="1"/>
+<text x="35" y="3" font-size="4" fill="#6b7280" text-anchor="middle">어휘</text>
+<text x="63" y="19" font-size="4" fill="#6b7280" text-anchor="start">문법</text>
+<text x="58" y="45" font-size="4" fill="#6b7280" text-anchor="start">독해</text>
+<text x="2" y="45" font-size="4" fill="#6b7280" text-anchor="start">문학</text>
+<text x="2" y="19" font-size="4" fill="#6b7280" text-anchor="start">쓰기</text>
+</svg>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 성적 추이 화면 ]</div>
+</div>
+</div>
+
+<div class="note" style="margin-top:8px">
+💡 <b>활용 팁:</b> 방사형 차트에서 안쪽으로 들어간 영역이 약한 영역입니다. 해당 영역의 문제를 더 많이 풀어보세요.
+</div>
+</div>
+
+<!-- ==================== 7. 설정 (PAGE 17) ==================== -->
+<div class="page">
+<h2><span class="sec-num">7</span> 설정</h2>
+<p>사이드바에서 <b>⚙️ 설정</b>을 누르면 계정 관리 화면이 나타납니다.</p>
+
+<h3>비밀번호 변경</h3>
+<ol class="step-list">
+<li>설정 화면에서 <b>🔑 비밀번호 변경</b> 버튼을 누릅니다.</li>
+<li>팝업 창에서 <b>현재 비밀번호</b>를 입력합니다.</li>
+<li><b>새 비밀번호</b>를 입력합니다.</li>
+<li><b>새 비밀번호 확인</b>에 동일하게 입력합니다.</li>
+<li>하단의 <b>변경</b> 버튼을 누르면 완료됩니다.</li>
+</ol>
+
+<div class="two-col" style="margin-top:8px">
+<div>
+<h4>모달 창 구성</h4>
+<table class="info">
+<tr><th>요소</th><th>설명</th></tr>
+<tr><td>헤더</td><td>"비밀번호 변경" 제목 + ✕ 닫기 버튼</td></tr>
+<tr><td>현재 비밀번호</td><td>기존 비밀번호 입력란</td></tr>
+<tr><td>새 비밀번호</td><td>변경할 새 비밀번호 입력란</td></tr>
+<tr><td>새 비밀번호 확인</td><td>새 비밀번호 재입력란</td></tr>
+<tr><td>취소 버튼</td><td>변경 취소 (보조 스타일)</td></tr>
+<tr><td>변경 버튼</td><td>비밀번호 변경 실행 (주요 스타일)</td></tr>
+</table>
+
+<div class="warn" style="margin-top:6px">
+⚠️ 비밀번호 변경 후에는 새 비밀번호로 다시 로그인해야 합니다.
+</div>
+</div>
+<div style="text-align:center">
+<!-- PHONE: Password Change Modal -->
+<div class="phone" style="background:rgba(0,0,0,.3)">
+<div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+<div class="ph-modal" style="margin-top:30px">
+<div class="modal-header">
+<span class="modal-title">비밀번호 변경</span>
+<span class="close-btn">✕</span>
+</div>
+<div class="modal-label">현재 비밀번호</div>
+<div class="modal-input" style="color:#94a3b8">••••••</div>
+<div class="modal-label">새 비밀번호</div>
+<div class="modal-input"></div>
+<div class="modal-label">새 비밀번호 확인</div>
+<div class="modal-input"></div>
+<div class="modal-footer">
+<span class="ph-btn-secondary">취소</span>
+<span class="ph-btn-primary">변경</span>
+</div>
+</div>
+</div>
+<div style="font-size:.7rem;color:#6b7280;margin-top:2px">[ 비밀번호 변경 모달 ]</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== 8. 부록 - FAQ (PAGE 18) ==================== -->
+<div class="page">
+<h2><span class="sec-num">8</span> 부록</h2>
+
+<h3>자주 묻는 질문 (FAQ)</h3>
+
+<div style="margin-top:6px">
+<h4 style="color:#4a7c59">Q1. 비밀번호를 잊어버렸어요.</h4>
+<p>선생님께 비밀번호 초기화를 요청하세요. 선생님이 임시 비밀번호를 다시 설정해 주시면, 로그인 후 설정에서 새 비밀번호로 변경하면 됩니다.</p>
+
+<h4 style="color:#4a7c59">Q2. 성적표가 보이지 않아요.</h4>
+<p>선생님이 성적표를 아직 등록하지 않았을 수 있습니다. 시험 후 성적표가 등록되면 "내 성적표" 메뉴에 자동으로 나타납니다. 며칠 기다려도 안 보이면 선생님께 문의하세요.</p>
+
+<h4 style="color:#4a7c59">Q3. 과제 사진이 거부되었어요. 어떻게 하나요?</h4>
+<p>거부된 페이지(빨간 ✕ 표시)를 다시 눌러서 재촬영하면 됩니다. 밝은 곳에서 글씨가 선명하게 보이도록 다시 찍어 제출하세요.</p>
+
+<h4 style="color:#4a7c59">Q4. 과제 마감일이 지나도 제출할 수 있나요?</h4>
+<p>기한이 지나도 제출은 가능하지만, "기한초과" 상태로 표시됩니다. 되도록 마감일 전에 제출하세요.</p>
+
+<h4 style="color:#4a7c59">Q5. PDF 다운로드가 안 돼요.</h4>
+<p>브라우저의 팝업 차단이 활성화되어 있을 수 있습니다. 팝업 차단을 해제하거나 다른 브라우저(크롬 권장)를 사용해 보세요. 데이터가 완전히 로딩된 후 다운로드 버튼을 누르세요.</p>
+
+<h4 style="color:#4a7c59">Q6. 모바일에서 화면이 이상하게 보여요.</h4>
+<p>브라우저를 최신 버전으로 업데이트하세요. 크롬(Chrome) 또는 사파리(Safari) 브라우저를 권장합니다. 화면이 깨질 경우 브라우저 캐시를 삭제한 후 새로고침하세요.</p>
+</div>
+</div>
+
+<!-- ==================== 8. 부록 - 문제 해결 (PAGE 19) ==================== -->
+<div class="page">
+<h3>문제 해결</h3>
+<p>자주 발생하는 문제와 해결 방법을 안내합니다.</p>
+
+<div style="margin-top:8px">
+<h4>문제 1: 로그인이 되지 않아요</h4>
+<table class="info">
+<tr><th>원인</th><th>해결 방법</th></tr>
+<tr><td>아이디 오입력</td><td>선생님이 알려준 아이디를 정확히 입력했는지 확인하세요 (대소문자 구분)</td></tr>
+<tr><td>비밀번호 오입력</td><td>비밀번호를 정확히 입력하세요. Caps Lock이 켜져 있지 않은지 확인하세요</td></tr>
+<tr><td>계정 미등록</td><td>선생님께 계정이 등록되었는지 확인을 요청하세요</td></tr>
+</table>
+
+<h4 style="margin-top:12px">문제 2: 카메라가 작동하지 않아요</h4>
+<table class="info">
+<tr><th>원인</th><th>해결 방법</th></tr>
+<tr><td>권한 미허용</td><td>브라우저에서 카메라 접근 권한을 "허용"으로 설정하세요</td></tr>
+<tr><td>다른 앱 사용 중</td><td>카메라를 사용 중인 다른 앱을 닫고 다시 시도하세요</td></tr>
+<tr><td>브라우저 미지원</td><td>크롬(Chrome) 최신 버전을 사용하세요</td></tr>
+</table>
+<div class="note">
+💡 카메라가 작동하지 않으면 <b>"파일 선택"</b> 옵션으로 갤러리에서 미리 찍어둔 사진을 업로드할 수 있습니다.
+</div>
+
+<h4 style="margin-top:12px">문제 3: 페이지가 느리게 로딩돼요</h4>
+<table class="info">
+<tr><th>원인</th><th>해결 방법</th></tr>
+<tr><td>느린 네트워크</td><td>Wi-Fi 연결 상태를 확인하거나 모바일 데이터로 전환하세요</td></tr>
+<tr><td>브라우저 캐시</td><td>브라우저 설정에서 캐시를 삭제하고 새로고침하세요</td></tr>
+<tr><td>오래된 브라우저</td><td>브라우저를 최신 버전으로 업데이트하세요</td></tr>
+</table>
+</div>
+
+<div style="margin-top:16px;text-align:center;padding:12px;background:#f0fdf4;border-radius:8px">
+<p style="font-size:.9rem;font-weight:600;color:#065f46;margin-bottom:4px">도움이 필요하면 선생님께 문의하세요!</p>
+<p style="font-size:.8rem;color:#6b7280">이 매뉴얼에서 해결되지 않는 문제가 있으면 담당 선생님께 직접 문의해 주세요.</p>
+</div>
+
+<div style="position:absolute;bottom:12mm;left:15mm;right:15mm;text-align:center;font-size:.75rem;color:#94a3b8;border-top:1px solid #e5e7eb;padding-top:6px">
+국어농장 성적표 생성 프로그램 &middot; 학생용 매뉴얼 v1.0 &middot; 2025년 1월
+</div>
+</div>
+
+</body>
+</html>
