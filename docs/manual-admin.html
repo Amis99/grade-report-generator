@@ -8,16 +8,16 @@
 /* ===== 기본 설정 ===== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--main:#10b981;--main-light:#d1fae5;--main-dark:#065f46;--blue:#3b82f6;--blue-light:#dbeafe;--yellow:#f59e0b;--yellow-light:#fef3c7;--red:#ef4444;--red-light:#fee2e2;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-500:#64748b;--gray-700:#334155;--gray-800:#1e293b;--gray-900:#0f172a}
-body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--gray-800);line-height:1.7;font-size:13px;counter-reset:page-num;background:#f1f5f9}
-h1{font-size:28px;color:var(--gray-900);margin-bottom:16px}
-h2{font-size:22px;color:var(--main-dark);margin-bottom:12px;padding:8px 0 8px 16px;border-left:4px solid var(--main)}
-h3{font-size:17px;color:var(--gray-800);margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--gray-200)}
-h4{font-size:15px;color:var(--gray-700);margin:14px 0 8px}
-p{margin-bottom:10px}
-ul,ol{margin:8px 0 12px 24px}
-li{margin-bottom:4px}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--gray-800);line-height:1.65;font-size:12.5px;counter-reset:page-num;background:#f1f5f9}
+h1{font-size:28px;color:var(--gray-900);margin-bottom:14px}
+h2{font-size:21px;color:var(--main-dark);margin-bottom:10px;padding:6px 0 6px 14px;border-left:4px solid var(--main)}
+h3{font-size:16px;color:var(--gray-800);margin:16px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--gray-200)}
+h4{font-size:14px;color:var(--gray-700);margin:12px 0 6px}
+p{margin-bottom:8px}
+ul,ol{margin:6px 0 10px 22px}
+li{margin-bottom:3px}
 a{color:var(--blue);text-decoration:none}
-code{background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px;font-family:'Consolas',monospace}
+code{background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:11.5px;font-family:'Consolas',monospace}
 strong{color:var(--gray-900)}
 
 /* ===== 페이지 시스템 ===== */
@@ -44,84 +44,84 @@ strong{color:var(--gray-900)}
 
 /* ===== 목차 ===== */
 .toc-list{list-style:none;margin:0;padding:0}
-.toc-list li{padding:6px 0;border-bottom:1px dotted var(--gray-300);display:flex;justify-content:space-between}
-.toc-list li.toc-main{font-weight:700;font-size:15px;margin-top:8px;color:var(--main-dark)}
-.toc-list li.toc-sub{padding-left:24px;font-size:13px;color:var(--gray-700)}
+.toc-list li{padding:5px 0;border-bottom:1px dotted var(--gray-300);display:flex;justify-content:space-between}
+.toc-list li.toc-main{font-weight:700;font-size:14px;margin-top:6px;color:var(--main-dark)}
+.toc-list li.toc-sub{padding-left:24px;font-size:12.5px;color:var(--gray-700)}
 
 /* ===== UI 다이어그램 ===== */
-.ui-diagram{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:16px;margin:12px 0 16px;page-break-inside:avoid}
+.ui-diagram{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:12px;margin:10px 0 12px;page-break-inside:avoid}
 @media print{.ui-diagram{box-shadow:none;border:1px solid #ccc}}
-.ui-diagram .ui-title{font-size:12px;color:var(--gray-500);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
-.ui-box{border:1.5px solid var(--gray-300);border-radius:6px;padding:10px;margin:6px 0;background:#fff;font-size:13px}
+.ui-diagram .ui-title{font-size:11px;color:var(--gray-500);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.ui-box{border:1.5px solid var(--gray-300);border-radius:6px;padding:8px;margin:5px 0;background:#fff;font-size:12.5px}
 .ui-box.green{border-color:var(--main);background:var(--main-light)}
 .ui-box.blue{border-color:var(--blue);background:var(--blue-light)}
 .ui-box.red{border-color:var(--red);background:var(--red-light)}
-.ui-header{background:var(--gray-100);border-bottom:1.5px solid var(--gray-300);padding:8px 10px;border-radius:6px 6px 0 0;font-weight:600;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.ui-header{background:var(--gray-100);border-bottom:1.5px solid var(--gray-300);padding:7px 10px;border-radius:6px 6px 0 0;font-weight:600;font-size:12.5px;display:flex;justify-content:space-between;align-items:center}
 .ui-sidebar{display:inline-block;width:180px;vertical-align:top;border:1.5px solid var(--gray-300);border-radius:6px;padding:8px;margin-right:10px;background:#fff;font-size:12px}
 .ui-main-area{display:inline-block;width:calc(100% - 200px);vertical-align:top;border:1.5px solid var(--gray-300);border-radius:6px;padding:8px;background:#fff;font-size:12px}
 .ui-row{display:flex;gap:8px;margin:4px 0}
-.ui-cell{flex:1;border:1px solid var(--gray-200);border-radius:4px;padding:6px 8px;background:#fff;font-size:12px;text-align:center}
+.ui-cell{flex:1;border:1px solid var(--gray-200);border-radius:4px;padding:5px 7px;background:#fff;font-size:12px;text-align:center}
 .ui-btn{display:inline-block;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:600;margin:2px}
 .ui-btn.primary{background:var(--main);color:#fff}
 .ui-btn.secondary{background:var(--gray-200);color:var(--gray-700)}
 .ui-btn.danger{background:var(--red);color:#fff}
 .ui-btn.blue{background:var(--blue);color:#fff}
-.ui-input{border:1.5px solid var(--gray-300);border-radius:4px;padding:5px 8px;font-size:12px;background:#fff;display:inline-block;min-width:120px}
+.ui-input{border:1.5px solid var(--gray-300);border-radius:4px;padding:4px 8px;font-size:12px;background:#fff;display:inline-block;min-width:120px}
 .ui-label{font-size:11px;color:var(--gray-500);margin-bottom:2px;display:block}
-.ui-nav-item{padding:6px 10px;margin:2px 0;border-radius:4px;font-size:12px;cursor:pointer}
+.ui-nav-item{padding:5px 10px;margin:2px 0;border-radius:4px;font-size:11px;cursor:pointer}
 .ui-nav-item.active{background:var(--main);color:#fff;font-weight:600}
 .ui-nav-item:not(.active){background:transparent}
-.ui-nav-section{font-size:10px;color:var(--gray-400);text-transform:uppercase;margin:8px 0 4px;font-weight:600}
+.ui-nav-section{font-size:10px;color:var(--gray-400);text-transform:uppercase;margin:6px 0 3px;font-weight:600}
 .ui-split{display:flex;gap:10px}
 .ui-split>div{flex:1}
-.ui-card{border:1px solid var(--gray-200);border-radius:6px;padding:8px;margin:4px 0;background:#fff;font-size:12px}
+.ui-card{border:1px solid var(--gray-200);border-radius:6px;padding:7px;margin:3px 0;background:#fff;font-size:12px}
 .ui-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .ui-badge.green{background:var(--main-light);color:var(--main-dark)}
 .ui-badge.yellow{background:var(--yellow-light);color:#92400e}
 .ui-badge.red{background:var(--red-light);color:#991b1b}
 .ui-badge.blue{background:var(--blue-light);color:#1e40af}
-.ui-grid{display:grid;gap:8px;margin:6px 0}
+.ui-grid{display:grid;gap:6px;margin:5px 0}
 .ui-grid.cols-2{grid-template-columns:1fr 1fr}
 .ui-grid.cols-3{grid-template-columns:1fr 1fr 1fr}
 .ui-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
-.ui-stat{text-align:center;padding:10px;border:1px solid var(--gray-200);border-radius:6px;background:#fff}
-.ui-stat .num{font-size:22px;font-weight:800;color:var(--main)}
+.ui-stat{text-align:center;padding:8px;border:1px solid var(--gray-200);border-radius:6px;background:#fff}
+.ui-stat .num{font-size:20px;font-weight:800;color:var(--main)}
 .ui-stat .label{font-size:11px;color:var(--gray-500)}
-.ui-table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
-.ui-table th{background:var(--main);color:#fff;padding:6px 8px;text-align:left;font-weight:600}
-.ui-table td{padding:5px 8px;border-bottom:1px solid var(--gray-200)}
+.ui-table{width:100%;border-collapse:collapse;font-size:12px;margin:5px 0}
+.ui-table th{background:var(--main);color:#fff;padding:5px 7px;text-align:left;font-weight:600}
+.ui-table td{padding:4px 7px;border-bottom:1px solid var(--gray-200)}
 .ui-table tr:nth-child(even) td{background:var(--gray-50)}
 
 /* ===== 정보 박스 ===== */
-.info-box{border-radius:6px;padding:12px 16px;margin:12px 0;border-left:4px solid;font-size:13px;page-break-inside:avoid}
+.info-box{border-radius:6px;padding:10px 12px;margin:10px 0;border-left:4px solid;font-size:12.5px;page-break-inside:avoid}
 .info-box.tip{border-color:var(--blue);background:var(--blue-light)}
 .info-box.warn{border-color:var(--yellow);background:var(--yellow-light)}
 .info-box.danger{border-color:var(--red);background:var(--red-light)}
 .info-box.success{border-color:var(--main);background:var(--main-light)}
-.info-box .info-title{font-weight:700;margin-bottom:4px}
+.info-box .info-title{font-weight:700;margin-bottom:3px}
 
 /* ===== 단계 ===== */
-.steps{margin:12px 0;padding:0;list-style:none;counter-reset:step}
-.steps li{position:relative;padding:8px 0 8px 40px;margin-bottom:6px;counter-increment:step}
-.steps li::before{content:counter(step);position:absolute;left:0;top:6px;width:28px;height:28px;background:var(--main);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.steps{margin:10px 0;padding:0;list-style:none;counter-reset:step}
+.steps li{position:relative;padding:6px 0 6px 36px;margin-bottom:4px;counter-increment:step}
+.steps li::before{content:counter(step);position:absolute;left:0;top:4px;width:26px;height:26px;background:var(--main);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
 
 /* ===== 표 ===== */
-table.data-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;page-break-inside:avoid}
-table.data-table th{background:var(--main);color:#fff;padding:8px 10px;text-align:left;font-weight:600}
-table.data-table td{padding:7px 10px;border-bottom:1px solid var(--gray-200)}
+table.data-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px;page-break-inside:avoid}
+table.data-table th{background:var(--main);color:#fff;padding:6px 9px;text-align:left;font-weight:600}
+table.data-table td{padding:5px 9px;border-bottom:1px solid var(--gray-200)}
 table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 
 /* ===== 관리자 전용 ===== */
-.admin-only{border:2px solid var(--red);border-radius:8px;padding:16px;margin:16px 0;background:#fff5f5;page-break-inside:avoid}
-.admin-only-badge{display:inline-block;background:var(--red);color:#fff;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:700;margin-bottom:8px}
+.admin-only{border:2px solid var(--red);border-radius:8px;padding:14px;margin:12px 0;background:#fff5f5;page-break-inside:avoid}
+.admin-only-badge{display:inline-block;background:var(--red);color:#fff;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:700;margin-bottom:6px}
 
 /* ===== FAQ ===== */
-.faq-item{margin:10px 0;padding:10px 14px;border:1px solid var(--gray-200);border-radius:6px;page-break-inside:avoid}
-.faq-q{font-weight:700;color:var(--main-dark);margin-bottom:4px}
+.faq-item{margin:8px 0;padding:8px 12px;border:1px solid var(--gray-200);border-radius:6px;page-break-inside:avoid}
+.faq-q{font-weight:700;color:var(--main-dark);margin-bottom:3px}
 .faq-a{color:var(--gray-700);padding-left:8px;border-left:3px solid var(--main-light)}
 
 /* ===== 푸터 ===== */
-.doc-footer{text-align:center;padding:20px 0;margin-top:40px;border-top:1px solid var(--gray-200);color:var(--gray-500);font-size:12px}
+.doc-footer{text-align:center;padding:16px 0;margin-top:30px;border-top:1px solid var(--gray-200);color:var(--gray-500);font-size:12px}
 </style>
 </head>
 <body>
@@ -129,6 +129,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 <!-- ==================== 표지 ==================== -->
 <div class="page page-cover">
   <div class="cover-content">
+    <div style="width:100px;height:100px;margin-bottom:20px"><img src="../images/logo.png" alt="국어농장 로고" style="width:100%;height:100%;object-fit:contain"></div>
     <div class="cover-bar"></div>
     <div class="cover-title">국어농장 성적표 생성 프로그램</div>
     <div class="cover-subtitle">본사 관리자용 매뉴얼</div>
@@ -142,7 +143,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 
 <!-- ==================== 목차 ==================== -->
 <div class="page">
-  <h2 style="border-left:none;text-align:center;font-size:24px;margin-bottom:24px">목 차</h2>
+  <h2 style="border-left:none;text-align:center;font-size:22px;margin-bottom:18px">목 차</h2>
   <ul class="toc-list">
     <li class="toc-main"><span>1. 시작하기</span></li>
     <li class="toc-sub"><span>1.1 로그인</span></li>
@@ -172,7 +173,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   </ul>
 </div>
 
-<!-- ==================== 1. 시작하기 (1/2) ==================== -->
+<!-- ==================== 1. 시작하기 (1/2) - 로그인 ==================== -->
 <div class="page">
 <h2>1. 시작하기</h2>
 
@@ -187,20 +188,21 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 </ol>
 
 <div class="ui-diagram">
-  <div class="ui-title">로그인 화면</div>
-  <div style="max-width:320px;margin:0 auto;text-align:center">
-    <div style="font-size:24px;margin-bottom:4px">🌾</div>
-    <div style="font-weight:700;font-size:16px;margin-bottom:16px">국어<span style="color:var(--main)">농장</span> 성적표 생성 프로그램</div>
-    <div style="margin-bottom:8px">
-      <span class="ui-label">아이디</span>
-      <div class="ui-input" style="width:100%;text-align:left;color:var(--gray-400)">아이디를 입력하세요</div>
+  <div class="ui-title">로그인 화면 (실제 화면 구조)</div>
+  <div style="display:flex;gap:0;border:2px solid var(--gray-300);border-radius:8px;overflow:hidden;min-height:220px;background:#BDD4EA">
+    <!-- 왼쪽: 일러스트 -->
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px">
+      <img src="../images/login-illustration.png" alt="로그인 일러스트" style="max-height:160px;object-fit:contain">
     </div>
-    <div style="margin-bottom:12px">
-      <span class="ui-label">비밀번호</span>
-      <div class="ui-input" style="width:100%;text-align:left;color:var(--gray-400)">********</div>
+    <!-- 오른쪽: 로그인 폼 -->
+    <div style="flex:1;background:#f8fafc;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="width:36px;height:36px;margin-bottom:6px"><img src="../images/logo.png" alt="로고" style="width:100%;height:100%;object-fit:contain"></div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--gray-700)">성적표 생성 프로그램</div>
+      <div style="width:220px;padding:7px 14px;background:#e2e8f0;border-radius:50px;font-size:12px;color:var(--gray-400);margin-bottom:6px">아이디</div>
+      <div style="width:220px;padding:7px 14px;background:#e2e8f0;border-radius:50px;font-size:12px;color:var(--gray-400);margin-bottom:10px">비밀번호</div>
+      <div style="width:220px;padding:8px;background:#2563eb;color:#fff;border-radius:50px;font-size:13px;font-weight:600;text-align:center">로그인</div>
+      <div style="font-size:11px;color:#2563eb;margin-top:8px">회원가입</div>
     </div>
-    <div class="ui-btn primary" style="width:100%;padding:8px;text-align:center">로그인</div>
-    <div style="font-size:11px;color:var(--gray-400);margin-top:10px">계정이 없으신가요? <span style="color:var(--blue)">회원가입</span></div>
   </div>
 </div>
 
@@ -210,17 +212,17 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 </div>
 </div>
 
-<!-- ==================== 1. 시작하기 (2/2) ==================== -->
+<!-- ==================== 1. 시작하기 (2/3) - 화면 구성 ==================== -->
 <div class="page">
 <h3>1.2 화면 구성</h3>
 <p>로그인 후 메인 화면은 <strong>사이드바 + 헤더 + 콘텐츠 영역</strong>으로 구성됩니다. 본사 관리자는 설정 메뉴를 포함한 모든 기능에 접근할 수 있습니다.</p>
 
 <div class="ui-diagram">
   <div class="ui-title">관리자 화면 전체 레이아웃</div>
-  <div style="display:flex;gap:0;border:2px solid var(--gray-300);border-radius:8px;overflow:hidden;min-height:340px">
+  <div style="display:flex;gap:0;border:2px solid var(--gray-300);border-radius:8px;overflow:hidden;min-height:300px">
     <!-- 사이드바 -->
-    <div style="width:200px;background:var(--gray-900);color:#fff;padding:12px;font-size:11px;flex-shrink:0">
-      <div style="font-weight:700;font-size:14px;margin-bottom:12px">🌾 국어<span style="color:var(--main)">농장</span></div>
+    <div style="width:190px;background:var(--gray-900);color:#fff;padding:10px;font-size:11px;flex-shrink:0">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:5px"><img src="../images/logo.png" alt="로고" style="width:22px;height:22px;object-fit:contain"> 국어<span style="color:var(--main)">농장</span></div>
       <div class="ui-nav-section" style="color:var(--gray-400)">메인</div>
       <div class="ui-nav-item active">🏠 대시보드</div>
       <div class="ui-nav-section" style="color:var(--gray-400)">시험 관리</div>
@@ -236,7 +238,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <div class="ui-nav-item" style="color:#ccc">📓 오답 노트</div>
       <div class="ui-nav-section" style="color:var(--gray-400)">설정</div>
       <div class="ui-nav-item" style="color:#ccc">⚙️ 설정</div>
-      <div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--gray-700);font-size:10px">
+      <div style="margin-top:10px;padding-top:6px;border-top:1px solid var(--gray-700);font-size:10px">
         <div>👤 관리자</div>
         <div style="color:var(--gray-400)">국어농장 본사</div>
       </div>
@@ -244,19 +246,19 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
     <!-- 메인 영역 -->
     <div style="flex:1;display:flex;flex-direction:column">
       <!-- 헤더 -->
-      <div style="background:#fff;border-bottom:1px solid var(--gray-200);padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:700;font-size:15px">📌 대시보드</div>
+      <div style="background:#fff;border-bottom:1px solid var(--gray-200);padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;font-size:14px">📌 대시보드</div>
         <div style="font-size:12px;color:var(--gray-500)">☰ 메뉴</div>
       </div>
       <!-- 콘텐츠 -->
-      <div style="flex:1;background:var(--gray-50);padding:16px">
-        <div style="font-size:12px;color:var(--gray-500);text-align:center;padding-top:40px">
+      <div style="flex:1;background:var(--gray-50);padding:14px">
+        <div style="font-size:12px;color:var(--gray-500);text-align:center;padding-top:30px">
           [콘텐츠 영역]<br>선택한 메뉴에 따라 내용이 변경됩니다
         </div>
       </div>
     </div>
   </div>
-  <div style="font-size:11px;color:var(--gray-500);margin-top:6px">
+  <div style="font-size:11px;color:var(--gray-500);margin-top:5px">
     ◀ 사이드바: 전체 메뉴 네비게이션 &nbsp;|&nbsp; ▲ 헤더: 현재 페이지 제목 + 메뉴 &nbsp;|&nbsp; 콘텐츠: 각 기능 화면
   </div>
 </div>
@@ -265,7 +267,10 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   <div class="info-title">⚠️ 관리자 vs 기관 관리자</div>
   본사 관리자(admin)는 설정 페이지에서 <strong>관리자 메뉴</strong>(가입 승인, 사용자 관리)가 추가로 표시됩니다. 기관 관리자(org_admin)에게는 이 메뉴가 보이지 않습니다.
 </div>
+</div>
 
+<!-- ==================== 1. 시작하기 (3/3) - 비밀번호 변경 + 2. 대시보드 ==================== -->
+<div class="page">
 <h3>1.3 비밀번호 변경</h3>
 <p>설정 페이지 또는 사이드바 하단 사용자 메뉴에서 비밀번호를 변경할 수 있습니다.</p>
 <ol class="steps">
@@ -273,31 +278,28 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   <li><strong>비밀번호 변경</strong> 섹션에서 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인을 입력합니다.</li>
   <li><strong>변경</strong> 버튼을 클릭합니다.</li>
 </ol>
-</div>
 
-<!-- ==================== 2. 대시보드 ==================== -->
-<div class="page">
-<h2>2. 대시보드</h2>
+<h2 style="margin-top:24px">2. 대시보드</h2>
 <p>로그인 후 가장 먼저 표시되는 화면으로, 현재 상태를 한눈에 파악할 수 있습니다.</p>
 
 <h4>주요 구성</h4>
 <ul>
   <li><strong>환영 인사</strong>: 관리자 이름, 소속, 현재 날짜를 표시</li>
-  <li><strong>할 일 피드</strong>: 진행중인 과제 수, 답안 미입력 시험 수, 미제출 과제 등</li>
+  <li><strong>오늘의 할 일</strong>: 진행중인 과제 수, 답안 미입력 시험 수, 미제출 과제 등</li>
   <li><strong>최근 활동 타임라인</strong>: 시험 생성, 학생 추가, 채점 활동 등 최근 이벤트</li>
 </ul>
 
 <div class="ui-diagram">
   <div class="ui-title">대시보드 화면</div>
   <!-- 환영 카드 -->
-  <div class="ui-box green" style="text-align:center;padding:16px">
-    <div style="font-size:16px;font-weight:700">👋 안녕하세요, 관리자님!</div>
+  <div class="ui-box green" style="text-align:center;padding:12px">
+    <div style="font-size:15px;font-weight:700">👋 안녕하세요, 관리자님!</div>
     <div style="font-size:12px;color:var(--main-dark)">2025년 1월 15일 수요일 | 국어농장 본사</div>
   </div>
-  <!-- 할 일 / 활동 -->
-  <div class="ui-split" style="margin-top:10px">
+  <!-- 오늘의 할 일 / 활동 -->
+  <div class="ui-split" style="margin-top:8px">
     <div>
-      <div style="font-weight:600;font-size:13px;margin-bottom:6px">📋 할 일</div>
+      <div style="font-weight:600;font-size:12px;margin-bottom:4px">📋 오늘의 할 일</div>
       <div class="ui-card">
         <div>📋 진행중인 과제: <strong style="color:var(--blue)">3개</strong></div>
       </div>
@@ -309,7 +311,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       </div>
     </div>
     <div>
-      <div style="font-weight:600;font-size:13px;margin-bottom:6px">🕐 최근 활동</div>
+      <div style="font-weight:600;font-size:12px;margin-bottom:4px">🕐 최근 활동</div>
       <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">10분 전</span> &middot; 시험 "1월 모의고사" 생성됨</div>
       <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">1시간 전</span> &middot; 학생 3명 추가됨</div>
       <div class="ui-card"><span style="color:var(--gray-400);font-size:11px">2시간 전</span> &middot; "12월 시험" 채점 완료</div>
@@ -338,8 +340,8 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
     <span>📝 시험 관리</span>
     <span class="ui-btn primary">+ 새 시험 만들기</span>
   </div>
-  <div style="padding:10px">
-    <div class="ui-input" style="width:100%;margin-bottom:8px;color:var(--gray-400)">🔍 시험명 검색...</div>
+  <div style="padding:8px">
+    <div class="ui-input" style="width:100%;margin-bottom:6px;color:var(--gray-400)">🔍 시험명 검색...</div>
     <div class="ui-card" style="border-left:3px solid var(--main)">
       <div style="display:flex;justify-content:space-between">
         <strong>1월 정기 모의고사</strong>
@@ -375,18 +377,18 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 <div class="ui-diagram">
   <div class="ui-title">시험 생성 폼</div>
   <div class="ui-box" style="max-width:400px;margin:0 auto">
-    <div style="font-weight:700;font-size:14px;margin-bottom:10px;text-align:center">새 시험 만들기</div>
-    <div style="margin-bottom:8px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:8px;text-align:center">새 시험 만들기</div>
+    <div style="margin-bottom:6px">
       <span class="ui-label">시험명 *</span>
       <div class="ui-input" style="width:100%">예: 1월 정기 모의고사</div>
     </div>
-    <div style="margin-bottom:8px">
+    <div style="margin-bottom:6px">
       <span class="ui-label">시행일 *</span>
       <div class="ui-input" style="width:100%">2025-01-15</div>
     </div>
-    <div style="margin-bottom:12px">
+    <div style="margin-bottom:10px">
       <span class="ui-label">설명</span>
-      <div class="ui-input" style="width:100%;min-height:40px">시험에 대한 간단한 설명</div>
+      <div class="ui-input" style="width:100%;min-height:36px">시험에 대한 간단한 설명</div>
     </div>
     <div style="text-align:right">
       <span class="ui-btn secondary">취소</span>
@@ -396,7 +398,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 </div>
 </div>
 
-<!-- ==================== 3. 시험 관리 (2/3) ==================== -->
+<!-- ==================== 3. 시험 관리 (2/3) - 수정/삭제 + 문제 추가 ==================== -->
 <div class="page">
 <h3>3.3 시험 수정 및 삭제</h3>
 <ul>
@@ -414,30 +416,30 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 <div class="ui-diagram">
   <div class="ui-title">문제 추가 모달</div>
   <div class="ui-box" style="max-width:440px;margin:0 auto">
-    <div style="font-weight:700;font-size:14px;margin-bottom:10px;text-align:center">문제 추가</div>
+    <div style="font-weight:700;font-size:14px;margin-bottom:8px;text-align:center">문제 추가</div>
     <div class="ui-grid cols-2">
       <div><span class="ui-label">문제 번호</span><div class="ui-input" style="width:100%">1 (자동)</div></div>
       <div><span class="ui-label">문제 유형</span><div class="ui-input" style="width:100%">객관식 ▼</div></div>
     </div>
-    <div class="ui-grid cols-2" style="margin-top:6px">
+    <div class="ui-grid cols-2" style="margin-top:5px">
       <div><span class="ui-label">배점</span><div class="ui-input" style="width:100%">4</div></div>
       <div><span class="ui-label">지문</span><div class="ui-input" style="width:100%">가</div></div>
     </div>
-    <div class="ui-grid cols-2" style="margin-top:6px">
+    <div class="ui-grid cols-2" style="margin-top:5px">
       <div><span class="ui-label">영역</span><div class="ui-input" style="width:100%">독서 ▼</div></div>
       <div><span class="ui-label">하위영역</span><div class="ui-input" style="width:100%">사실적 이해</div></div>
     </div>
-    <div style="margin-top:8px">
+    <div style="margin-top:6px">
       <span class="ui-label">정답 (객관식)</span>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">1</span>
-        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">2</span>
-        <span class="ui-btn primary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">3</span>
-        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">4</span>
-        <span class="ui-btn secondary" style="border-radius:50%;width:32px;height:32px;text-align:center;line-height:24px">5</span>
+      <div style="display:flex;gap:8px;margin-top:3px">
+        <span class="ui-btn secondary" style="border-radius:50%;width:30px;height:30px;text-align:center;line-height:22px">1</span>
+        <span class="ui-btn secondary" style="border-radius:50%;width:30px;height:30px;text-align:center;line-height:22px">2</span>
+        <span class="ui-btn primary" style="border-radius:50%;width:30px;height:30px;text-align:center;line-height:22px">3</span>
+        <span class="ui-btn secondary" style="border-radius:50%;width:30px;height:30px;text-align:center;line-height:22px">4</span>
+        <span class="ui-btn secondary" style="border-radius:50%;width:30px;height:30px;text-align:center;line-height:22px">5</span>
       </div>
     </div>
-    <div style="text-align:right;margin-top:12px">
+    <div style="text-align:right;margin-top:10px">
       <span class="ui-btn secondary">취소</span>
       <span class="ui-btn primary">저장</span>
     </div>
@@ -456,7 +458,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 </table>
 </div>
 
-<!-- ==================== 3. 시험 관리 (3/3) ==================== -->
+<!-- ==================== 3. 시험 관리 (3/3) - CSV ==================== -->
 <div class="page">
 <h3>3.5 CSV 가져오기 및 내보내기</h3>
 <p>문제를 CSV 파일로 일괄 등록하거나 내보낼 수 있습니다.</p>
@@ -494,13 +496,13 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
     <tr><td>2</td><td>객관식</td><td>4</td><td>문법</td><td>음운</td><td>-</td><td>2</td><td>✏️ 🗑️</td></tr>
     <tr><td>3</td><td>서술형</td><td>8</td><td>문학</td><td>감상</td><td>나</td><td>(텍스트)</td><td>✏️ 🗑️</td></tr>
   </table>
-  <div style="padding:8px;text-align:center">
+  <div style="padding:6px;text-align:center">
     <span class="ui-btn primary">+ 문제 추가</span>
   </div>
 </div>
 </div>
 
-<!-- ==================== 4. 답안 입력 ==================== -->
+<!-- ==================== 4. 답안 입력 (1/2) ==================== -->
 <div class="page">
 <h2>4. 답안 입력</h2>
 <p>학생들의 시험 답안을 입력하는 화면입니다. 스프레드시트 형식으로 한 화면에서 여러 학생의 답안을 입력할 수 있습니다.</p>
@@ -528,8 +530,8 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <span class="ui-btn secondary">CSV 내보내기</span>
     </div>
   </div>
-  <div style="padding:8px">
-    <div class="ui-input" style="width:250px;margin-bottom:8px">📋 시험 선택: 1월 정기 모의고사 ▼</div>
+  <div style="padding:6px">
+    <div class="ui-input" style="width:250px;margin-bottom:6px">📋 시험 선택: 1월 정기 모의고사 ▼</div>
     <div style="overflow-x:auto">
       <table class="ui-table">
         <tr><th></th><th>학생명</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>...</th><th>점수</th><th>관리</th></tr>
@@ -553,12 +555,15 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
         <tr><td colspan="10" style="text-align:center;color:var(--gray-400)">+ 행 추가 (클릭하여 학생 선택)</td></tr>
       </table>
     </div>
-    <div style="text-align:right;margin-top:8px">
-      <span class="ui-btn primary" style="padding:8px 24px">💾 저장하기</span>
+    <div style="text-align:right;margin-top:6px">
+      <span class="ui-btn primary" style="padding:6px 20px">💾 저장하기</span>
     </div>
   </div>
 </div>
+</div>
 
+<!-- ==================== 4. 답안 입력 (2/2) ==================== -->
+<div class="page">
 <div class="info-box tip">
   <div class="info-title">💡 색상 의미</div>
   정답인 경우 <span style="background:var(--main);color:#fff;padding:1px 6px;border-radius:3px;font-size:12px">초록</span>, 오답인 경우 <span style="background:var(--red);color:#fff;padding:1px 6px;border-radius:3px;font-size:12px">빨강</span>으로 표시됩니다.
@@ -572,11 +577,9 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   데이터 행: <code>홍길동,3,2,1,4,5,...</code><br>
   서술형 문제는 점수를 직접 입력합니다.
 </div>
-</div>
 
-<!-- ==================== 5. 채점 및 분석 (1/2) ==================== -->
-<div class="page">
-<h2>5. 채점 및 분석</h2>
+<!-- ==================== 5. 채점 및 분석 시작 ==================== -->
+<h2 style="margin-top:24px">5. 채점 및 분석</h2>
 <p>시험별 채점 현황과 문제별 통계를 확인할 수 있습니다.</p>
 
 <h3>5.1 채점 현황</h3>
@@ -606,7 +609,10 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
     <tr><td>3</td><td>김철수</td><td>서울중</td><td><strong>72</strong></td><td>72%</td></tr>
   </table>
 </div>
+</div>
 
+<!-- ==================== 5. 채점 및 분석 (2/2) ==================== -->
+<div class="page">
 <h3>5.3 서술형 채점</h3>
 <p>서술형 문제가 포함된 시험의 경우, 각 학생의 서술형 답안에 대해 수동으로 점수를 부여해야 합니다.</p>
 
@@ -616,14 +622,14 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 <div class="ui-diagram">
   <div class="ui-title">문제별 분석 모달</div>
   <div class="ui-box" style="max-width:400px;margin:0 auto">
-    <div style="font-weight:700;text-align:center;margin-bottom:8px">문제 1번 분석</div>
-    <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">영역: 독서 | 배점: 4점 | 정답: 3번</div>
-    <div style="margin-bottom:6px">
-      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">1번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:8%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">8%</span></div>
-      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">2번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:12%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">12%</span></div>
-      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px;font-weight:700;color:var(--main)">3번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:72%;background:var(--main);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px;font-weight:700">72%</span></div>
-      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">4번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:4%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">4%</span></div>
-      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">5번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:16px;overflow:hidden"><div style="width:4%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">4%</span></div>
+    <div style="font-weight:700;text-align:center;margin-bottom:6px">문제 1번 분석</div>
+    <div style="font-size:12px;color:var(--gray-500);margin-bottom:6px">영역: 독서 | 배점: 4점 | 정답: 3번</div>
+    <div style="margin-bottom:5px">
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">1번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:8%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">8%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">2번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:12%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">12%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px;font-weight:700;color:var(--main)">3번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:72%;background:var(--main);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px;font-weight:700">72%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">4번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:4%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">4%</span></div>
+      <div style="display:flex;align-items:center;margin:3px 0"><span style="width:30px">5번</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:4%;background:var(--gray-400);height:100%"></div></div><span style="width:30px;text-align:right;font-size:11px">4%</span></div>
     </div>
     <div style="text-align:center;font-size:13px;color:var(--main);font-weight:600">정답률: 72%</div>
   </div>
@@ -631,11 +637,9 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 
 <h3>5.5 성적 CSV 내보내기</h3>
 <p>채점 결과 전체를 CSV 파일로 내보내어 외부에서 활용할 수 있습니다.</p>
-</div>
 
 <!-- ==================== 6. 성적표 생성 ==================== -->
-<div class="page">
-<h2>6. 성적표 생성</h2>
+<h2 style="margin-top:24px">6. 성적표 생성</h2>
 <p>학생별 성적표를 생성하고 PDF로 저장하거나 인쇄할 수 있습니다.</p>
 
 <ol class="steps">
@@ -645,15 +649,20 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   <li>성적표 미리보기를 확인합니다.</li>
   <li><strong>PDF 다운로드</strong> 또는 <strong>인쇄</strong> 버튼을 클릭합니다.</li>
 </ol>
+</div>
+
+<!-- ==================== 6. 성적표 생성 (계속) ==================== -->
+<div class="page">
+<h3 style="margin-top:0">6. 성적표 생성 (계속)</h3>
 
 <div class="ui-diagram">
   <div class="ui-title">성적표 미리보기</div>
   <div class="ui-box" style="max-width:480px;margin:0 auto">
-    <div style="text-align:center;border-bottom:2px solid var(--main);padding-bottom:8px;margin-bottom:10px">
+    <div style="text-align:center;border-bottom:2px solid var(--main);padding-bottom:6px;margin-bottom:8px">
       <div style="font-size:16px;font-weight:800">국어농장 성적표</div>
       <div style="font-size:12px;color:var(--gray-500)">1월 정기 모의고사</div>
     </div>
-    <div class="ui-grid cols-2" style="font-size:12px;margin-bottom:10px">
+    <div class="ui-grid cols-2" style="font-size:12px;margin-bottom:8px">
       <div><strong>이름:</strong> 홍길동</div>
       <div><strong>학교:</strong> 서울중학교 2학년</div>
       <div><strong>총점:</strong> <span style="color:var(--main);font-weight:700">85 / 100</span></div>
@@ -666,7 +675,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <tr><td>문학</td><td>7</td><td>8</td><td>88%</td></tr>
       <tr><td>문법</td><td>6</td><td>7</td><td>86%</td></tr>
     </table>
-    <div style="font-weight:600;font-size:12px;margin:8px 0 4px">문제별 정오표</div>
+    <div style="font-weight:600;font-size:12px;margin:6px 0 4px">문제별 정오표</div>
     <div style="display:flex;flex-wrap:wrap;gap:3px;font-size:11px">
       <span style="background:var(--main);color:#fff;padding:2px 6px;border-radius:3px">1.O</span>
       <span style="background:var(--red);color:#fff;padding:2px 6px;border-radius:3px">2.X</span>
@@ -677,16 +686,14 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <span>...</span>
     </div>
   </div>
-  <div style="text-align:center;margin-top:8px">
+  <div style="text-align:center;margin-top:6px">
     <span class="ui-btn primary">📥 PDF 다운로드</span>
     <span class="ui-btn secondary">🖨️ 인쇄</span>
   </div>
 </div>
-</div>
 
 <!-- ==================== 7. 오답 노트 ==================== -->
-<div class="page">
-<h2>7. 오답 노트</h2>
+<h2 style="margin-top:24px">7. 오답 노트</h2>
 <p>학생이 틀린 문제를 모아 영역별로 분석한 오답 노트를 생성합니다.</p>
 
 <ol class="steps">
@@ -696,43 +703,51 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   <li><strong>오답 노트 생성</strong> 버튼을 클릭합니다.</li>
   <li>미리보기를 확인한 후 <strong>PDF 다운로드</strong>를 클릭합니다.</li>
 </ol>
+</div>
+
+<!-- ==================== 7. 오답 노트 (계속) ==================== -->
+<div class="page">
+<h3 style="margin-top:0">7. 오답 노트 (계속)</h3>
 
 <div class="ui-diagram">
   <div class="ui-title">오답 노트 미리보기</div>
   <div class="ui-box" style="max-width:480px;margin:0 auto">
-    <div style="text-align:center;border-bottom:2px solid var(--main);padding-bottom:8px;margin-bottom:10px">
+    <div style="text-align:center;border-bottom:2px solid var(--main);padding-bottom:6px;margin-bottom:8px">
       <div style="font-size:16px;font-weight:800">오답 노트</div>
       <div style="font-size:12px;color:var(--gray-500)">홍길동 | 1월 정기 모의고사</div>
     </div>
-    <div style="font-weight:600;font-size:12px;margin-bottom:6px">영역별 정답률 요약</div>
+    <div style="font-weight:600;font-size:12px;margin-bottom:5px">영역별 정답률 요약</div>
     <div style="display:flex;align-items:center;margin:3px 0;font-size:12px"><span style="width:50px">독서</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:80%;background:var(--main);height:100%"></div></div><span style="width:35px;text-align:right">80%</span></div>
     <div style="display:flex;align-items:center;margin:3px 0;font-size:12px"><span style="width:50px">문학</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:88%;background:var(--main);height:100%"></div></div><span style="width:35px;text-align:right">88%</span></div>
     <div style="display:flex;align-items:center;margin:3px 0;font-size:12px"><span style="width:50px">문법</span><div style="flex:1;background:var(--gray-200);border-radius:4px;height:14px;overflow:hidden"><div style="width:57%;background:var(--yellow);height:100%"></div></div><span style="width:35px;text-align:right">57%</span></div>
-    <div style="margin-top:10px;font-weight:600;font-size:12px;margin-bottom:4px">오답 상세</div>
+    <div style="margin-top:8px;font-weight:600;font-size:12px;margin-bottom:4px">오답 상세</div>
     <div class="ui-card">
       <div style="font-weight:600">문제 2번 <span class="ui-badge red">오답</span></div>
       <div style="font-size:11px;color:var(--gray-500)">영역: 독서 | 배점: 4점</div>
-      <div style="font-size:12px;margin-top:4px">내 답: <span style="color:var(--red);font-weight:600">1번</span> &rarr; 정답: <span style="color:var(--main);font-weight:600">2번</span></div>
+      <div style="font-size:12px;margin-top:3px">내 답: <span style="color:var(--red);font-weight:600">1번</span> &rarr; 정답: <span style="color:var(--main);font-weight:600">2번</span></div>
     </div>
     <div class="ui-card">
       <div style="font-weight:600">문제 5번 <span class="ui-badge red">오답</span></div>
       <div style="font-size:11px;color:var(--gray-500)">영역: 문법 | 배점: 3점</div>
-      <div style="font-size:12px;margin-top:4px">내 답: <span style="color:var(--red);font-weight:600">3번</span> &rarr; 정답: <span style="color:var(--main);font-weight:600">5번</span></div>
+      <div style="font-size:12px;margin-top:3px">내 답: <span style="color:var(--red);font-weight:600">3번</span> &rarr; 정답: <span style="color:var(--main);font-weight:600">5번</span></div>
     </div>
   </div>
-  <div style="text-align:center;margin-top:8px">
+  <div style="text-align:center;margin-top:6px">
     <span class="ui-btn primary">📥 PDF 다운로드</span>
   </div>
 </div>
-</div>
 
-<!-- ==================== 8. 학생 관리 (1/2) ==================== -->
-<div class="page">
-<h2>8. 학생 관리</h2>
+<!-- ==================== 8. 학생 관리 시작 ==================== -->
+<h2 style="margin-top:24px">8. 학생 관리</h2>
 <p>학생 정보의 등록, 수정, 삭제 및 학생 계정 관리를 수행합니다. 본사 관리자는 <strong>모든 기관의 학생</strong>을 관리할 수 있습니다.</p>
 
 <h3>8.1 학생 목록</h3>
 <p>이름 검색, 수강반 필터링이 가능하며, 체크박스로 여러 학생을 선택하여 일괄 작업을 수행할 수 있습니다.</p>
+</div>
+
+<!-- ==================== 8. 학생 관리 (계속) - 학생 목록 UI + 추가/수정/삭제 ==================== -->
+<div class="page">
+<h3 style="margin-top:0">8.1 학생 목록 (계속)</h3>
 
 <div class="ui-diagram">
   <div class="ui-title">학생 관리 화면</div>
@@ -743,8 +758,8 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <span class="ui-btn secondary">🔄 모두 자동 병합</span>
     </div>
   </div>
-  <div style="padding:8px">
-    <div style="display:flex;gap:8px;margin-bottom:8px">
+  <div style="padding:6px">
+    <div style="display:flex;gap:6px;margin-bottom:6px">
       <div class="ui-input" style="flex:1">🔍 이름으로 검색...</div>
       <div class="ui-input" style="width:150px">수강반 필터 ▼</div>
     </div>
@@ -754,7 +769,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <tr><td>☐</td><td>김철수</td><td>한국중</td><td>2</td><td>1</td><td>8</td><td>B반</td><td>✏️ 🗑️</td></tr>
       <tr><td>☐</td><td>이영희</td><td>서울중</td><td>3</td><td>2</td><td>12</td><td>A반</td><td>✏️ 🗑️</td></tr>
     </table>
-    <div style="margin-top:6px;display:flex;gap:6px">
+    <div style="margin-top:5px;display:flex;gap:6px">
       <span class="ui-btn primary">+ 학생 추가</span>
       <span class="ui-btn blue">📚 수강반 일괄 등록</span>
     </div>
@@ -781,7 +796,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 </div>
 </div>
 
-<!-- ==================== 8. 학생 관리 (2/2) ==================== -->
+<!-- ==================== 8. 학생 관리 (계속) - 계정 관리 + 중복 병합 ==================== -->
 <div class="page">
 <h3>8.3 계정 관리</h3>
 <p>학생이 학생 포털(<code>student.html</code>)에 로그인할 수 있도록 계정을 생성하고 관리합니다.</p>
@@ -789,11 +804,11 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 <div class="ui-diagram">
   <div class="ui-title">학생 계정 생성 모달</div>
   <div class="ui-box" style="max-width:360px;margin:0 auto">
-    <div style="font-weight:700;text-align:center;margin-bottom:10px">학생 계정 생성</div>
-    <div style="margin-bottom:6px"><span class="ui-label">학생 선택</span><div class="ui-input" style="width:100%">홍길동 (서울중 2-3)</div></div>
-    <div style="margin-bottom:6px"><span class="ui-label">아이디 *</span><div class="ui-input" style="width:100%">hong2025</div></div>
-    <div style="margin-bottom:6px"><span class="ui-label">비밀번호 *</span><div class="ui-input" style="width:100%">********</div></div>
-    <div style="margin-bottom:8px"><span class="ui-label">비밀번호 확인 *</span><div class="ui-input" style="width:100%">********</div></div>
+    <div style="font-weight:700;text-align:center;margin-bottom:8px">학생 계정 생성</div>
+    <div style="margin-bottom:5px"><span class="ui-label">학생 선택</span><div class="ui-input" style="width:100%">홍길동 (서울중 2-3)</div></div>
+    <div style="margin-bottom:5px"><span class="ui-label">아이디 *</span><div class="ui-input" style="width:100%">hong2025</div></div>
+    <div style="margin-bottom:5px"><span class="ui-label">비밀번호 *</span><div class="ui-input" style="width:100%">********</div></div>
+    <div style="margin-bottom:6px"><span class="ui-label">비밀번호 확인 *</span><div class="ui-input" style="width:100%">********</div></div>
     <div style="text-align:right">
       <span class="ui-btn secondary">취소</span>
       <span class="ui-btn primary">생성</span>
@@ -836,10 +851,10 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
     <span>📚 수강반 관리</span>
     <span class="ui-btn primary">+ 새 수강반 만들기</span>
   </div>
-  <div class="ui-split" style="min-height:200px">
+  <div class="ui-split" style="min-height:180px">
     <!-- 좌측: 목록 -->
-    <div style="border-right:1px solid var(--gray-200);padding:8px">
-      <div style="font-weight:600;font-size:12px;margin-bottom:6px">수강반 목록</div>
+    <div style="border-right:1px solid var(--gray-200);padding:6px">
+      <div style="font-weight:600;font-size:12px;margin-bottom:5px">수강반 목록</div>
       <div class="ui-card" style="border-left:3px solid var(--main);background:var(--main-light)">
         <strong>A반</strong><br><span style="font-size:11px;color:var(--gray-500)">12명 등록</span>
       </div>
@@ -851,10 +866,10 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       </div>
     </div>
     <!-- 우측: 상세 -->
-    <div style="padding:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="padding:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div>
-          <strong style="font-size:15px">A반</strong>
+          <strong style="font-size:14px">A반</strong>
           <div style="font-size:11px;color:var(--gray-500)">중등 2학년 기초반</div>
         </div>
         <div>
@@ -865,7 +880,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <div style="font-weight:600;font-size:12px;margin-bottom:4px">수강생 목록 (12명)</div>
       <div class="ui-card" style="display:flex;justify-content:space-between"><span>홍길동 (서울중 2-3)</span><span class="ui-btn danger" style="font-size:10px;padding:2px 6px">제거</span></div>
       <div class="ui-card" style="display:flex;justify-content:space-between"><span>이영희 (서울중 3-2)</span><span class="ui-btn danger" style="font-size:10px;padding:2px 6px">제거</span></div>
-      <div style="text-align:center;margin-top:8px">
+      <div style="text-align:center;margin-top:6px">
         <span class="ui-btn primary">+ 학생 추가</span>
       </div>
     </div>
@@ -886,7 +901,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 </ul>
 </div>
 
-<!-- ==================== 10. 과제 관리 (1/3) ==================== -->
+<!-- ==================== 10. 과제 관리 (1/4) - 과제 생성 + 분할 화면 ==================== -->
 <div class="page">
 <h2>10. 과제 관리</h2>
 <p>과제의 생성, PDF 업로드, 학생 제출물 관리 및 유사도 검사를 수행합니다.</p>
@@ -903,12 +918,12 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
   <div class="ui-title">과제 관리 - 분할 화면</div>
   <div class="ui-split">
     <!-- 좌측: 과제 목록 -->
-    <div style="border-right:1px solid var(--gray-200);padding:8px;min-width:180px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:13px">과제 목록</strong>
+    <div style="border-right:1px solid var(--gray-200);padding:6px;min-width:170px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <strong style="font-size:12px">과제 목록</strong>
         <span class="ui-btn primary" style="font-size:10px">+ 새 과제</span>
       </div>
-      <div class="ui-input" style="width:100%;margin-bottom:6px;font-size:11px">🔍 검색...</div>
+      <div class="ui-input" style="width:100%;margin-bottom:5px;font-size:11px">🔍 검색...</div>
       <div class="ui-card" style="border-left:3px solid var(--main)">
         <strong>독해 연습 1</strong><br>
         <span class="ui-badge green">진행 중</span>
@@ -926,11 +941,11 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       </div>
     </div>
     <!-- 우측: 과제 상세 -->
-    <div style="padding:8px;flex:1">
-      <div class="ui-box green" style="padding:10px;margin-bottom:8px">
+    <div style="padding:6px;flex:1">
+      <div class="ui-box green" style="padding:8px;margin-bottom:6px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <strong style="font-size:15px">독해 연습 1</strong>
+            <strong style="font-size:14px">독해 연습 1</strong>
             <span class="ui-badge green">진행 중</span>
             <div style="font-size:11px;color:var(--main-dark)">A반 | 마감: 2025-01-20</div>
           </div>
@@ -940,26 +955,29 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:4px;margin-bottom:8px">
+      <div style="display:flex;gap:4px;margin-bottom:6px">
         <span class="ui-btn secondary" style="font-size:10px">초안으로</span>
         <span class="ui-btn primary" style="font-size:10px">진행 중</span>
         <span class="ui-btn danger" style="font-size:10px">마감</span>
       </div>
       <!-- PDF -->
       <div class="ui-card">
-        <div style="font-weight:600;font-size:12px;margin-bottom:4px">📎 PDF 파일</div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:3px">📎 PDF 파일</div>
         <span class="ui-btn blue" style="font-size:10px">PDF 업로드</span>
         <span class="ui-btn secondary" style="font-size:10px">페이지 미리보기</span>
       </div>
       <!-- 제출 현황 -->
       <div class="ui-card">
-        <div style="font-weight:600;font-size:12px;margin-bottom:4px">📊 제출 현황</div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:3px">📊 제출 현황</div>
         <div style="font-size:11px;color:var(--gray-500)">제출 현황은 아래에 이어집니다</div>
       </div>
     </div>
   </div>
 </div>
+</div>
 
+<!-- ==================== 10. 과제 관리 (2/4) - PDF 업로드 + 상태 변경 ==================== -->
+<div class="page">
 <h3>10.2 PDF 업로드 및 페이지 관리</h3>
 <ol class="steps">
   <li>과제 상세에서 <strong>PDF 업로드</strong> 버튼을 클릭합니다.</li>
@@ -971,16 +989,13 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 <div class="ui-diagram">
   <div class="ui-title">페이지 미리보기</div>
   <div class="ui-grid cols-4">
-    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">1페이지</div></div>
-    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">2페이지</div></div>
-    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">3페이지</div></div>
-    <div class="ui-card" style="text-align:center;padding:16px"><div style="font-size:24px">📄</div><div style="font-size:11px">4페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:14px"><div style="font-size:24px">📄</div><div style="font-size:11px">1페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:14px"><div style="font-size:24px">📄</div><div style="font-size:11px">2페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:14px"><div style="font-size:24px">📄</div><div style="font-size:11px">3페이지</div></div>
+    <div class="ui-card" style="text-align:center;padding:14px"><div style="font-size:24px">📄</div><div style="font-size:11px">4페이지</div></div>
   </div>
 </div>
-</div>
 
-<!-- ==================== 10. 과제 관리 (2/3) ==================== -->
-<div class="page">
 <h3>10.3 상태 변경</h3>
 <table class="data-table">
   <tr><th>상태</th><th>설명</th><th>학생에게 보임</th></tr>
@@ -1024,9 +1039,12 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       <td><span class="ui-btn secondary" style="font-size:10px">확인</span> <span class="ui-btn secondary" style="font-size:10px">코멘트</span></td>
     </tr>
   </table>
-  <div style="font-size:11px;color:var(--gray-500);margin-top:4px">✅ 제출됨 &nbsp; ❌ 거부됨 &nbsp; - 미제출</div>
+  <div style="font-size:11px;color:var(--gray-500);margin-top:3px">✅ 제출됨 &nbsp; ❌ 거부됨 &nbsp; - 미제출</div>
+</div>
 </div>
 
+<!-- ==================== 10. 과제 관리 (3/4) - 제출물 확인 + 유사도 검사 ==================== -->
+<div class="page">
 <h4>학생 제출물 확인</h4>
 <p>제출 현황에서 <strong>확인</strong> 버튼을 클릭하면 해당 학생이 제출한 이미지를 페이지별로 확인할 수 있습니다. 이미지를 클릭하면 확대하여 볼 수 있습니다.</p>
 
@@ -1035,10 +1053,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 
 <h4>선생님 코멘트</h4>
 <p><strong>코멘트</strong> 버튼을 클릭하여 학생에게 피드백을 작성할 수 있습니다. 학생은 자신의 과제 화면에서 코멘트를 확인할 수 있습니다.</p>
-</div>
 
-<!-- ==================== 10. 과제 관리 (3/3) ==================== -->
-<div class="page">
 <h3>10.5 유사도 검사</h3>
 <p>AI 기반(Amazon Bedrock)으로 학생 제출물 간 유사도를 검사합니다.</p>
 
@@ -1059,7 +1074,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       </div>
       <div style="font-size:18px;font-weight:800;color:var(--red)">92%</div>
     </div>
-    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:4px;overflow:hidden"><div style="width:92%;background:var(--red);height:100%"></div></div>
+    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:3px;overflow:hidden"><div style="width:92%;background:var(--red);height:100%"></div></div>
   </div>
   <div class="ui-card" style="border-left:3px solid var(--yellow)">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -1069,7 +1084,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       </div>
       <div style="font-size:18px;font-weight:800;color:var(--yellow)">65%</div>
     </div>
-    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:4px;overflow:hidden"><div style="width:65%;background:var(--yellow);height:100%"></div></div>
+    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:3px;overflow:hidden"><div style="width:65%;background:var(--yellow);height:100%"></div></div>
   </div>
   <div class="ui-card" style="border-left:3px solid var(--main)">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -1079,9 +1094,9 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
       </div>
       <div style="font-size:18px;font-weight:800;color:var(--main)">28%</div>
     </div>
-    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:4px;overflow:hidden"><div style="width:28%;background:var(--main);height:100%"></div></div>
+    <div style="background:var(--gray-200);border-radius:4px;height:8px;margin-top:3px;overflow:hidden"><div style="width:28%;background:var(--main);height:100%"></div></div>
   </div>
-  <div style="font-size:11px;color:var(--gray-500);margin-top:6px">🔴 80% 이상: 매우 유사 (의심) &nbsp; 🟡 50~80%: 주의 &nbsp; 🟢 50% 미만: 정상</div>
+  <div style="font-size:11px;color:var(--gray-500);margin-top:4px">🔴 80% 이상: 매우 유사 (의심) &nbsp; 🟡 50~80%: 주의 &nbsp; 🟢 50% 미만: 정상</div>
 </div>
 </div>
 
@@ -1140,7 +1155,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 
 <div class="ui-diagram">
   <div class="ui-title">가입 승인 대기 목록</div>
-  <div style="font-weight:600;font-size:13px;margin-bottom:6px">가입 승인 대기 (3건)</div>
+  <div style="font-weight:600;font-size:12px;margin-bottom:5px">가입 승인 대기 (3건)</div>
   <div class="ui-card" style="display:flex;justify-content:space-between;align-items:center">
     <div>
       <strong>park_teacher</strong><br>
@@ -1183,7 +1198,7 @@ table.data-table tr:nth-child(even) td{background:var(--gray-50)}
 
 <div class="ui-diagram">
   <div class="ui-title">사용자 관리 테이블</div>
-  <div style="font-weight:600;font-size:13px;margin-bottom:6px">사용자 관리 (15명)</div>
+  <div style="font-weight:600;font-size:12px;margin-bottom:5px">사용자 관리 (15명)</div>
   <table class="ui-table">
     <tr><th>사용자명</th><th>역할</th><th>소속 기관</th><th>상태</th><th>관리</th></tr>
     <tr>
