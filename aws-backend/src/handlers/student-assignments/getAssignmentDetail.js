@@ -41,11 +41,6 @@ exports.handler = async (event) => {
             return error('Assignment not found', 404);
         }
 
-        // Check organization
-        if (assignment.organization !== user.organization) {
-            return error('Access denied', 403);
-        }
-
         // Check if student is in one of the assigned classes using PK pattern
         const studentClasses = await queryByPK(
             Tables.STUDENT_CLASSES,

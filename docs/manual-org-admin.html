@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -39,43 +39,85 @@ code{background:#f1f5f9;padding:2px 6px;border-radius:3px;font-size:11px;font-fa
 .cover-content .org{font-size:16px;color:#64748b;margin-top:8px}
 
 /* TOC */
-.toc h2{border:none;text-align:center;color:#0f172a;font-size:24px}
-.toc ul{list-style:none;margin:0;padding:0}
-.toc>ul>li{margin:8px 0;font-weight:600;font-size:14px}
-.toc>ul>li>ul{margin:3px 0 3px 20px}
-.toc>ul>li>ul>li{font-weight:400;font-size:12px;margin:2px 0}
+.toc h2{border:none;text-align:center;color:#0f172a;font-size:22px;margin-bottom:12px}
+.toc>ul{list-style:none;margin:0;padding:0;columns:2;column-gap:28px}
+.toc>ul>li{margin:5px 0;font-weight:600;font-size:12.5px;break-inside:avoid}
+.toc>ul>li>ul{list-style:none;margin:2px 0 2px 16px;padding:0}
+.toc>ul>li>ul>li{font-weight:400;font-size:11px;margin:1px 0}
 .toc a{color:#1e293b;text-decoration:none}
 .toc a:hover{color:#10b981}
 
-/* UI diagram components */
-.diagram{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:12px 0;page-break-inside:avoid;font-size:12px}
-@media print{.diagram{box-shadow:none;border:1px solid #cbd5e1}}
-.diagram-title{font-size:11px;color:#64748b;margin-bottom:8px;font-weight:600}
-.ui-box{border:1px solid #cbd5e1;border-radius:6px;background:#fff;padding:8px;margin:5px 0}
-.ui-header{background:#10b981;color:#fff;padding:5px 10px;border-radius:4px 4px 0 0;margin:-8px -8px 8px;font-weight:600;font-size:12px}
-.ui-sidebar{display:inline-block;vertical-align:top;width:200px;background:#1e293b;color:#e2e8f0;padding:8px;border-radius:6px;font-size:11px;margin-right:8px}
-.ui-sidebar div{padding:3px 7px;margin:2px 0;border-radius:4px}
-.ui-sidebar .active{background:#10b981;color:#fff}
-.ui-content{display:inline-block;vertical-align:top;width:calc(100% - 220px);min-height:120px}
-.ui-btn{display:inline-block;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:600;margin:2px 1px;cursor:default}
-.ui-btn-green{background:#10b981;color:#fff}
-.ui-btn-blue{background:#3b82f6;color:#fff}
-.ui-btn-red{background:#ef4444;color:#fff}
-.ui-btn-gray{background:#e2e8f0;color:#475569}
-.ui-btn-yellow{background:#f59e0b;color:#fff}
-.ui-input{border:1px solid #cbd5e1;border-radius:4px;padding:3px 7px;font-size:11px;width:180px;display:inline-block;background:#fff;color:#94a3b8}
-.ui-select{border:1px solid #cbd5e1;border-radius:4px;padding:3px 7px;font-size:11px;display:inline-block;background:#fff;color:#475569}
-.ui-table{width:100%;font-size:11px;border-collapse:collapse;margin:6px 0}
-.ui-table th{background:#f1f5f9;color:#475569;padding:4px 7px;text-align:left;border-bottom:2px solid #e2e8f0;font-weight:600}
-.ui-table td{padding:4px 7px;border-bottom:1px solid #f1f5f9}
-.ui-card{border:1px solid #e2e8f0;border-radius:6px;padding:8px;margin:5px;display:inline-block;vertical-align:top;min-width:130px;background:#fff}
-.ui-card .card-num{font-size:20px;font-weight:700;color:#10b981}
-.ui-card .card-label{font-size:10px;color:#64748b}
-.ui-modal{border:2px solid #cbd5e1;border-radius:8px;background:#fff;padding:0;margin:10px auto;max-width:420px}
-.ui-modal-header{background:#f8fafc;padding:8px 12px;border-bottom:1px solid #e2e8f0;font-weight:600;border-radius:8px 8px 0 0;font-size:13px}
-.ui-modal-body{padding:12px}
-.ui-form-row{margin:5px 0}
-.ui-form-row label{display:inline-block;width:76px;font-size:11px;font-weight:600;color:#475569}
+/* ===== 실제 앱 UI 다이어그램 (스코프: .app-demo) ===== */
+.app-demo{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:12px 0;page-break-inside:avoid;font-size:11px;line-height:1.5;color:#1f2937;overflow:hidden}
+@media print{.app-demo{box-shadow:none;border:1px solid #cbd5e1}}
+.app-demo .demo-title{font-size:11px;color:#64748b;margin-bottom:8px;font-weight:600}
+/* Portal: 사이드바 + 헤더 + 레이아웃 */
+.app-demo .portal-container{display:flex;gap:0;min-height:260px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;background:#fafafa}
+.app-demo .sidebar{width:170px;flex-shrink:0;background:#fff;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;font-size:10px}
+.app-demo .sidebar-header{padding:8px 10px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:6px}
+.app-demo .sidebar-logo-icon{width:24px;height:24px;background:#f9a8d4;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;overflow:hidden}
+.app-demo .sidebar-logo-icon img{width:100%;height:100%;object-fit:contain}
+.app-demo .sidebar-logo-text{font-size:10px;font-weight:700;color:#1f2937}
+.app-demo .sidebar-logo-text span{color:#db2777}
+.app-demo .sidebar-nav{flex:1;padding:6px 0;overflow:hidden}
+.app-demo .nav-section{margin-bottom:4px}
+.app-demo .nav-section-title{padding:3px 12px;font-size:8px;font-weight:600;color:#6b7280;text-transform:uppercase}
+.app-demo .nav-item{display:flex;align-items:center;padding:4px 12px;color:#6b7280;font-size:10px;border-left:2.5px solid transparent;gap:5px;margin:1px 0}
+.app-demo .nav-item.active{background:#fdf2f8;color:#db2777;border-left-color:#ec4899;font-weight:600}
+.app-demo .sidebar-footer{padding:8px 10px;border-top:1px solid #e5e7eb;display:flex;align-items:center;gap:6px;font-size:10px}
+.app-demo .main-content{flex:1;min-width:0;display:flex;flex-direction:column}
+.app-demo .main-header{padding:7px 12px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.app-demo .content-area{flex:1;padding:10px;overflow:hidden}
+/* Dashboard */
+.app-demo .dashboard-welcome{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;border-top:3px solid #f9a8d4}
+.app-demo .feed-section{margin-bottom:8px}
+.app-demo .feed-title{font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:5px}
+.app-demo .feed-item{background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:7px 9px;display:flex;gap:8px;font-size:10px}
+.app-demo .todo-stat-item{background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:7px 9px;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+/* Auth: 로그인 */
+.app-demo .auth-layout{display:flex;gap:0;min-height:200px;border-radius:6px;overflow:hidden}
+.app-demo .auth-illustration{flex:1;background:#BDD4EA;display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden}
+.app-demo .auth-illustration img{max-height:130px;object-fit:contain}
+.app-demo .auth-form-area{flex:1;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+.app-demo .input-new{width:100%;padding:5px 10px;background:#e2e8f0;border:none;border-radius:50px;font-size:9px;color:#94a3b8;margin-bottom:4px;box-sizing:border-box}
+.app-demo .btn-login{width:100%;padding:6px 10px;background:#2563eb;color:#fff;border:none;border-radius:50px;font-size:10px;font-weight:600;text-align:center;margin-top:4px}
+/* 공통: 카드, 버튼, 폼, 테이블, 배지 */
+.app-demo .card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.app-demo .card-header{padding:7px 10px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:11px;background:#f8fafc}
+.app-demo .card-body{padding:8px 10px}
+.app-demo .btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;padding:3px 10px;font-size:10px;font-weight:500;border-radius:5px;border:none}
+.app-demo .btn-primary{background:#f9a8d4;color:#1f2937}
+.app-demo .btn-secondary{background:#fff;color:#1f2937;border:1px solid #e5e7eb}
+.app-demo .btn-danger{background:#ef4444;color:#fff}
+.app-demo .btn-success{background:#10b981;color:#fff}
+.app-demo .btn-blue{background:#3b82f6;color:#fff}
+.app-demo .btn-warning{background:#f59e0b;color:#fff}
+.app-demo .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:500}
+.app-demo .badge-success{background:#d1fae5;color:#059669}
+.app-demo .badge-warning{background:#fef3c7;color:#d97706}
+.app-demo .badge-error{background:#fee2e2;color:#dc2626}
+.app-demo .badge-info{background:#dbeafe;color:#1e40af}
+.app-demo .form-group{margin-bottom:5px}
+.app-demo .form-group label{display:block;font-size:9px;font-weight:600;color:#6b7280;margin-bottom:2px}
+.app-demo .form-control{display:inline-block;padding:3px 7px;border:1px solid #e5e7eb;border-radius:4px;font-size:10px;background:#fff;box-sizing:border-box}
+.app-demo .form-select{display:inline-block;padding:3px 7px;border:1px solid #e5e7eb;border-radius:4px;font-size:10px;background:#fff}
+.app-demo .form-label{display:inline-block;width:76px;font-size:11px;font-weight:600;color:#475569}
+.app-demo table{width:100%;border-collapse:collapse;font-size:10px;margin:4px 0}
+.app-demo th{background:#f8fafc;color:#374151;padding:4px 6px;text-align:left;font-weight:600;border-bottom:1.5px solid #e5e7eb;font-size:9px}
+.app-demo td{padding:3px 6px;border-bottom:1px solid #f1f5f9;font-size:10px}
+/* 모달 */
+.app-demo .modal-content{background:#fff;border:2px solid #e5e7eb;border-radius:8px;max-width:420px;margin:0 auto;overflow:hidden}
+.app-demo .modal-header{background:#f8fafc;padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:12px}
+.app-demo .modal-body{padding:10px 12px}
+.app-demo .modal-footer{padding:8px 12px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:5px}
+/* 미니카드, 통계카드, 분할패널, 그리드 */
+.app-demo .mini-card{background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:8px;margin:5px;display:inline-block;vertical-align:top;min-width:130px}
+.app-demo .mini-card .card-num{font-size:20px;font-weight:700;color:#10b981}
+.app-demo .mini-card .card-label{font-size:10px;color:#64748b}
+.app-demo .stat-card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px;text-align:center}
+.app-demo .split-layout{display:flex;gap:0;overflow:hidden;border:1px solid #e5e7eb;border-radius:6px;background:#fff}
+.app-demo .grid-cols-2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.app-demo .grid-cols-4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 
 /* Info boxes, steps, badges, etc. */
 .info-box{padding:10px 14px;border-radius:6px;margin:10px 0;font-size:12px;page-break-inside:avoid}
@@ -92,8 +134,8 @@ code{background:#f1f5f9;padding:2px 6px;border-radius:3px;font-size:11px;font-fa
 .badge-yellow{background:#fef3c7;color:#92400e}
 .badge-red{background:#fee2e2;color:#991b1b}
 .footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:32px;padding:14px 0;border-top:1px solid #e2e8f0}
-.split-panel{display:flex;gap:8px}
-.split-panel .panel{flex:1;border:1px solid #e2e8f0;border-radius:6px;padding:8px;background:#fff}
+.split-panel{display:flex;gap:8px;overflow:hidden}
+.split-panel .panel{flex:1;min-width:0;border:1px solid #e2e8f0;border-radius:6px;padding:8px;background:#fff}
 .flow-arrow{display:inline-block;font-size:18px;color:#10b981;margin:0 6px;vertical-align:middle}
 .status-flow{text-align:center;margin:10px 0;font-size:12px}
 .status-flow .badge{margin:0 4px}
@@ -209,8 +251,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li>대시보드 화면으로 이동합니다.</li>
 </ol>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 로그인 화면 (실제 구조)</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 로그인 화면 (실제 구조)</div>
 <div style="display:flex;gap:0;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;min-height:200px;background:#BDD4EA">
 <!-- 왼쪽: 일러스트 -->
 <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
@@ -236,10 +278,10 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <h3 id="s1-2">1.2 화면 구성</h3>
 <p>로그인 후 표시되는 메인 화면은 <strong>좌측 사이드바</strong>, <strong>상단 헤더</strong>, <strong>콘텐츠 영역</strong>으로 구성됩니다.</p>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 전체 화면 레이아웃</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 전체 화면 레이아웃</div>
 <div style="display:flex;gap:8px;min-height:280px">
-<div class="ui-sidebar" style="width:190px;min-height:280px;flex-shrink:0">
+<div class="sidebar" style="width:190px;min-height:280px;flex-shrink:0">
 <div style="font-weight:700;margin-bottom:8px;color:#10b981;display:flex;align-items:center;gap:4px"><img src="../images/logo.png" alt="로고" style="width:20px;height:20px;object-fit:contain"> 국어<span style="color:#db2777">농장</span></div>
 <hr style="border-color:#334155;margin:6px 0">
 <div style="color:#94a3b8;font-size:10px;margin:4px 0">메인</div>
@@ -315,27 +357,27 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li><strong>최근 활동 타임라인:</strong> 최근 수행한 작업 이력이 시간순으로 표시됩니다.</li>
 </ul>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 대시보드</div>
-<div class="ui-box">
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 대시보드</div>
+<div class="card card-body">
 <div style="padding:8px;background:#f0fdf4;border-radius:6px;margin-bottom:10px">
 <div style="font-size:15px;font-weight:700">&#x1F44B; 안녕하세요, 홍길동 님!</div>
 <div style="font-size:11px;color:#64748b">2025년 1월 15일 수요일</div>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-<div class="ui-card">
+<div class="mini-card">
 <div class="card-label">진행 중인 과제</div>
 <div class="card-num">3</div>
 </div>
-<div class="ui-card">
+<div class="mini-card">
 <div class="card-label">미채점 시험</div>
 <div class="card-num">2</div>
 </div>
-<div class="ui-card">
+<div class="mini-card">
 <div class="card-label">전체 학생 수</div>
 <div class="card-num">45</div>
 </div>
-<div class="ui-card">
+<div class="mini-card">
 <div class="card-label">수강반 수</div>
 <div class="card-num">4</div>
 </div>
@@ -379,18 +421,18 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li>시험명을 클릭하면 상세 화면으로 이동합니다.</li>
 </ul>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 시험 목록</div>
-<div class="ui-box">
-<div class="ui-header">&#x1F4DD; 시험 관리</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 시험 목록</div>
+<div class="card card-body">
+<div class="card-header">&#x1F4DD; 시험 관리</div>
 <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-<div class="ui-input" style="width:250px">&#x1F50D; 시험명 검색...</div>
-<span class="ui-btn ui-btn-green">+ 새 시험</span>
+<div class="form-control" style="width:250px">&#x1F50D; 시험명 검색...</div>
+<span class="btn btn-success">+ 새 시험</span>
 </div>
-<table class="ui-table">
+<table>
 <tr><th>시험명</th><th>시행일</th><th>문제 수</th><th>출처</th><th>관리</th></tr>
-<tr><td>1월 모의고사</td><td>2025-01-15</td><td>25</td><td><span class="badge badge-green">기관</span></td><td><span class="ui-btn ui-btn-blue" style="padding:2px 8px">수정</span> <span class="ui-btn ui-btn-red" style="padding:2px 8px">삭제</span></td></tr>
-<tr><td>12월 월말평가</td><td>2024-12-28</td><td>30</td><td><span class="badge badge-green">기관</span></td><td><span class="ui-btn ui-btn-blue" style="padding:2px 8px">수정</span> <span class="ui-btn ui-btn-red" style="padding:2px 8px">삭제</span></td></tr>
+<tr><td>1월 모의고사</td><td>2025-01-15</td><td>25</td><td><span class="badge badge-green">기관</span></td><td><span class="btn btn-blue" style="padding:2px 8px">수정</span> <span class="btn btn-danger" style="padding:2px 8px">삭제</span></td></tr>
+<tr><td>12월 월말평가</td><td>2024-12-28</td><td>30</td><td><span class="badge badge-green">기관</span></td><td><span class="btn btn-blue" style="padding:2px 8px">수정</span> <span class="btn btn-danger" style="padding:2px 8px">삭제</span></td></tr>
 <tr><td>전국 모의고사 3회</td><td>2024-12-20</td><td>45</td><td><span class="badge badge-blue">본사</span></td><td><span style="color:#94a3b8;font-size:11px">조회만 가능</span></td></tr>
 </table>
 </div>
@@ -411,8 +453,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <div class="page">
 <h3 id="s3-3">3.3 시험 수정/삭제</h3>
 <ul>
-<li><strong>수정:</strong> 시험 목록에서 <span class="ui-btn ui-btn-blue" style="padding:1px 6px;font-size:11px">수정</span> 버튼을 클릭하여 시험 정보를 변경합니다.</li>
-<li><strong>삭제:</strong> <span class="ui-btn ui-btn-red" style="padding:1px 6px;font-size:11px">삭제</span> 버튼을 클릭합니다. 삭제 전 확인 대화상자가 표시됩니다.</li>
+<li><strong>수정:</strong> 시험 목록에서 <span class="btn btn-blue" style="padding:1px 6px;font-size:11px">수정</span> 버튼을 클릭하여 시험 정보를 변경합니다.</li>
+<li><strong>삭제:</strong> <span class="btn btn-danger" style="padding:1px 6px;font-size:11px">삭제</span> 버튼을 클릭합니다. 삭제 전 확인 대화상자가 표시됩니다.</li>
 </ul>
 <div class="info-box info-danger">&#x1F6A8; <strong>주의:</strong> 시험을 삭제하면 해당 시험의 문제, 답안, 채점 결과가 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</div>
 
@@ -425,22 +467,22 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li><strong>저장</strong>을 클릭하여 문제를 등록합니다.</li>
 </ol>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 문제 추가 모달</div>
-<div class="ui-modal">
-<div class="ui-modal-header">&#x2795; 문제 추가</div>
-<div class="ui-modal-body">
-<div class="ui-form-row"><label>문제 번호</label> <span class="ui-input" style="width:80px">1</span></div>
-<div class="ui-form-row"><label>문제 유형</label> <span class="ui-select">&#x25BC; 객관식</span></div>
-<div class="ui-form-row"><label>배점</label> <span class="ui-input" style="width:80px">4</span></div>
-<div class="ui-form-row"><label>영역</label> <span class="ui-select">&#x25BC; 독서</span></div>
-<div class="ui-form-row"><label>하위영역</label> <span class="ui-select">&#x25BC; 사실적 독해</span></div>
-<div class="ui-form-row"><label>지문</label> <span class="ui-input" style="width:240px;height:36px">(선택) 지문 내용 입력...</span></div>
-<div class="ui-form-row"><label>정답</label> <span class="ui-select">&#x25BC; 3</span> <span style="font-size:10px;color:#94a3b8">객관식: 1~5 중 선택</span></div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 문제 추가 모달</div>
+<div class="modal-content">
+<div class="modal-header">&#x2795; 문제 추가</div>
+<div class="modal-body">
+<div class="form-group"><label>문제 번호</label> <span class="form-control" style="width:80px">1</span></div>
+<div class="form-group"><label>문제 유형</label> <span class="form-select">&#x25BC; 객관식</span></div>
+<div class="form-group"><label>배점</label> <span class="form-control" style="width:80px">4</span></div>
+<div class="form-group"><label>영역</label> <span class="form-select">&#x25BC; 독서</span></div>
+<div class="form-group"><label>하위영역</label> <span class="form-select">&#x25BC; 사실적 독해</span></div>
+<div class="form-group"><label>지문</label> <span class="form-control" style="width:240px;height:36px">(선택) 지문 내용 입력...</span></div>
+<div class="form-group"><label>정답</label> <span class="form-select">&#x25BC; 3</span> <span style="font-size:10px;color:#94a3b8">객관식: 1~5 중 선택</span></div>
 <hr style="margin:8px 0">
 <div style="text-align:right">
-<span class="ui-btn ui-btn-gray">취소</span>
-<span class="ui-btn ui-btn-green">저장</span>
+<span class="btn btn-secondary">취소</span>
+<span class="btn btn-success">저장</span>
 </div>
 </div>
 </div>
@@ -510,22 +552,22 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li><strong>저장</strong> 버튼을 클릭하여 답안을 저장합니다.</li>
 </ol>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 답안 입력 시트</div>
-<div class="ui-box">
-<div class="ui-header">&#x270F;&#xFE0F; 답안 입력</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 답안 입력 시트</div>
+<div class="card card-body">
+<div class="card-header">&#x270F;&#xFE0F; 답안 입력</div>
 <div style="margin-bottom:8px">
-<span style="font-size:11px;font-weight:600">시험: </span><span class="ui-select">&#x25BC; 1월 모의고사 (2025-01-15)</span>
-<span style="margin-left:12px;font-size:11px;font-weight:600">학생: </span><span class="ui-select">&#x25BC; 김영희</span>
+<span style="font-size:11px;font-weight:600">시험: </span><span class="form-select">&#x25BC; 1월 모의고사 (2025-01-15)</span>
+<span style="margin-left:12px;font-size:11px;font-weight:600">학생: </span><span class="form-select">&#x25BC; 김영희</span>
 </div>
-<table class="ui-table">
+<table>
 <tr><th style="width:50px">번호</th><th style="width:60px">유형</th><th style="width:45px">배점</th><th>정답</th><th>학생 답안</th><th style="width:50px">점수</th></tr>
-<tr><td>1</td><td>객관식</td><td>4</td><td>3</td><td><span class="ui-select" style="width:50px">&#x25BC; 3</span></td><td><span style="color:#10b981">4</span></td></tr>
-<tr><td>2</td><td>객관식</td><td>4</td><td>2</td><td><span class="ui-select" style="width:50px">&#x25BC; 4</span></td><td><span style="color:#ef4444">0</span></td></tr>
-<tr><td>3</td><td>서술형</td><td>8</td><td>-</td><td><span class="ui-input" style="width:200px">학생 서술형 답안...</span></td><td><span class="ui-input" style="width:40px">6</span></td></tr>
+<tr><td>1</td><td>객관식</td><td>4</td><td>3</td><td><span class="form-select" style="width:50px">&#x25BC; 3</span></td><td><span style="color:#10b981">4</span></td></tr>
+<tr><td>2</td><td>객관식</td><td>4</td><td>2</td><td><span class="form-select" style="width:50px">&#x25BC; 4</span></td><td><span style="color:#ef4444">0</span></td></tr>
+<tr><td>3</td><td>서술형</td><td>8</td><td>-</td><td><span class="form-control" style="width:200px">학생 서술형 답안...</span></td><td><span class="form-control" style="width:40px">6</span></td></tr>
 </table>
 <div style="text-align:right;margin-top:6px">
-<span class="ui-btn ui-btn-green">&#x1F4BE; 저장</span>
+<span class="btn btn-success">&#x1F4BE; 저장</span>
 </div>
 </div>
 </div>
@@ -555,24 +597,24 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <h3 id="s5-1">5.1 채점 현황</h3>
 <p>시험을 선택하면 전체 채점 현황이 요약 카드로 표시됩니다.</p>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 채점 현황</div>
-<div class="ui-box">
-<div class="ui-header">&#x1F4CA; 채점 및 분석 - 1월 모의고사</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 채점 현황</div>
+<div class="card card-body">
+<div class="card-header">&#x1F4CA; 채점 및 분석 - 1월 모의고사</div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-<div class="ui-card"><div class="card-label">평균 점수</div><div class="card-num">72.5</div></div>
-<div class="ui-card"><div class="card-label">최고 점수</div><div class="card-num">96</div></div>
-<div class="ui-card"><div class="card-label">최저 점수</div><div class="card-num">48</div></div>
-<div class="ui-card"><div class="card-label">응시 인원</div><div class="card-num">18</div></div>
+<div class="mini-card"><div class="card-label">평균 점수</div><div class="card-num">72.5</div></div>
+<div class="mini-card"><div class="card-label">최고 점수</div><div class="card-num">96</div></div>
+<div class="mini-card"><div class="card-label">최저 점수</div><div class="card-num">48</div></div>
+<div class="mini-card"><div class="card-label">응시 인원</div><div class="card-num">18</div></div>
 </div>
-<table class="ui-table">
+<table>
 <tr><th>순위</th><th>이름</th><th>학교</th><th>총점</th><th>백분율</th></tr>
 <tr><td>1</td><td>이철수</td><td>한국중</td><td>96</td><td>96%</td></tr>
 <tr><td>2</td><td>김영희</td><td>서울중</td><td>88</td><td>88%</td></tr>
 <tr><td>3</td><td>박민수</td><td>한국중</td><td>84</td><td>84%</td></tr>
 </table>
 <div style="text-align:right;margin-top:6px">
-<span class="ui-btn ui-btn-green">&#x1F4E5; CSV 내보내기</span>
+<span class="btn btn-success">&#x1F4E5; CSV 내보내기</span>
 </div>
 </div>
 </div>
@@ -624,9 +666,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <tr><td>오답 목록</td><td>틀린 문제 번호, 정답, 학생 답안</td></tr>
 </table>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 성적표 미리보기</div>
-<div class="ui-box" style="max-width:420px;margin:0 auto">
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 성적표 미리보기</div>
+<div class="card card-body" style="max-width:420px;margin:0 auto">
 <div style="text-align:center;border-bottom:2px solid #10b981;padding-bottom:6px;margin-bottom:8px">
 <div style="font-size:17px;font-weight:700;color:#10b981">국어농장 성적표</div>
 <div style="font-size:10px;color:#64748b">1월 모의고사 | 2025-01-15</div>
@@ -636,12 +678,12 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <div><strong>학교:</strong> 서울중학교 2학년</div>
 </div>
 <div style="display:flex;gap:6px;margin-bottom:8px">
-<div class="ui-card" style="flex:1;text-align:center;min-width:auto"><div class="card-label">총점</div><div class="card-num">88/100</div></div>
-<div class="ui-card" style="flex:1;text-align:center;min-width:auto"><div class="card-label">석차</div><div class="card-num">2/18</div></div>
-<div class="ui-card" style="flex:1;text-align:center;min-width:auto"><div class="card-label">백분율</div><div class="card-num">88%</div></div>
+<div class="mini-card" style="flex:1;text-align:center;min-width:auto"><div class="card-label">총점</div><div class="card-num">88/100</div></div>
+<div class="mini-card" style="flex:1;text-align:center;min-width:auto"><div class="card-label">석차</div><div class="card-num">2/18</div></div>
+<div class="mini-card" style="flex:1;text-align:center;min-width:auto"><div class="card-label">백분율</div><div class="card-num">88%</div></div>
 </div>
 <div style="font-size:11px;font-weight:600;margin:6px 0 3px">&#x1F4CA; 영역별 분석</div>
-<table class="ui-table">
+<table>
 <tr><th>영역</th><th>득점</th><th>정답률</th></tr>
 <tr><td>독서</td><td>24/28</td><td>86%</td></tr>
 <tr><td>문학</td><td>32/36</td><td>89%</td></tr>
@@ -649,8 +691,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <tr><td>화법과 작문</td><td>16/16</td><td>100%</td></tr>
 </table>
 <div style="text-align:center;margin-top:8px">
-<span class="ui-btn ui-btn-green">&#x1F4BE; PDF 저장</span>
-<span class="ui-btn ui-btn-blue">&#x1F5A8;&#xFE0F; 인쇄</span>
+<span class="btn btn-success">&#x1F4BE; PDF 저장</span>
+<span class="btn btn-blue">&#x1F5A8;&#xFE0F; 인쇄</span>
 </div>
 </div>
 </div>
@@ -678,9 +720,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li>영역별 취약점 분석</li>
 </ul>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 오답 노트</div>
-<div class="ui-box" style="max-width:420px;margin:0 auto">
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 오답 노트</div>
+<div class="card card-body" style="max-width:420px;margin:0 auto">
 <div style="text-align:center;border-bottom:2px solid #f59e0b;padding-bottom:6px;margin-bottom:8px">
 <div style="font-size:17px;font-weight:700;color:#f59e0b">&#x1F4D3; 오답 노트</div>
 <div style="font-size:10px;color:#64748b">김영희 | 1월 모의고사</div>
@@ -700,7 +742,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <span style="color:#64748b">유형: 형태론</span>
 </div>
 <div style="text-align:center;margin-top:8px">
-<span class="ui-btn ui-btn-green">&#x1F4BE; PDF 저장</span>
+<span class="btn btn-success">&#x1F4BE; PDF 저장</span>
 </div>
 </div>
 </div>
@@ -719,26 +761,26 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li>수강반별 필터링이 가능합니다.</li>
 </ul>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 학생 목록</div>
-<div class="ui-box">
-<div class="ui-header">&#x1F465; 학생 관리</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 학생 목록</div>
+<div class="card card-body">
+<div class="card-header">&#x1F465; 학생 관리</div>
 <div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:5px">
 <div>
-<span class="ui-input" style="width:180px">&#x1F50D; 이름 검색...</span>
-<span class="ui-select">&#x25BC; 수강반 전체</span>
+<span class="form-control" style="width:180px">&#x1F50D; 이름 검색...</span>
+<span class="form-select">&#x25BC; 수강반 전체</span>
 </div>
 <div>
-<span class="ui-btn ui-btn-green">+ 학생 추가</span>
-<span class="ui-btn ui-btn-blue">중복 찾기</span>
-<span class="ui-btn ui-btn-yellow">일괄 등록</span>
+<span class="btn btn-success">+ 학생 추가</span>
+<span class="btn btn-blue">중복 찾기</span>
+<span class="btn btn-warning">일괄 등록</span>
 </div>
 </div>
-<table class="ui-table">
+<table>
 <tr><th>이름</th><th>학교</th><th>학년</th><th>반</th><th>번호</th><th>계정</th><th>관리</th></tr>
-<tr><td>김영희</td><td>서울중</td><td>2</td><td>3</td><td>15</td><td><span class="badge badge-green">연결됨</span></td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px">수정</span> <span class="ui-btn ui-btn-red" style="padding:2px 6px">삭제</span></td></tr>
-<tr><td>이철수</td><td>한국중</td><td>2</td><td>1</td><td>8</td><td><span class="badge badge-yellow">미연결</span></td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px">수정</span> <span class="ui-btn ui-btn-red" style="padding:2px 6px">삭제</span></td></tr>
-<tr><td>박민수</td><td>한국중</td><td>1</td><td>5</td><td>22</td><td><span class="badge badge-green">연결됨</span></td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px">수정</span> <span class="ui-btn ui-btn-red" style="padding:2px 6px">삭제</span></td></tr>
+<tr><td>김영희</td><td>서울중</td><td>2</td><td>3</td><td>15</td><td><span class="badge badge-green">연결됨</span></td><td><span class="btn btn-blue" style="padding:2px 6px">수정</span> <span class="btn btn-danger" style="padding:2px 6px">삭제</span></td></tr>
+<tr><td>이철수</td><td>한국중</td><td>2</td><td>1</td><td>8</td><td><span class="badge badge-yellow">미연결</span></td><td><span class="btn btn-blue" style="padding:2px 6px">수정</span> <span class="btn btn-danger" style="padding:2px 6px">삭제</span></td></tr>
+<tr><td>박민수</td><td>한국중</td><td>1</td><td>5</td><td>22</td><td><span class="badge badge-green">연결됨</span></td><td><span class="btn btn-blue" style="padding:2px 6px">수정</span> <span class="btn btn-danger" style="padding:2px 6px">삭제</span></td></tr>
 </table>
 </div>
 </div>
@@ -755,8 +797,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 
 <h3 id="s8-3">8.3 학생 수정/삭제</h3>
 <ul>
-<li><strong>수정:</strong> 학생 목록에서 <span class="ui-btn ui-btn-blue" style="padding:1px 6px;font-size:11px">수정</span> 버튼을 클릭하여 정보를 변경합니다.</li>
-<li><strong>삭제:</strong> <span class="ui-btn ui-btn-red" style="padding:1px 6px;font-size:11px">삭제</span> 버튼을 클릭합니다.</li>
+<li><strong>수정:</strong> 학생 목록에서 <span class="btn btn-blue" style="padding:1px 6px;font-size:11px">수정</span> 버튼을 클릭하여 정보를 변경합니다.</li>
+<li><strong>삭제:</strong> <span class="btn btn-danger" style="padding:1px 6px;font-size:11px">삭제</span> 버튼을 클릭합니다.</li>
 </ul>
 <div class="info-box info-danger">&#x1F6A8; <strong>주의:</strong> 학생을 삭제하면 해당 학생의 시험 답안 및 성적 데이터가 모두 삭제됩니다.</div>
 
@@ -770,20 +812,20 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li>필요 시 비밀번호를 재설정할 수 있습니다.</li>
 </ol>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 계정 관리 탭</div>
-<div class="ui-box" style="max-width:380px">
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 계정 관리 탭</div>
+<div class="card card-body" style="max-width:380px">
 <div style="display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:8px">
 <div style="padding:5px 12px;font-size:12px;color:#94a3b8">기본 정보</div>
 <div style="padding:5px 12px;font-size:12px;font-weight:600;color:#10b981;border-bottom:2px solid #10b981">계정 관리</div>
 </div>
 <div style="font-size:12px;font-weight:600;margin-bottom:6px">김영희 - 계정 정보</div>
-<div class="ui-form-row"><label>아이디</label> <span class="ui-input" style="width:160px">student_kim01</span></div>
-<div class="ui-form-row"><label>비밀번호</label> <span class="ui-input" style="width:160px">********</span></div>
-<div class="ui-form-row"><label>상태</label> <span class="badge badge-green">활성</span></div>
+<div class="form-group"><label>아이디</label> <span class="form-control" style="width:160px">student_kim01</span></div>
+<div class="form-group"><label>비밀번호</label> <span class="form-control" style="width:160px">********</span></div>
+<div class="form-group"><label>상태</label> <span class="badge badge-green">활성</span></div>
 <div style="margin-top:8px">
-<span class="ui-btn ui-btn-blue">비밀번호 재설정</span>
-<span class="ui-btn ui-btn-green">저장</span>
+<span class="btn btn-blue">비밀번호 재설정</span>
+<span class="btn btn-success">저장</span>
 </div>
 </div>
 </div>
@@ -823,10 +865,10 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 
 <p>수강반 관리 화면은 <strong>좌측 패널</strong>(수강반 목록)과 <strong>우측 패널</strong>(수강반 상세/학생 목록)로 구성됩니다.</p>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 수강반 관리 (분할 패널)</div>
-<div class="ui-box">
-<div class="ui-header">&#x1F4DA; 수강반 관리</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 수강반 관리 (분할 패널)</div>
+<div class="card card-body">
+<div class="card-header">&#x1F4DA; 수강반 관리</div>
 <div class="split-panel">
 <div class="panel" style="max-width:170px">
 <div style="font-size:11px;font-weight:600;margin-bottom:5px">수강반 목록</div>
@@ -834,25 +876,25 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <div style="padding:4px 7px;margin:2px 0;font-size:11px">&#x1F4D8; B반 (10명)</div>
 <div style="padding:4px 7px;margin:2px 0;font-size:11px">&#x1F4D9; C반 (15명)</div>
 <div style="padding:4px 7px;margin:2px 0;font-size:11px">&#x1F4D5; D반 (8명)</div>
-<div style="margin-top:6px"><span class="ui-btn ui-btn-green" style="font-size:10px;padding:2px 8px">+ 새 수강반</span></div>
+<div style="margin-top:6px"><span class="btn btn-success" style="font-size:10px;padding:2px 8px">+ 새 수강반</span></div>
 </div>
 <div class="panel" style="flex:1">
 <div style="display:flex;justify-content:space-between;margin-bottom:6px">
 <div style="font-size:13px;font-weight:600">&#x1F4D7; A반 <span style="font-size:10px;color:#64748b;font-weight:400">12명</span></div>
 <div>
-<span class="ui-btn ui-btn-blue" style="font-size:10px;padding:2px 7px">수정</span>
-<span class="ui-btn ui-btn-red" style="font-size:10px;padding:2px 7px">삭제</span>
+<span class="btn btn-blue" style="font-size:10px;padding:2px 7px">수정</span>
+<span class="btn btn-danger" style="font-size:10px;padding:2px 7px">삭제</span>
 </div>
 </div>
 <div style="font-size:10px;color:#64748b;margin-bottom:6px">설명: 중2 독서 심화반</div>
 <div style="display:flex;justify-content:space-between;margin-bottom:5px">
 <span style="font-size:11px;font-weight:600">등록 학생</span>
-<span class="ui-btn ui-btn-green" style="font-size:10px;padding:2px 7px">+ 학생 추가</span>
+<span class="btn btn-success" style="font-size:10px;padding:2px 7px">+ 학생 추가</span>
 </div>
-<table class="ui-table">
+<table>
 <tr><th>이름</th><th>학교</th><th>학년</th><th>관리</th></tr>
-<tr><td style="font-size:10px">김영희</td><td style="font-size:10px">서울중</td><td style="font-size:10px">2</td><td><span class="ui-btn ui-btn-red" style="font-size:9px;padding:1px 5px">제거</span></td></tr>
-<tr><td style="font-size:10px">이철수</td><td style="font-size:10px">한국중</td><td style="font-size:10px">2</td><td><span class="ui-btn ui-btn-red" style="font-size:9px;padding:1px 5px">제거</span></td></tr>
+<tr><td style="font-size:10px">김영희</td><td style="font-size:10px">서울중</td><td style="font-size:10px">2</td><td><span class="btn btn-danger" style="font-size:9px;padding:1px 5px">제거</span></td></tr>
+<tr><td style="font-size:10px">이철수</td><td style="font-size:10px">한국중</td><td style="font-size:10px">2</td><td><span class="btn btn-danger" style="font-size:9px;padding:1px 5px">제거</span></td></tr>
 </table>
 </div>
 </div>
@@ -870,7 +912,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <h4>학생 등록/제거</h4>
 <ul>
 <li><strong>등록:</strong> 우측 패널에서 <strong>+ 학생 추가</strong>를 클릭하고 등록할 학생을 선택합니다.</li>
-<li><strong>제거:</strong> 학생 옆의 <span class="ui-btn ui-btn-red" style="padding:1px 6px;font-size:10px">제거</span> 버튼을 클릭합니다. (학생 정보는 삭제되지 않고 수강반에서만 제거됩니다.)</li>
+<li><strong>제거:</strong> 학생 옆의 <span class="btn btn-danger" style="padding:1px 6px;font-size:10px">제거</span> 버튼을 클릭합니다. (학생 정보는 삭제되지 않고 수강반에서만 제거됩니다.)</li>
 </ul>
 </div>
 
@@ -892,19 +934,19 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li><strong>저장</strong>을 클릭합니다.</li>
 </ol>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 과제 목록</div>
-<div class="ui-box">
-<div class="ui-header">&#x1F4CB; 과제 관리</div>
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 과제 목록</div>
+<div class="card card-body">
+<div class="card-header">&#x1F4CB; 과제 관리</div>
 <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-<span class="ui-input" style="width:200px">&#x1F50D; 과제 검색...</span>
-<span class="ui-btn ui-btn-green">+ 새 과제</span>
+<span class="form-control" style="width:200px">&#x1F50D; 과제 검색...</span>
+<span class="btn btn-success">+ 새 과제</span>
 </div>
-<table class="ui-table">
+<table>
 <tr><th>과제명</th><th>수강반</th><th>마감일</th><th>상태</th><th>제출</th><th>관리</th></tr>
-<tr><td>독해 연습 1회</td><td>A반</td><td>2025-01-20</td><td><span class="badge badge-green">진행 중</span></td><td>12/15</td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px">상세</span></td></tr>
-<tr><td>문법 워크시트</td><td>B반</td><td>2025-01-18</td><td><span class="badge badge-red">마감</span></td><td>10/10</td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px">상세</span></td></tr>
-<tr><td>작문 과제</td><td>A반</td><td>2025-01-25</td><td><span class="badge badge-yellow">초안</span></td><td>0/15</td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px">상세</span></td></tr>
+<tr><td>독해 연습 1회</td><td>A반</td><td>2025-01-20</td><td><span class="badge badge-green">진행 중</span></td><td>12/15</td><td><span class="btn btn-blue" style="padding:2px 6px">상세</span></td></tr>
+<tr><td>문법 워크시트</td><td>B반</td><td>2025-01-18</td><td><span class="badge badge-red">마감</span></td><td>10/10</td><td><span class="btn btn-blue" style="padding:2px 6px">상세</span></td></tr>
+<tr><td>작문 과제</td><td>A반</td><td>2025-01-25</td><td><span class="badge badge-yellow">초안</span></td><td>0/15</td><td><span class="btn btn-blue" style="padding:2px 6px">상세</span></td></tr>
 </table>
 </div>
 </div>
@@ -944,22 +986,22 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <h3 id="s10-4">10.4 제출 현황</h3>
 <p>과제 상세 화면에서 학생별 제출 상황을 확인합니다.</p>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 제출 현황</div>
-<div class="ui-box">
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 제출 현황</div>
+<div class="card card-body">
 <div style="font-weight:600;margin-bottom:6px">&#x1F4CB; 제출 현황 - 독해 연습 1회 (A반)</div>
-<table class="ui-table">
+<table>
 <tr><th>학생</th><th>1페이지</th><th>2페이지</th><th>3페이지</th><th>상태</th><th>유사도</th><th>관리</th></tr>
-<tr><td>김영희</td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span class="badge badge-green">완료</span></td><td>-</td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px;font-size:10px">확인</span></td></tr>
-<tr><td>이철수</td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#94a3b8">&#x2B1C;</span></td><td><span class="badge badge-yellow">부분 제출</span></td><td>-</td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px;font-size:10px">확인</span></td></tr>
-<tr><td>박민수</td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span class="badge badge-green">완료</span></td><td><span class="badge badge-red">92%</span></td><td><span class="ui-btn ui-btn-blue" style="padding:2px 6px;font-size:10px">확인</span></td></tr>
+<tr><td>김영희</td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span class="badge badge-green">완료</span></td><td>-</td><td><span class="btn btn-blue" style="padding:2px 6px;font-size:10px">확인</span></td></tr>
+<tr><td>이철수</td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#94a3b8">&#x2B1C;</span></td><td><span class="badge badge-yellow">부분 제출</span></td><td>-</td><td><span class="btn btn-blue" style="padding:2px 6px;font-size:10px">확인</span></td></tr>
+<tr><td>박민수</td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span style="color:#10b981">&#x2705;</span></td><td><span class="badge badge-green">완료</span></td><td><span class="badge badge-red">92%</span></td><td><span class="btn btn-blue" style="padding:2px 6px;font-size:10px">확인</span></td></tr>
 <tr><td>최지연</td><td><span style="color:#94a3b8">&#x2B1C;</span></td><td><span style="color:#94a3b8">&#x2B1C;</span></td><td><span style="color:#94a3b8">&#x2B1C;</span></td><td><span class="badge badge-red">미제출</span></td><td>-</td><td>-</td></tr>
 </table>
 </div>
 </div>
 
 <h4>학생 제출물 확인</h4>
-<p>각 학생의 <span class="ui-btn ui-btn-blue" style="padding:1px 6px;font-size:10px">확인</span> 버튼을 클릭하면 해당 학생이 페이지별로 제출한 이미지를 볼 수 있습니다.</p>
+<p>각 학생의 <span class="btn btn-blue" style="padding:1px 6px;font-size:10px">확인</span> 버튼을 클릭하면 해당 학생이 페이지별로 제출한 이미지를 볼 수 있습니다.</p>
 </div>
 
 <!-- ==================== 10. 과제 관리 (page 4: 유사도 + 코멘트) ==================== -->
@@ -974,9 +1016,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 <li>필요 시 수동으로 통과/미통과 처리합니다.</li>
 </ol>
 
-<div class="diagram">
-<div class="diagram-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 유사도 검사 결과</div>
-<div class="ui-box" style="max-width:420px">
+<div class="app-demo">
+<div class="demo-title">&#x1F5A5;&#xFE0F; UI 다이어그램 - 유사도 검사 결과</div>
+<div class="card card-body" style="max-width:420px">
 <div style="font-weight:600;margin-bottom:6px">&#x1F50D; 유사도 검사 결과</div>
 <div style="background:#fef2f2;border-radius:6px;padding:8px;margin:5px 0;font-size:11px">
 <div style="display:flex;justify-content:space-between">
@@ -985,9 +1027,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 </div>
 <div style="font-size:10px;color:#64748b;margin-top:3px">2페이지에서 높은 유사도 감지</div>
 <div style="margin-top:5px">
-<span class="ui-btn ui-btn-green" style="font-size:10px;padding:2px 8px">&#x2705; 통과</span>
-<span class="ui-btn ui-btn-red" style="font-size:10px;padding:2px 8px">&#x274C; 미통과</span>
-<span class="ui-btn ui-btn-blue" style="font-size:10px;padding:2px 8px">비교 보기</span>
+<span class="btn btn-success" style="font-size:10px;padding:2px 8px">&#x2705; 통과</span>
+<span class="btn btn-danger" style="font-size:10px;padding:2px 8px">&#x274C; 미통과</span>
+<span class="btn btn-blue" style="font-size:10px;padding:2px 8px">비교 보기</span>
 </div>
 </div>
 <div style="background:#fffbeb;border-radius:6px;padding:8px;margin:5px 0;font-size:11px">
@@ -997,9 +1039,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
 </div>
 <div style="font-size:10px;color:#64748b;margin-top:3px">1페이지에서 중간 유사도 감지</div>
 <div style="margin-top:5px">
-<span class="ui-btn ui-btn-green" style="font-size:10px;padding:2px 8px">&#x2705; 통과</span>
-<span class="ui-btn ui-btn-red" style="font-size:10px;padding:2px 8px">&#x274C; 미통과</span>
-<span class="ui-btn ui-btn-blue" style="font-size:10px;padding:2px 8px">비교 보기</span>
+<span class="btn btn-success" style="font-size:10px;padding:2px 8px">&#x2705; 통과</span>
+<span class="btn btn-danger" style="font-size:10px;padding:2px 8px">&#x274C; 미통과</span>
+<span class="btn btn-blue" style="font-size:10px;padding:2px 8px">비교 보기</span>
 </div>
 </div>
 </div>

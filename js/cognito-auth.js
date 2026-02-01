@@ -258,8 +258,17 @@ class CognitoAuth {
                         case 'custom:role':
                             userInfo.role = attr.getValue();
                             break;
+                        case 'custom:studentId':
+                            userInfo.studentId = attr.getValue();
+                            break;
                     }
                 });
+
+                // custom:role이 없지만 studentId가 있으면 student로 판단
+                if (userInfo.role === 'org_admin' && userInfo.studentId) {
+                    console.warn('⚠️ custom:role 누락, studentId로 student 역할 판단');
+                    userInfo.role = 'student';
+                }
 
                 resolve(userInfo);
             });
@@ -282,6 +291,7 @@ class CognitoAuth {
             const claims = JSON.parse(decoded);
 
             console.log('ID Token claims:', claims);
+            console.log('🔍 역할 판단: custom:role=', claims['custom:role'], ', custom:studentId=', claims['custom:studentId']);
 
             return {
                 sub: claims.sub || '',
@@ -289,7 +299,7 @@ class CognitoAuth {
                 username: claims.email || claims['cognito:username'] || '',
                 name: claims.name || '',
                 organization: claims['custom:organization'] || '',
-                role: claims['custom:role'] || 'org_admin',
+                role: claims['custom:role'] || (claims['custom:studentId'] ? 'student' : 'org_admin'),
                 studentId: claims['custom:studentId'] || null
             };
         } catch (error) {

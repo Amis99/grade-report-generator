@@ -3,7 +3,7 @@
  * Firebase storage.js를 대체하는 AWS API Gateway 클라이언트
  * 기존 storage 인터페이스와 호환성 유지
  */
-console.log('📦 api-client.js 버전 2025-01-21b 로드됨 (답안 삭제 API 추가)');
+console.log('📦 api-client.js 버전 2026-01-31a 로드됨 (deleteAnswer 404 graceful 처리)');
 
 class ApiClient {
     constructor() {
@@ -582,12 +582,16 @@ class ApiClient {
         console.log('🗑️ deleteAnswer 호출됨:', id);
         try {
             await this.request('DELETE', `/answers/${id}`);
-            this.cache.answers = this.cache.answers.filter(a => a.id !== id);
             console.log('✅ 답안 삭제 성공');
         } catch (error) {
-            console.error('❌ 답안 삭제 실패:', error);
-            throw error;
+            if (error.message && error.message.includes('not found')) {
+                console.warn('⚠️ 서버에 답안이 이미 없음 (무시):', id);
+            } else {
+                console.error('❌ 답안 삭제 실패:', error);
+                throw error;
+            }
         }
+        this.cache.answers = this.cache.answers.filter(a => a.id !== id);
     }
 
     async deleteAnswersByExamId(examId) {

@@ -4,7 +4,7 @@
  *
  * Returns assignments for the logged-in student based on their classes
  */
-const { getItem, queryByPK, queryByIndex, Tables } = require('../../utils/dynamoClient');
+const { getItem, queryByPK, scanTable, Tables } = require('../../utils/dynamoClient');
 const { success, error, getUserFromEvent } = require('../../utils/response');
 
 exports.handler = async (event) => {
@@ -45,41 +45,22 @@ exports.handler = async (event) => {
             return success({ assignments: [], debug: { reason: 'no_classes', studentId } });
         }
 
-        // Get organizations from the classes the student is enrolled in
-        const classOrganizations = new Set();
-        for (const classId of classIds) {
-            const classInfo = await getItem(Tables.CLASSES, `CLASS#${classId}`, 'METADATA');
-            if (classInfo && classInfo.organization) {
-                classOrganizations.add(classInfo.organization);
-            }
-        }
-
-        console.log('[getMyAssignments] classOrganizations:', Array.from(classOrganizations));
-
-        // Get assignments from all relevant organizations
-        let allAssignments = [];
-        for (const org of classOrganizations) {
-            const orgAssignments = await queryByIndex(
-                Tables.ASSIGNMENTS,
-                'organization-dueDate-index',
-                'organization = :org',
-                { ':org': org }
-            );
-            allAssignments = allAssignments.concat(orgAssignments);
-        }
+        // 모든 과제를 스캔하여 학생의 수강반과 매칭되는 과제 조회
+        // (본사관리자가 타 기관 수강반에 배정한 과제도 포함하기 위해 조직 필터 제거)
+        const allAssignments = await scanTable(
+            Tables.ASSIGNMENTS,
+            'SK = :sk',
+            { ':sk': 'METADATA' }
+        );
 
         console.log('[getMyAssignments] allAssignments count:', allAssignments.length);
-        console.log('[getMyAssignments] allAssignments:', JSON.stringify(allAssignments.slice(0, 5)));
 
-        // Filter assignments by:
-        // 1. Status is 'active'
-        // 2. Student is in one of the assigned classes
+        // Filter: active status AND student is in one of the assigned classes
         const activeAssignments = allAssignments
-            .filter(a => a.SK === 'METADATA')
             .filter(a => a.status === 'active')
             .filter(a => {
                 const hasMatchingClass = a.classIds && a.classIds.some(cid => classIds.includes(cid));
-                console.log(`[getMyAssignments] 과제 "${a.name}" classIds: ${JSON.stringify(a.classIds)}, 매칭: ${hasMatchingClass}`);
+                console.log(`[getMyAssignments] 과제 "${a.name}" classIds: ${JSON.stringify(a.classIds)}, org: ${a.organization}, 매칭: ${hasMatchingClass}`);
                 return hasMatchingClass;
             });
 

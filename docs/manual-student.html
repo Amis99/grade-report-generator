@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -75,96 +75,96 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 .phone-sidebar-overlay .sidebar .sidebar-footer .user-av{width:18px;height:18px;background:#f9a8d4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;color:#9d174d;font-weight:700}
 .phone-sidebar-overlay .backdrop{flex:1;background:rgba(0,0,0,.4)}
 
-/* phone inner UI cards */
-.ph-welcome{background:#fff;border-radius:7px;padding:8px 10px;margin-bottom:7px;border-top:2.5px solid #f9a8d4;position:relative}
-.ph-welcome .name{font-weight:700;color:#db2777;font-size:10px}
-.ph-welcome .sub{color:#6b7280;font-size:8px}
-.ph-feed-title{font-weight:700;font-size:9.5px;margin:5px 0 4px;display:flex;align-items:center;gap:4px}
-.ph-card{background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
-.ph-card .icon-box{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
-.ph-card .card-text{font-size:7.5px;color:#374151;line-height:1.35}
-.ph-card .card-text .card-tag{font-size:6.5px;font-weight:600;margin-bottom:1px}
-.ph-card .card-text .card-title{font-weight:600;font-size:8px}
+/* ===== phone inner UI — real app class names ===== */
+.phone-body .dashboard-welcome{background:#fff;border-radius:7px;padding:8px 10px;margin-bottom:7px;border-top:2.5px solid #f9a8d4;position:relative}
+.phone-body .dashboard-welcome .user-name{font-weight:700;color:#db2777;font-size:10px}
+.phone-body .dashboard-welcome .welcome-message{color:#6b7280;font-size:8px}
+.phone-body .feed-title{font-weight:700;font-size:9.5px;margin:5px 0 4px;display:flex;align-items:center;gap:4px}
+.phone-body .feed-item{background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.phone-body .feed-item .feed-item-indicator{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.phone-body .feed-item .feed-item-content{font-size:7.5px;color:#374151;line-height:1.35}
+.phone-body .feed-item .feed-item-tag{font-size:6.5px;font-weight:600;margin-bottom:1px}
+.phone-body .feed-item .feed-item-title{font-weight:600;font-size:8px}
 
-/* phone exam cards */
-.ph-exam-card{background:#fff;border-radius:5px;padding:7px 9px;margin-bottom:5px;border:1px solid #e5e7eb}
-.ph-exam-card.selected{border-color:#4a7c59;background:#f0fdf4}
-.ph-exam-card .exam-name{font-weight:600;font-size:9px}
-.ph-exam-card .exam-date{font-size:7px;color:#6b7280}
+/* exam cards */
+.phone-body .exam-card{background:#fff;border-radius:5px;padding:7px 9px;margin-bottom:5px;border:1px solid #e5e7eb}
+.phone-body .exam-card.selected{border-color:#4a7c59;background:#f0fdf4}
+.phone-body .exam-card .exam-name{font-weight:600;font-size:9px}
+.phone-body .exam-card .exam-date{font-size:7px;color:#6b7280}
 
-/* phone score cards */
-.ph-scores{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:5px 0}
-.ph-score-card{border-radius:5px;padding:6px;text-align:center}
-.ph-score-card.primary{background:linear-gradient(135deg,#4a7c59,#3d6b4a);color:#fff}
-.ph-score-card.secondary{background:#fff;border:1px solid #e5e7eb}
-.ph-score-card .label{font-size:6.5px;opacity:.85}
-.ph-score-card .val{font-size:13px;font-weight:700}
+/* score cards */
+.phone-body .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:5px 0}
+.phone-body .score-card{border-radius:5px;padding:6px;text-align:center}
+.phone-body .score-card.primary{background:linear-gradient(135deg,#4a7c59,#3d6b4a);color:#fff}
+.phone-body .score-card.secondary{background:#fff;border:1px solid #e5e7eb}
+.phone-body .score-card .label{font-size:6.5px;opacity:.85}
+.phone-body .score-card .val{font-size:13px;font-weight:700}
 
-/* phone wrong answer items */
-.ph-wrong{border-left:2.5px solid #ef4444;padding:4px 8px;margin-bottom:4px;background:#fff;border-radius:0 5px 5px 0}
-.ph-wrong .q-num{font-weight:700;font-size:8px;color:#ef4444}
-.ph-wrong .q-detail{font-size:7px;color:#6b7280}
+/* wrong answer items */
+.phone-body .wrong-item{border-left:2.5px solid #ef4444;padding:4px 8px;margin-bottom:4px;background:#fff;border-radius:0 5px 5px 0}
+.phone-body .wrong-item .q-num{font-weight:700;font-size:8px;color:#ef4444}
+.phone-body .wrong-item .q-detail{font-size:7px;color:#6b7280}
 
-/* phone assignment */
-.ph-assign-card{background:#fff;border-radius:6px;padding:8px 9px;margin-bottom:5px;border:1px solid #e5e7eb}
-.ph-assign-card .assign-name{font-weight:600;font-size:9px}
-.ph-assign-card .assign-badge{display:inline-block;padding:1px 6px;border-radius:7px;font-size:6.5px;font-weight:600}
-.ph-assign-card .progress-bar{height:5px;background:#e5e7eb;border-radius:2.5px;margin:4px 0;overflow:hidden}
-.ph-assign-card .progress-fill{height:100%;background:#10b981;border-radius:2.5px}
-.ph-assign-card .assign-meta{font-size:7px;color:#6b7280}
-.ph-assign-card.completed{border-color:#10b981}
-.ph-assign-card.overdue{border-color:#ef4444}
+/* assignment cards */
+.phone-body .assignment-card{background:#fff;border-radius:6px;padding:8px 9px;margin-bottom:5px;border:1px solid #e5e7eb}
+.phone-body .assignment-card .assign-name{font-weight:600;font-size:9px}
+.phone-body .assignment-card .assign-badge{display:inline-block;padding:1px 6px;border-radius:7px;font-size:6.5px;font-weight:600}
+.phone-body .assignment-card .progress-bar{height:5px;background:#e5e7eb;border-radius:2.5px;margin:4px 0;overflow:hidden}
+.phone-body .assignment-card .progress-fill{height:100%;background:#10b981;border-radius:2.5px}
+.phone-body .assignment-card .assign-meta{font-size:7px;color:#6b7280}
+.phone-body .assignment-card.completed{border-color:#10b981}
+.phone-body .assignment-card.overdue{border-color:#ef4444}
 
-/* phone page grid */
-.ph-page-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:5px 0}
-.ph-page-item{aspect-ratio:1/1.414;border:2px solid #e5e7eb;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:6.5px;position:relative;background:#fff}
-.ph-page-item.done{border-color:#10b981}
-.ph-page-item.done::after{content:'✓';position:absolute;top:2px;right:3px;color:#10b981;font-size:9px;font-weight:700}
-.ph-page-item.rejected{border-color:#ef4444}
-.ph-page-item.rejected::after{content:'✕';position:absolute;top:2px;right:3px;color:#ef4444;font-size:9px;font-weight:700}
-.ph-page-item.submitted{border-color:#f59e0b}
-.ph-page-item.submitted::after{content:'◷';position:absolute;top:2px;right:3px;color:#f59e0b;font-size:9px}
-.ph-page-item .pg-num{font-weight:700;font-size:9px;color:#374151}
+/* page grid */
+.phone-body .pages-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:5px 0}
+.phone-body .page-item{aspect-ratio:1/1.414;border:2px solid #e5e7eb;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:6.5px;position:relative;background:#fff}
+.phone-body .page-item.done{border-color:#10b981}
+.phone-body .page-item.done::after{content:'✓';position:absolute;top:2px;right:3px;color:#10b981;font-size:9px;font-weight:700}
+.phone-body .page-item.rejected{border-color:#ef4444}
+.phone-body .page-item.rejected::after{content:'✕';position:absolute;top:2px;right:3px;color:#ef4444;font-size:9px;font-weight:700}
+.phone-body .page-item.submitted{border-color:#f59e0b}
+.phone-body .page-item.submitted::after{content:'◷';position:absolute;top:2px;right:3px;color:#f59e0b;font-size:9px}
+.phone-body .page-item .pg-num{font-weight:700;font-size:9px;color:#374151}
 
-/* phone camera */
-.ph-camera{background:#111;border-radius:6px;padding:10px;text-align:center;margin:5px 0}
-.ph-camera .viewfinder{width:60%;aspect-ratio:1/1.414;border:1.5px dashed rgba(255,255,255,.6);margin:8px auto;border-radius:3px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:6.5px}
-.ph-camera .capture-btn{width:28px;height:28px;background:#fff;border-radius:50%;margin:8px auto 3px;border:2.5px solid #ccc}
-.ph-camera .file-link{color:#93c5fd;font-size:7px;margin-top:3px}
+/* camera */
+.phone-body .camera-container{background:#111;border-radius:6px;padding:10px;text-align:center;margin:5px 0}
+.phone-body .camera-container .a4-guideline{width:60%;aspect-ratio:1/1.414;border:1.5px dashed rgba(255,255,255,.6);margin:8px auto;border-radius:3px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:6.5px}
+.phone-body .camera-container .capture-btn{width:28px;height:28px;background:#fff;border-radius:50%;margin:8px auto 3px;border:2.5px solid #ccc}
+.phone-body .camera-container .file-link{color:#93c5fd;font-size:7px;margin-top:3px}
 
-/* phone charts placeholder */
-.ph-chart{background:#fff;border-radius:6px;padding:8px;margin-bottom:6px;text-align:center;min-height:75px;display:flex;align-items:center;justify-content:center}
-.ph-chart .chart-placeholder{color:#9ca3af;font-size:7.5px}
+/* chart */
+.phone-body .chart-container{background:#fff;border-radius:6px;padding:8px;margin-bottom:6px;text-align:center;min-height:75px;display:flex;align-items:center;justify-content:center}
+.phone-body .chart-container .chart-placeholder{color:#9ca3af;font-size:7.5px}
 
-/* phone settings */
-.ph-setting-card{background:#fff;border-radius:6px;padding:10px;margin-bottom:6px}
-.ph-setting-card .setting-title{font-weight:700;font-size:9.5px;margin-bottom:5px}
-.ph-btn-secondary{display:inline-block;padding:4px 10px;border:1px solid #e5e7eb;border-radius:5px;font-size:7.5px;color:#374151;background:#fff}
-.ph-btn-primary{display:inline-block;padding:4px 10px;border:none;border-radius:5px;font-size:7.5px;color:#fff;background:#4a7c59}
+/* settings */
+.phone-body .setting-card{background:#fff;border-radius:6px;padding:10px;margin-bottom:6px}
+.phone-body .setting-card .setting-title{font-weight:700;font-size:9.5px;margin-bottom:5px}
+.phone .btn-secondary{display:inline-block;padding:4px 10px;border:1px solid #e5e7eb;border-radius:5px;font-size:7.5px;color:#374151;background:#fff}
+.phone .btn-primary{display:inline-block;padding:4px 10px;border:none;border-radius:5px;font-size:7.5px;color:#fff;background:#4a7c59}
 
-/* phone modal */
-.ph-modal{background:#fff;border-radius:8px;padding:10px;margin:25px 10px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
-.ph-modal .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:5px;margin-bottom:8px}
-.ph-modal .modal-header .modal-title{font-weight:700;font-size:9.5px}
-.ph-modal .modal-header .close-btn{font-size:11px;color:#6b7280;cursor:pointer}
-.ph-modal .modal-input{width:100%;padding:4px 8px;border:1px solid #e5e7eb;border-radius:4px;font-size:7.5px;margin-bottom:5px;background:#f9fafb}
-.ph-modal .modal-label{font-size:7px;color:#374151;margin-bottom:2px;font-weight:600}
-.ph-modal .modal-footer{display:flex;justify-content:flex-end;gap:5px;margin-top:8px}
+/* modal */
+.phone .modal-dialog{background:#fff;border-radius:8px;padding:10px;margin:25px 10px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+.phone .modal-dialog .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:5px;margin-bottom:8px}
+.phone .modal-dialog .modal-header .modal-title{font-weight:700;font-size:9.5px}
+.phone .modal-dialog .modal-header .close-btn{font-size:11px;color:#6b7280;cursor:pointer}
+.phone .modal-dialog .form-control{width:100%;padding:4px 8px;border:1px solid #e5e7eb;border-radius:4px;font-size:7.5px;margin-bottom:5px;background:#f9fafb}
+.phone .modal-dialog .form-label{font-size:7px;color:#374151;margin-bottom:2px;font-weight:600}
+.phone .modal-dialog .modal-footer{display:flex;justify-content:flex-end;gap:5px;margin-top:8px}
 
-/* phone login */
-.ph-login-bg{background:#BDD4EA;padding:0}
-.ph-login-illust{height:70px;background:linear-gradient(135deg,#BDD4EA 60%,#a3c4e0);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.ph-login-illust img{max-height:60px;object-fit:contain}
-.ph-login-form{background:#f8fafc;padding:10px 12px;border-radius:12px 12px 0 0}
-.ph-login-form .login-logo{text-align:center;margin-bottom:4px}
-.ph-login-form .login-logo .logo-img{width:36px;height:36px;border-radius:10px;margin:0 auto 3px;overflow:hidden}
-.ph-login-form .login-logo .logo-img img{width:100%;height:100%;object-fit:contain}
-.ph-login-form .login-title{text-align:center;font-weight:700;font-size:10px;color:#334155;margin-bottom:8px}
-.ph-login-form .login-input{width:100%;padding:5px 10px;background:#e2e8f0;border:none;border-radius:20px;font-size:7.5px;margin-bottom:5px;outline:none}
-.ph-login-form .login-btn{width:100%;padding:6px;background:#2563eb;color:#fff;border:none;border-radius:20px;font-size:8.5px;font-weight:600;text-align:center;margin-top:3px;cursor:pointer}
-.ph-login-form .login-footer{text-align:center;margin-top:5px;font-size:7px}
-.ph-login-form .login-footer a{color:#2563eb;text-decoration:none}
-.ph-login-form .login-error{background:#fee;color:#c00;font-size:7px;padding:3px 8px;border-radius:4px;margin-bottom:4px;text-align:center}
+/* login */
+.phone .auth-layout{background:#BDD4EA;padding:0}
+.phone .auth-illustration{height:70px;background:linear-gradient(135deg,#BDD4EA 60%,#a3c4e0);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.phone .auth-illustration img{max-height:60px;object-fit:contain}
+.phone .auth-form-area{background:#f8fafc;padding:10px 12px;border-radius:12px 12px 0 0}
+.phone .auth-form-area .login-logo{text-align:center;margin-bottom:4px}
+.phone .auth-form-area .login-logo .logo-img{width:36px;height:36px;border-radius:10px;margin:0 auto 3px;overflow:hidden}
+.phone .auth-form-area .login-logo .logo-img img{width:100%;height:100%;object-fit:contain}
+.phone .auth-form-area .login-title{text-align:center;font-weight:700;font-size:10px;color:#334155;margin-bottom:8px}
+.phone .auth-form-area .input-new{width:100%;padding:5px 10px;background:#e2e8f0;border:none;border-radius:20px;font-size:7.5px;margin-bottom:5px;outline:none}
+.phone .auth-form-area .btn-login{width:100%;padding:6px;background:#2563eb;color:#fff;border:none;border-radius:20px;font-size:8.5px;font-weight:600;text-align:center;margin-top:3px;cursor:pointer}
+.phone .auth-form-area .login-footer{text-align:center;margin-top:5px;font-size:7px}
+.phone .auth-form-area .login-footer a{color:#2563eb;text-decoration:none}
+.phone .auth-form-area .login-error{background:#fee;color:#c00;font-size:7px;padding:3px 8px;border-radius:4px;margin-bottom:4px;text-align:center}
 
 /* annotation arrow/label */
 .diagram-wrap{position:relative;display:inline-block}
@@ -267,16 +267,16 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <!-- PHONE: Login Screen -->
 <div class="phone">
 <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
-<div class="ph-login-bg">
-<div class="ph-login-illust"><img src="../images/login-illustration.png" alt="일러스트"></div>
-<div class="ph-login-form">
+<div class="auth-layout">
+<div class="auth-illustration"><img src="../images/login-illustration.png" alt="일러스트"></div>
+<div class="auth-form-area">
 <div class="login-logo">
 <div class="logo-img"><img src="../images/logo.png" alt="로고"></div>
 </div>
 <div class="login-title">성적표 생성 프로그램</div>
-<div class="login-input" style="color:#94a3b8">아이디</div>
-<div class="login-input" style="color:#94a3b8">비밀번호</div>
-<div class="login-btn">로그인</div>
+<div class="input-new" style="color:#94a3b8">아이디</div>
+<div class="input-new" style="color:#94a3b8">비밀번호</div>
+<div class="btn-login">로그인</div>
 <div class="login-footer"><a>회원가입</a></div>
 </div>
 </div>
@@ -421,33 +421,33 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <span class="avatar">김</span>
 </div>
 <div class="phone-body">
-<div class="ph-welcome">
-<div>안녕하세요, <span class="name">김학생</span>님!</div>
-<div class="sub">오늘도 열심히 공부해봐요!</div>
-<div class="sub">📅 2025년 1월 15일 수요일</div>
+<div class="dashboard-welcome">
+<div>안녕하세요, <span class="user-name">김학생</span>님!</div>
+<div class="welcome-message">오늘도 열심히 공부해봐요!</div>
+<div class="welcome-message">📅 2025년 1월 15일 수요일</div>
 </div>
-<div class="ph-feed-title">📌 해야 할 것</div>
-<div class="ph-card">
-<div class="icon-box" style="background:#dbeafe">📋</div>
-<div class="card-text">
-<div class="card-tag" style="color:#2563eb">과제</div>
-<div class="card-title">1월 2주차 어휘 과제</div>
-</div>
-</div>
-<div class="ph-feed-title">📊 최근 성적</div>
-<div class="ph-card">
-<div class="icon-box" style="background:#d1fae5">📄</div>
-<div class="card-text">
-<div class="card-tag" style="color:#059669">성적표</div>
-<div class="card-title">1월 모의고사 — 82점</div>
+<div class="feed-title">📌 해야 할 것</div>
+<div class="feed-item">
+<div class="feed-item-indicator" style="background:#dbeafe">📋</div>
+<div class="feed-item-content">
+<div class="feed-item-tag" style="color:#2563eb">과제</div>
+<div class="feed-item-title">1월 2주차 어휘 과제</div>
 </div>
 </div>
-<div class="ph-feed-title">💬 선생님 코멘트</div>
-<div class="ph-card">
-<div class="icon-box" style="background:#fce7f3">💬</div>
-<div class="card-text">
-<div class="card-tag" style="color:#db2777">코멘트</div>
-<div class="card-title">독해력이 많이 좋아졌어요!</div>
+<div class="feed-title">📊 최근 성적</div>
+<div class="feed-item">
+<div class="feed-item-indicator" style="background:#d1fae5">📄</div>
+<div class="feed-item-content">
+<div class="feed-item-tag" style="color:#059669">성적표</div>
+<div class="feed-item-title">1월 모의고사 — 82점</div>
+</div>
+</div>
+<div class="feed-title">💬 선생님 코멘트</div>
+<div class="feed-item">
+<div class="feed-item-indicator" style="background:#fce7f3">💬</div>
+<div class="feed-item-content">
+<div class="feed-item-tag" style="color:#db2777">코멘트</div>
+<div class="feed-item-title">독해력이 많이 좋아졌어요!</div>
 </div>
 </div>
 </div>
@@ -527,22 +527,22 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 </div>
 <div class="phone-body">
 <div style="font-weight:700;font-size:8px;border-bottom:1.5px solid #4a7c59;padding-bottom:2px;margin-bottom:4px">내 성적표</div>
-<div class="ph-exam-card selected">
+<div class="exam-card selected">
 <div class="exam-name">1월 모의고사</div>
 <div class="exam-date">2025.01.10 · 100점 만점</div>
 </div>
-<div class="ph-exam-card">
+<div class="exam-card">
 <div class="exam-name">12월 정기시험</div>
 <div class="exam-date">2024.12.15 · 100점 만점</div>
 </div>
-<div class="ph-scores">
-<div class="ph-score-card primary"><div class="label">총점</div><div class="val">82</div></div>
-<div class="ph-score-card secondary"><div class="label">평균</div><div class="val">75.3</div></div>
-<div class="ph-score-card secondary"><div class="label">석차</div><div class="val">3/15</div></div>
-<div class="ph-score-card secondary"><div class="label">정답률</div><div class="val">82%</div></div>
+<div class="score-grid">
+<div class="score-card primary"><div class="label">총점</div><div class="val">82</div></div>
+<div class="score-card secondary"><div class="label">평균</div><div class="val">75.3</div></div>
+<div class="score-card secondary"><div class="label">석차</div><div class="val">3/15</div></div>
+<div class="score-card secondary"><div class="label">정답률</div><div class="val">82%</div></div>
 </div>
-<div class="ph-wrong"><span class="q-num">3번</span> <span class="q-detail">정답: ② &nbsp; 내 답: ④</span></div>
-<div class="ph-wrong"><span class="q-num">7번</span> <span class="q-detail">정답: ③ &nbsp; 내 답: ①</span></div>
+<div class="wrong-item"><span class="q-num">3번</span> <span class="q-detail">정답: ② &nbsp; 내 답: ④</span></div>
+<div class="wrong-item"><span class="q-num">7번</span> <span class="q-detail">정답: ③ &nbsp; 내 답: ①</span></div>
 </div>
 </div>
 <div style="font-size:.8rem;color:#6b7280;margin-top:4px">[ 성적표 화면 ]</div>
@@ -571,7 +571,7 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <p>틀린 문제는 <span style="display:inline-block;width:4px;height:14px;background:#ef4444;border-radius:1px;vertical-align:middle"></span> <span class="red">빨간색 왼쪽 테두리</span>로 강조됩니다. 각 항목에서 문제 번호, 정답, 내가 선택한 답을 확인할 수 있습니다.</p>
 
 <h4 style="margin-top:8px">PDF 다운로드</h4>
-<p>성적표 하단에 있는 <span class="ph-btn-primary" style="font-size:.8rem">PDF 다운로드</span> 버튼을 누르면 성적표가 깔끔한 A4 형식으로 저장됩니다. 부모님께 보여드리거나 인쇄할 때 유용합니다.</p>
+<p>성적표 하단에 있는 <span class="btn-primary" style="font-size:.8rem">PDF 다운로드</span> 버튼을 누르면 성적표가 깔끔한 A4 형식으로 저장됩니다. 부모님께 보여드리거나 인쇄할 때 유용합니다.</p>
 
 <div class="warn">
 ⚠️ PDF 다운로드는 성적표가 완전히 로딩된 후에 눌러주세요. 로딩 중에 누르면 빈 PDF가 생성될 수 있습니다.
@@ -615,7 +615,7 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <span class="avatar">김</span>
 </div>
 <div class="phone-body">
-<div class="ph-assign-card">
+<div class="assignment-card">
 <div style="display:flex;justify-content:space-between;align-items:center">
 <span class="assign-name">1월 2주차 어휘</span>
 <span class="assign-badge" style="background:#dbeafe;color:#1e40af">진행중</span>
@@ -624,7 +624,7 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
 <div class="assign-meta">마감: 2025.01.20 · 2/4 완료</div>
 </div>
-<div class="ph-assign-card completed">
+<div class="assignment-card completed">
 <div style="display:flex;justify-content:space-between;align-items:center">
 <span class="assign-name">1월 1주차 문법</span>
 <span class="assign-badge" style="background:#d1fae5;color:#065f46">완료</span>
@@ -633,7 +633,7 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
 <div class="assign-meta">마감: 2025.01.13 · 4/4 완료</div>
 </div>
-<div class="ph-assign-card overdue">
+<div class="assignment-card overdue">
 <div style="display:flex;justify-content:space-between;align-items:center">
 <span class="assign-name">12월 독해 숙제</span>
 <span class="assign-badge" style="background:#fee2e2;color:#991b1b">기한초과</span>
@@ -690,11 +690,11 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <div style="background:#eff6ff;border-left:2px solid #3b82f6;padding:3px 5px;border-radius:0 3px 3px 0;margin-bottom:5px;font-size:5.5px;color:#1e40af">
 📘 페이지를 눌러 촬영해 주세요
 </div>
-<div class="ph-page-grid">
-<div class="ph-page-item done"><span class="pg-num">42</span><span style="font-size:4px;color:#10b981">완료</span></div>
-<div class="ph-page-item done"><span class="pg-num">43</span><span style="font-size:4px;color:#10b981">완료</span></div>
-<div class="ph-page-item submitted"><span class="pg-num">44</span><span style="font-size:4px;color:#f59e0b">제출됨</span></div>
-<div class="ph-page-item"><span class="pg-num">45</span><span style="font-size:4px;color:#6b7280">미제출</span></div>
+<div class="pages-grid">
+<div class="page-item done"><span class="pg-num">42</span><span style="font-size:4px;color:#10b981">완료</span></div>
+<div class="page-item done"><span class="pg-num">43</span><span style="font-size:4px;color:#10b981">완료</span></div>
+<div class="page-item submitted"><span class="pg-num">44</span><span style="font-size:4px;color:#f59e0b">제출됨</span></div>
+<div class="page-item"><span class="pg-num">45</span><span style="font-size:4px;color:#6b7280">미제출</span></div>
 </div>
 </div>
 </div>
@@ -738,8 +738,8 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <div style="padding:6px">
 <div style="text-align:right;margin-bottom:2px"><span style="color:#fff;font-size:8px;cursor:pointer">✕</span></div>
 <div style="font-size:7px;color:#fff;text-align:center;font-weight:600;margin-bottom:4px">페이지 44 촬영</div>
-<div class="ph-camera">
-<div class="viewfinder">A4 가이드라인<br>여기에 맞추세요</div>
+<div class="camera-container">
+<div class="a4-guideline">A4 가이드라인<br>여기에 맞추세요</div>
 <div class="capture-btn"></div>
 <div class="file-link">📁 파일 선택</div>
 </div>
@@ -891,8 +891,8 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 
 <table class="info">
 <tr><th>버튼</th><th>기능</th></tr>
-<tr><td><span class="ph-btn-secondary" style="font-size:.8rem">모두 선택</span></td><td>모든 시험을 한 번에 선택합니다</td></tr>
-<tr><td><span class="ph-btn-primary" style="font-size:.8rem">오답 노트 생성</span></td><td>선택한 시험들의 오답을 모아 노트를 생성합니다</td></tr>
+<tr><td><span class="btn-secondary" style="font-size:.8rem">모두 선택</span></td><td>모든 시험을 한 번에 선택합니다</td></tr>
+<tr><td><span class="btn-primary" style="font-size:.8rem">오답 노트 생성</span></td><td>선택한 시험들의 오답을 모아 노트를 생성합니다</td></tr>
 </table>
 
 <h4 style="margin-top:10px">오답 항목 구성</h4>
@@ -948,7 +948,7 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <span class="avatar">김</span>
 </div>
 <div class="phone-body">
-<div class="ph-chart" style="min-height:70px;flex-direction:column">
+<div class="chart-container" style="min-height:70px;flex-direction:column">
 <div style="font-weight:700;font-size:7px;margin-bottom:4px">📊 점수 추이</div>
 <svg width="120" height="45" viewBox="0 0 120 45">
 <polyline points="10,35 35,28 60,32 85,20 110,15" fill="none" stroke="#4a7c59" stroke-width="1.5"/>
@@ -964,7 +964,7 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <text x="110" y="43" font-size="4" fill="#6b7280" text-anchor="middle">1월</text>
 </svg>
 </div>
-<div class="ph-chart" style="min-height:65px;flex-direction:column">
+<div class="chart-container" style="min-height:65px;flex-direction:column">
 <div style="font-weight:700;font-size:7px;margin-bottom:4px">🕸️ 영역별 정답률</div>
 <svg width="80" height="60" viewBox="0 0 80 60">
 <polygon points="40,5 68,15 65,42 15,42 12,15" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
@@ -1024,20 +1024,20 @@ table.info th{background:#f0fdf4;color:#065f46;font-weight:600;white-space:nowra
 <!-- PHONE: Password Change Modal -->
 <div class="phone" style="background:rgba(0,0,0,.3)">
 <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
-<div class="ph-modal" style="margin-top:30px">
+<div class="modal-dialog" style="margin-top:30px">
 <div class="modal-header">
 <span class="modal-title">비밀번호 변경</span>
 <span class="close-btn">✕</span>
 </div>
-<div class="modal-label">현재 비밀번호</div>
-<div class="modal-input" style="color:#94a3b8">••••••</div>
-<div class="modal-label">새 비밀번호</div>
-<div class="modal-input"></div>
-<div class="modal-label">새 비밀번호 확인</div>
-<div class="modal-input"></div>
+<div class="form-label">현재 비밀번호</div>
+<div class="form-control" style="color:#94a3b8">••••••</div>
+<div class="form-label">새 비밀번호</div>
+<div class="form-control"></div>
+<div class="form-label">새 비밀번호 확인</div>
+<div class="form-control"></div>
 <div class="modal-footer">
-<span class="ph-btn-secondary">취소</span>
-<span class="ph-btn-primary">변경</span>
+<span class="btn-secondary">취소</span>
+<span class="btn-primary">변경</span>
 </div>
 </div>
 </div>
