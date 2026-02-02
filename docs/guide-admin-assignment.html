@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>과제 관리 방법 안내 - 관리자용</title>
+<style>
+@page { size: A4; margin: 12mm 14mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif; color: #1f2937; line-height: 1.5; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.page {
+    width: 210mm; min-height: 297mm; max-height: 297mm; overflow: hidden;
+    margin: 0 auto; padding: 10mm 12mm 8mm;
+    position: relative;
+}
+
+/* 헤더 */
+.header { text-align: center; margin-bottom: 8px; }
+.header-title { font-size: 24px; font-weight: 800; color: #2563eb; }
+.header-sub { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+/* 흐름 요약 */
+.flow { display: flex; align-items: center; justify-content: center; gap: 0; margin: 6px 0 10px; }
+.flow-item { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.flow-item.a { background: #dbeafe; color: #1e40af; }
+.flow-item.b { background: #dcfce7; color: #166534; }
+.flow-item.c { background: #fef9c3; color: #854d0e; }
+.flow-item.d { background: #fce7f3; color: #9d174d; }
+.flow-item.e { background: #f3e8ff; color: #6b21a8; }
+.flow-arrow { font-size: 13px; color: #bbb; padding: 0 3px; }
+
+/* 4열 그리드 */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+
+/* 단계 카드 */
+.step-card { display: flex; flex-direction: column; }
+.step-label { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.step-num {
+    width: 20px; height: 20px; border-radius: 50%; background: #2563eb; color: #fff;
+    font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.step-title { font-size: 12px; font-weight: 700; color: #1f2937; }
+.step-desc { font-size: 10px; color: #4b5563; line-height: 1.4; margin-bottom: 4px; }
+
+/* 패드 프레임 — 3:4 세로 비율, 통일 사이즈 */
+.screen {
+    width: 100%; aspect-ratio: 3 / 4;
+    border: 2px solid #d1d5db; border-radius: 12px; overflow: hidden;
+    background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column;
+}
+.screen-toolbar {
+    background: #f3f4f6; padding: 4px 8px; font-size: 7.5px; color: #9ca3af;
+    display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #e5e7eb; flex-shrink: 0;
+}
+.screen-dot { width: 5px; height: 5px; border-radius: 50%; }
+.screen-dot.r { background: #ef4444; }
+.screen-dot.y { background: #f59e0b; }
+.screen-dot.g { background: #22c55e; }
+.screen-body {
+    display: flex; flex: 1; overflow: hidden;
+}
+.screen-sidebar {
+    width: 30%; background: #fdf2f8; padding: 8px 6px; flex-shrink: 0; border-right: 1px solid #fce7f3;
+}
+.screen-sidebar .logo { font-size: 9px; font-weight: 800; color: #db2777; margin-bottom: 7px; }
+.screen-main {
+    flex: 1; background: #f9fafb; padding: 8px 9px; overflow: hidden;
+}
+
+/* 미니 네비 */
+.mini-nav { font-size: 7.5px; padding: 4px 6px; border-radius: 5px; margin-bottom: 3px; color: #6b7280; display: flex; align-items: center; gap: 3px; }
+.mini-nav.active { background: #fce7f3; color: #db2777; font-weight: 700; }
+
+/* 미니 카드 */
+.mc { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 6px; margin-bottom: 4px; }
+.mc-t { font-size: 8.5px; font-weight: 600; color: #1f2937; }
+.mc-s { font-size: 7.5px; color: #6b7280; margin-top: 1px; }
+.mc-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 7px; font-weight: 700; }
+.mc-badge.green { background: #dcfce7; color: #166534; }
+.mc-badge.yellow { background: #fef9c3; color: #854d0e; }
+.mc-badge.red { background: #fee2e2; color: #991b1b; }
+.mc-badge.blue { background: #dbeafe; color: #1e40af; }
+.mc-badge.purple { background: #f3e8ff; color: #6b21a8; }
+
+/* 미니 폼 */
+.mf { display: flex; flex-direction: column; gap: 4px; }
+.mf-row { display: flex; align-items: center; gap: 5px; }
+.mf-label { font-size: 8px; font-weight: 600; color: #374151; width: 38px; flex-shrink: 0; }
+.mf-input { flex: 1; height: 16px; border: 1px solid #d1d5db; border-radius: 3px; background: #fff; font-size: 7.5px; padding: 0 5px; color: #6b7280; display: flex; align-items: center; }
+.mf-select { flex: 1; height: 16px; border: 1px solid #d1d5db; border-radius: 3px; background: #fff; font-size: 7.5px; padding: 0 5px; color: #6b7280; display: flex; align-items: center; justify-content: space-between; }
+.mf-btn { padding: 3px 9px; border-radius: 4px; font-size: 7.5px; font-weight: 600; border: none; display: inline-block; }
+.mf-btn.pri { background: #2563eb; color: #fff; }
+.mf-btn.sec { background: #e5e7eb; color: #374151; }
+.mf-btn.suc { background: #16a34a; color: #fff; }
+.mf-btn.dan { background: #dc2626; color: #fff; }
+
+/* 미니 테이블 */
+.mt { width: 100%; border-collapse: collapse; font-size: 7.5px; }
+.mt th { background: #f3f4f6; padding: 3px 4px; text-align: left; font-weight: 600; border-bottom: 1px solid #d1d5db; color: #374151; }
+.mt td { padding: 3px 4px; border-bottom: 1px solid #f0f0f0; color: #4b5563; }
+
+/* PDF 썸네일 */
+.pdf-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 5px 0; }
+.pdf-thumb {
+    aspect-ratio: 1/1.414; border: 1px solid #d1d5db; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7.5px; color: #9ca3af; background: #fafafa;
+}
+
+/* 업로드 영역 */
+.upload-zone {
+    border: 1.5px dashed #93c5fd; background: #eff6ff; border-radius: 6px;
+    padding: 10px 8px; text-align: center; margin: 5px 0;
+}
+.upload-zone-text { font-size: 8px; color: #3b82f6; }
+
+/* 유사도 결과 카드 */
+.sim-card { border-radius: 5px; padding: 6px 7px; margin-bottom: 4px; font-size: 7.5px; }
+.sim-card.high { background: #fef2f2; border-left: 3px solid #ef4444; }
+.sim-card.mid { background: #fffbeb; border-left: 3px solid #f59e0b; }
+
+/* 하단 2열 */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.section-title { font-size: 12px; font-weight: 700; color: #1f2937; margin-bottom: 6px; }
+
+/* 상태 표 */
+.status-tbl { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+.status-tbl th { background: #f3f4f6; padding: 4px 7px; text-align: left; font-weight: 700; border-bottom: 2px solid #d1d5db; font-size: 9.5px; }
+.status-tbl td { padding: 4px 7px; border-bottom: 1px solid #f0f0f0; }
+.sdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* FAQ */
+.faq-item { font-size: 10px; color: #4b5563; line-height: 1.5; margin-bottom: 4px; }
+.faq-item b { color: #1f2937; }
+
+/* 팁 */
+.tip-item { font-size: 10px; color: #4b5563; line-height: 1.5; margin-bottom: 3px; padding-left: 14px; position: relative; }
+.tip-item::before { content: '✓'; position: absolute; left: 0; color: #2563eb; font-weight: 700; font-size: 11px; }
+
+/* 알림 박스 */
+.info-box {
+    margin-top: 8px; padding: 7px 9px; border-radius: 7px; border-left: 4px solid;
+}
+.info-box.blue { background: #eff6ff; border-color: #3b82f6; }
+.info-box.yellow { background: #fefce8; border-color: #eab308; }
+.info-box.green { background: #f0fdf4; border-color: #22c55e; }
+.info-box.purple { background: #faf5ff; border-color: #a855f7; }
+.info-box-title { font-size: 10.5px; font-weight: 700; margin-bottom: 2px; }
+.info-box-text { font-size: 10px; line-height: 1.5; }
+.info-box.blue .info-box-title { color: #1e40af; }
+.info-box.blue .info-box-text { color: #1e40af; }
+.info-box.yellow .info-box-title { color: #854d0e; }
+.info-box.yellow .info-box-text { color: #854d0e; }
+.info-box.green .info-box-title { color: #166534; }
+.info-box.green .info-box-text { color: #166534; }
+.info-box.purple .info-box-title { color: #6b21a8; }
+.info-box.purple .info-box-text { color: #6b21a8; }
+
+.page-footer {
+    position: absolute; bottom: 8mm; left: 12mm; right: 12mm;
+    text-align: center; font-size: 9px; color: #bbb;
+    border-top: 0.5px solid #e5e7eb; padding-top: 4px;
+}
+
+@media print { body { background: #fff; } .page { box-shadow: none; margin: 0; } }
+@media screen { .page { box-shadow: 0 2px 12px rgba(0,0,0,0.12); } body { background: #e5e7eb; padding: 20px 0; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="header-title">과제 관리 방법 안내</div>
+        <div class="header-sub">국어농장 성적표 생성 프로그램 — 관리자용 가이드</div>
+    </div>
+
+    <!-- 흐름 요약 -->
+    <div class="flow">
+        <div class="flow-item a">과제 생성</div><span class="flow-arrow">→</span>
+        <div class="flow-item b">PDF 업로드</div><span class="flow-arrow">→</span>
+        <div class="flow-item b">상태 변경</div><span class="flow-arrow">→</span>
+        <div class="flow-item c">제출 현황</div><span class="flow-arrow">→</span>
+        <div class="flow-item d">유사도 검사</div><span class="flow-arrow">→</span>
+        <div class="flow-item e">코멘트</div>
+    </div>
+
+    <!-- 4단계 패드 목업 -->
+    <div class="steps">
+        <!-- STEP 1: 과제 생성 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">1</div><div class="step-title">과제 생성</div></div>
+            <div class="step-desc">과제 관리 → <strong>+ 새 과제</strong> → 정보 입력</div>
+            <div class="screen">
+                <div class="screen-toolbar">
+                    <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+                    <span style="margin-left:4px;">성적표 생성 프로그램</span>
+                </div>
+                <div class="screen-body">
+                    <div class="screen-sidebar">
+                        <div class="logo">국어<span style="color:#ec4899;">농장</span></div>
+                        <div class="mini-nav">🏠 대시보드</div>
+                        <div class="mini-nav">📝 시험 관리</div>
+                        <div class="mini-nav active">📋 과제 관리</div>
+                        <div class="mini-nav">👨‍🎓 학생 관리</div>
+                        <div class="mini-nav">📚 수강반</div>
+                    </div>
+                    <div class="screen-main">
+                        <div style="font-size:9px;font-weight:700;margin-bottom:5px;">새 과제 만들기</div>
+                        <div class="mf">
+                            <div class="mf-row"><span class="mf-label">제목</span><div class="mf-input">받아쓰기 연습 1회</div></div>
+                            <div class="mf-row"><span class="mf-label">설명</span><div class="mf-input">1단원 받아쓰기</div></div>
+                            <div class="mf-row"><span class="mf-label">수강반</span><div class="mf-select">A반 <span style="font-size:6px;">▼</span></div></div>
+                            <div class="mf-row"><span class="mf-label">마감일</span><div class="mf-input">2026-02-10</div></div>
+                            <div class="upload-zone">
+                                <div class="upload-zone-text">PDF 파일을 드래그하거나 클릭</div>
+                            </div>
+                            <div style="text-align:right;margin-top:3px;">
+                                <span class="mf-btn sec">취소</span>
+                                <span class="mf-btn pri">저장</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: PDF 업로드 & 상태 변경 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">2</div><div class="step-title">PDF / 상태</div></div>
+            <div class="step-desc">PDF 업로드 → 썸네일 생성 → <strong>상태 변경</strong></div>
+            <div class="screen">
+                <div class="screen-toolbar">
+                    <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+                    <span style="margin-left:4px;">과제 관리</span>
+                </div>
+                <div class="screen-body">
+                    <div class="screen-sidebar">
+                        <div class="logo">국어<span style="color:#ec4899;">농장</span></div>
+                        <div class="mini-nav">🏠 대시보드</div>
+                        <div class="mini-nav">📝 시험 관리</div>
+                        <div class="mini-nav active">📋 과제 관리</div>
+                        <div class="mini-nav">👨‍🎓 학생 관리</div>
+                        <div class="mini-nav">📚 수강반</div>
+                    </div>
+                    <div class="screen-main">
+                        <div style="font-size:9px;font-weight:700;margin-bottom:4px;">받아쓰기 연습 1회</div>
+                        <div style="font-size:7.5px;color:#6b7280;margin-bottom:4px;">A반 | 마감: 2026-02-10</div>
+                        <div style="display:flex;gap:4px;margin-bottom:6px;">
+                            <span class="mc-badge green">진행 중</span>
+                            <span class="mc-badge blue" style="cursor:pointer;">상태 변경 ▼</span>
+                        </div>
+                        <div style="font-size:8px;font-weight:600;margin-bottom:3px;">PDF 페이지 미리보기</div>
+                        <div class="pdf-grid">
+                            <div class="pdf-thumb">1</div>
+                            <div class="pdf-thumb">2</div>
+                            <div class="pdf-thumb">3</div>
+                            <div class="pdf-thumb">4</div>
+                            <div class="pdf-thumb">5</div>
+                        </div>
+                        <div style="font-size:7px;color:#9ca3af;margin-top:4px;">총 5페이지 | 학생은 페이지별로 촬영 제출</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: 제출 현황 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">3</div><div class="step-title">제출 현황</div></div>
+            <div class="step-desc">학생별 페이지 <strong>제출 상황</strong> 한눈에 확인</div>
+            <div class="screen">
+                <div class="screen-toolbar">
+                    <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+                    <span style="margin-left:4px;">제출 현황</span>
+                </div>
+                <div class="screen-body">
+                    <div class="screen-sidebar">
+                        <div class="logo">국어<span style="color:#ec4899;">농장</span></div>
+                        <div class="mini-nav">🏠 대시보드</div>
+                        <div class="mini-nav">📝 시험 관리</div>
+                        <div class="mini-nav active">📋 과제 관리</div>
+                        <div class="mini-nav">👨‍🎓 학생 관리</div>
+                        <div class="mini-nav">📚 수강반</div>
+                    </div>
+                    <div class="screen-main">
+                        <div style="font-size:8.5px;font-weight:700;margin-bottom:5px;">제출 현황 - 받아쓰기 1회</div>
+                        <table class="mt">
+                            <tr><th>학생</th><th>1p</th><th>2p</th><th>3p</th><th>상태</th></tr>
+                            <tr><td>김영희</td><td style="color:#10b981;">✓</td><td style="color:#10b981;">✓</td><td style="color:#10b981;">✓</td><td><span class="mc-badge green">완료</span></td></tr>
+                            <tr><td>이철수</td><td style="color:#10b981;">✓</td><td style="color:#10b981;">✓</td><td style="color:#9ca3af;">□</td><td><span class="mc-badge yellow">부분</span></td></tr>
+                            <tr><td>박민수</td><td style="color:#10b981;">✓</td><td style="color:#10b981;">✓</td><td style="color:#10b981;">✓</td><td><span class="mc-badge red">92%</span></td></tr>
+                            <tr><td>최지연</td><td style="color:#9ca3af;">□</td><td style="color:#9ca3af;">□</td><td style="color:#9ca3af;">□</td><td><span class="mc-badge red">미제출</span></td></tr>
+                        </table>
+                        <div style="margin-top:5px;text-align:right;">
+                            <span class="mf-btn pri" style="font-size:7px;">유사도 검사</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: 유사도 & 코멘트 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">4</div><div class="step-title">유사도 / 코멘트</div></div>
+            <div class="step-desc">AI <strong>유사도 검사</strong> + 학생별 <strong>코멘트</strong></div>
+            <div class="screen">
+                <div class="screen-toolbar">
+                    <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+                    <span style="margin-left:4px;">유사도 검사</span>
+                </div>
+                <div class="screen-body">
+                    <div class="screen-sidebar">
+                        <div class="logo">국어<span style="color:#ec4899;">농장</span></div>
+                        <div class="mini-nav">🏠 대시보드</div>
+                        <div class="mini-nav">📝 시험 관리</div>
+                        <div class="mini-nav active">📋 과제 관리</div>
+                        <div class="mini-nav">👨‍🎓 학생 관리</div>
+                        <div class="mini-nav">📚 수강반</div>
+                    </div>
+                    <div class="screen-main">
+                        <div style="font-size:8.5px;font-weight:700;margin-bottom:5px;">유사도 검사 결과</div>
+                        <div class="sim-card high">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span><b>김영희</b> ↔ <b>박민수</b></span>
+                                <span class="mc-badge red">92%</span>
+                            </div>
+                            <div style="font-size:6.5px;color:#64748b;margin-top:2px;">2페이지 높은 유사도</div>
+                            <div style="margin-top:3px;">
+                                <span class="mf-btn suc" style="font-size:6px;padding:2px 5px;">통과</span>
+                                <span class="mf-btn dan" style="font-size:6px;padding:2px 5px;">미통과</span>
+                            </div>
+                        </div>
+                        <div class="sim-card mid">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span><b>이철수</b> ↔ <b>최지연</b></span>
+                                <span class="mc-badge yellow">67%</span>
+                            </div>
+                            <div style="font-size:6.5px;color:#64748b;margin-top:2px;">1페이지 중간 유사도</div>
+                        </div>
+                        <div style="margin-top:6px;background:#fff;border-radius:5px;padding:6px 7px;border:1px solid #e5e7eb;">
+                            <div style="font-size:7.5px;font-weight:600;color:#374151;">코멘트 작성</div>
+                            <div style="font-size:7px;color:#9ca3af;border:1px solid #e5e7eb;border-radius:3px;padding:3px 5px;margin-top:3px;min-height:16px;">3페이지 다시 제출해 주세요.</div>
+                            <div style="text-align:right;margin-top:3px;"><span class="mf-btn pri" style="font-size:6.5px;padding:2px 6px;">저장</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 2열 -->
+    <div class="bottom-row">
+        <div>
+            <div class="section-title">과제 상태 흐름</div>
+            <table class="status-tbl">
+                <tr><th>상태</th><th>설명</th><th>학생 행동</th></tr>
+                <tr><td><span class="sdot" style="background:#eab308;"></span>초안</td><td>준비 중, 학생 미공개</td><td>제출 불가</td></tr>
+                <tr><td><span class="sdot" style="background:#22c55e;"></span>진행 중</td><td>과제 공개됨</td><td>제출 가능</td></tr>
+                <tr><td><span class="sdot" style="background:#ef4444;"></span>마감</td><td>제출 마감</td><td>제출 불가</td></tr>
+            </table>
+
+            <div style="margin-top:10px;">
+                <div class="section-title">자주 묻는 질문</div>
+                <div class="faq-item"><b>Q. 과제를 수정할 수 있나요?</b><br>→ 네, 과제 상세에서 제목·설명·마감일을 수정할 수 있습니다</div>
+                <div class="faq-item"><b>Q. PDF 없이 과제를 만들 수 있나요?</b><br>→ 네, PDF 없이도 생성 가능합니다. 학생은 빈 페이지에 제출합니다</div>
+                <div class="faq-item"><b>Q. 학생이 재제출하면 어떻게 되나요?</b><br>→ 기존 제출물이 새 사진으로 교체됩니다</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">과제 관리 포인트</div>
+            <div class="tip-item"><strong>초안</strong> 상태에서 PDF 업로드를 완료한 뒤 <strong>진행 중</strong>으로 변경하세요.</div>
+            <div class="tip-item"><strong>제출 현황</strong>에서 학생별 페이지 완료 여부를 수시로 확인하세요.</div>
+            <div class="tip-item">부적절한 제출물은 해당 페이지를 <strong>거부</strong> 처리하면 학생이 재촬영합니다.</div>
+            <div class="tip-item"><strong>유사도 검사</strong>는 모든 학생이 제출 완료한 후 실행하세요.</div>
+            <div class="tip-item"><strong>코멘트</strong>를 남기면 학생 대시보드에 표시됩니다.</div>
+
+            <div class="info-box blue">
+                <div class="info-box-title">유사도 검사란?</div>
+                <div class="info-box-text">AI가 학생 제출물 간 유사도를 자동 분석합니다. 80% 이상은 빨간색, 50~80%는 노란색으로 표시됩니다.</div>
+            </div>
+
+            <div class="info-box yellow">
+                <div class="info-box-title">마감일 변경</div>
+                <div class="info-box-text">과제 상세에서 마감일을 수정할 수 있습니다. 마감 후에도 "진행 중"으로 변경하면 재제출 가능합니다.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box green" style="margin-top:10px;text-align:center;">
+        <div class="info-box-text" style="font-size:11.5px;font-weight:700;">과제 생성 → PDF 업로드 → 진행 중 변경 → 제출 확인 → 유사도 검사 순으로 관리하세요!</div>
+    </div>
+
+    <div class="page-footer">과제 관리 방법 안내 — 관리자용 | 국어농장 성적표 생성 프로그램</div>
+</div>
+
+</body>
+</html>

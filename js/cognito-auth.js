@@ -82,8 +82,24 @@ class CognitoAuth {
                     this.currentUser = cognitoUser;
                     this.session = result;
 
-                    // ID 토큰에서 사용자 정보 파싱 (더 안정적)
-                    const userInfo = this.parseIdToken(result.getIdToken().getJwtToken());
+                    // ID 토큰에서 사용자 정보 파싱
+                    let userInfo = this.parseIdToken(result.getIdToken().getJwtToken());
+
+                    // JWT 토큰에 custom:role이 없을 수 있으므로 Cognito API로 확인
+                    if (!userInfo.role || userInfo.role === 'org_admin') {
+                        try {
+                            const attrInfo = await this.getUserAttributes();
+                            if (attrInfo && attrInfo.role) {
+                                console.log('🔄 getUserAttributes로 역할 보정:', attrInfo.role);
+                                userInfo.role = attrInfo.role;
+                                if (attrInfo.studentId) {
+                                    userInfo.studentId = attrInfo.studentId;
+                                }
+                            }
+                        } catch (attrErr) {
+                            console.warn('getUserAttributes 실패, 토큰 기반 역할 사용:', attrErr);
+                        }
+                    }
 
                     // 세션 저장 (기존 SessionManager 호환)
                     this.saveLocalSession(userInfo);
@@ -141,7 +157,24 @@ class CognitoAuth {
                     this.session = result;
 
                     // ID 토큰에서 사용자 정보 파싱
-                    const userInfo = this.parseIdToken(result.getIdToken().getJwtToken());
+                    let userInfo = this.parseIdToken(result.getIdToken().getJwtToken());
+
+                    // JWT 토큰에 custom:role이 없을 수 있으므로 Cognito API로 확인
+                    if (!userInfo.role || userInfo.role === 'org_admin') {
+                        try {
+                            const attrInfo = await this.getUserAttributes();
+                            if (attrInfo && attrInfo.role) {
+                                console.log('🔄 getUserAttributes로 역할 보정:', attrInfo.role);
+                                userInfo.role = attrInfo.role;
+                                if (attrInfo.studentId) {
+                                    userInfo.studentId = attrInfo.studentId;
+                                }
+                            }
+                        } catch (attrErr) {
+                            console.warn('getUserAttributes 실패, 토큰 기반 역할 사용:', attrErr);
+                        }
+                    }
+
                     this.saveLocalSession(userInfo);
 
                     resolve({ success: true, user: userInfo });
@@ -470,6 +503,7 @@ class CognitoAuth {
             name: userInfo.name,
             organization: userInfo.organization,
             role: userInfo.role,
+            studentId: userInfo.studentId || null,
             loginAt: Date.now(),
             expiresAt: Date.now() + SESSION_DURATION
         };

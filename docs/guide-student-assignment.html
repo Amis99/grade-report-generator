@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>과제 제출 방법 안내 - 학생용</title>
+<style>
+@page { size: A4; margin: 12mm 14mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif; color: #1f2937; line-height: 1.5; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.page {
+    width: 210mm; min-height: 297mm; max-height: 297mm; overflow: hidden;
+    margin: 0 auto; padding: 10mm 12mm 8mm;
+    position: relative;
+}
+
+/* 헤더 */
+.header { text-align: center; margin-bottom: 10px; }
+.header-title { font-size: 24px; font-weight: 800; color: #4a7c59; }
+.header-sub { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+/* 흐름 요약 */
+.flow { display: flex; align-items: center; justify-content: center; gap: 0; margin: 8px 0 12px; }
+.flow-item { padding: 5px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; }
+.flow-item.a { background: #dcfce7; color: #166534; }
+.flow-item.b { background: #dbeafe; color: #1e40af; }
+.flow-item.c { background: #fef9c3; color: #854d0e; }
+.flow-item.d { background: #fce7f3; color: #9d174d; }
+.flow-arrow { font-size: 14px; color: #bbb; padding: 0 4px; }
+
+/* 4열 그리드 */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+
+/* 단계 카드 */
+.step-card { display: flex; flex-direction: column; }
+.step-label { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.step-num {
+    width: 22px; height: 22px; border-radius: 50%; background: #4a7c59; color: #fff;
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.step-title { font-size: 13px; font-weight: 700; color: #1f2937; }
+.step-desc { font-size: 11px; color: #4b5563; line-height: 1.5; margin-bottom: 5px; }
+
+/* 폰 프레임 — 동일 사이즈, 9:17 비율 */
+.phone {
+    width: 100%; aspect-ratio: 9 / 17;
+    border: 2px solid #d1d5db; border-radius: 16px; overflow: hidden;
+    background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex; flex-direction: column;
+}
+.phone-status {
+    background: #f8f9fa; padding: 3px 8px; font-size: 7.5px; color: #9ca3af;
+    display: flex; justify-content: space-between; flex-shrink: 0;
+}
+.phone-header {
+    background: #fff; padding: 5px 8px; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 700; color: #1f2937;
+    flex-shrink: 0;
+}
+.phone-header .hamburger { font-size: 11px; color: #666; }
+.phone-body {
+    padding: 7px 8px; background: #f9fafb;
+    flex: 1; overflow: hidden;
+}
+
+/* 미니 사이드바 오버레이 */
+.mini-sidebar {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 65%; background: #fdf2f8;
+    border-radius: 0 10px 10px 0; padding: 20px 7px 7px; z-index: 2;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
+.mini-sidebar .logo { font-size: 10px; font-weight: 800; color: #db2777; margin-bottom: 8px; padding: 0 4px; }
+.mini-nav { font-size: 8px; padding: 5px 7px; border-radius: 5px; margin-bottom: 2px; color: #6b7280; display: flex; align-items: center; gap: 4px; }
+.mini-nav.active { background: #fce7f3; color: #db2777; font-weight: 700; }
+.mini-overlay { position: absolute; right: 0; top: 0; bottom: 0; width: 35%; background: rgba(0,0,0,0.25); }
+
+/* 미니 카드 */
+.mc { background: #fff; border: 1px solid #e5e7eb; border-radius: 7px; padding: 6px 7px; margin-bottom: 5px; }
+.mc.selected { border-color: #4a7c59; background: #f0fdf4; }
+.mc-t { font-size: 8.5px; font-weight: 600; color: #1f2937; }
+.mc-s { font-size: 7.5px; color: #6b7280; margin-top: 1px; }
+.mc-bar { height: 5px; background: #e5e7eb; border-radius: 3px; margin-top: 3px; overflow: hidden; }
+.mc-bar-fill { height: 100%; background: #10b981; }
+.mc-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 7px; font-weight: 700; }
+.mc-badge.ok { background: #dcfce7; color: #166534; }
+.mc-badge.over { background: #fee2e2; color: #991b1b; }
+
+/* 미니 페이지 그리드 */
+.mp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 5px 0; }
+.mp {
+    aspect-ratio: 1/1.414; border: 2px solid #e5e7eb; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: #bbb; position: relative; background: #fafafa;
+}
+.mp.done { border-color: #10b981; background: #f0fdf4; }
+.mp.done::after { content: 'O'; position: absolute; background: rgba(16,185,129,0.85); color: #fff; width: 14px; height: 14px; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.mp.rej { border-color: #ef4444; background: #fef2f2; }
+.mp.rej::after { content: 'X'; position: absolute; background: rgba(239,68,68,0.85); color: #fff; width: 14px; height: 14px; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.mp.pend { border-color: #f59e0b; background: #fffbeb; }
+.mp.pend::after { content: '!'; position: absolute; background: rgba(245,158,11,0.85); color: #fff; width: 14px; height: 14px; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.mp.hl { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+.mp-lbl { font-size: 6.5px; color: #999; margin-top: 2px; }
+
+/* 미니 카메라 */
+.mini-cam { background: #111; border-radius: 0; padding: 7px; height: 100%; display: flex; flex-direction: column; }
+.mini-cam-view { width: 100%; flex: 1; background: #333; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+.mini-cam-guide { border: 2px dashed rgba(255,255,255,0.6); width: 55%; height: 78%; border-radius: 2px; }
+.mini-cam-btns { display: flex; justify-content: center; gap: 8px; flex-shrink: 0; }
+.mini-cam-btn { padding: 4px 10px; border-radius: 5px; font-size: 8px; font-weight: 600; border: none; }
+.mini-cam-btn.sec { background: #e5e7eb; color: #333; }
+.mini-cam-btn.pri { background: #4a7c59; color: #fff; }
+
+/* 하단 2열 */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.section-title { font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 7px; }
+
+/* 상태 표 */
+.status-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+.status-tbl th { background: #f3f4f6; padding: 5px 8px; text-align: left; font-weight: 700; border-bottom: 2px solid #d1d5db; font-size: 10px; }
+.status-tbl td { padding: 5px 8px; border-bottom: 1px solid #f0f0f0; }
+.sdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+/* FAQ */
+.faq-item { font-size: 10.5px; color: #4b5563; line-height: 1.6; margin-bottom: 5px; }
+.faq-item b { color: #1f2937; }
+
+/* 팁 */
+.tip-item { font-size: 11px; color: #4b5563; line-height: 1.6; margin-bottom: 4px; padding-left: 16px; position: relative; }
+.tip-item::before { content: '✓'; position: absolute; left: 0; color: #4a7c59; font-weight: 700; font-size: 12px; }
+
+/* 알림 박스 */
+.info-box {
+    margin-top: 10px; padding: 8px 10px; border-radius: 8px; border-left: 4px solid;
+}
+.info-box.blue { background: #eff6ff; border-color: #3b82f6; }
+.info-box.yellow { background: #fefce8; border-color: #eab308; }
+.info-box.green { background: #f0fdf4; border-color: #22c55e; }
+.info-box-title { font-size: 11.5px; font-weight: 700; margin-bottom: 3px; }
+.info-box-text { font-size: 10.5px; line-height: 1.55; }
+.info-box.blue .info-box-title { color: #1e40af; }
+.info-box.blue .info-box-text { color: #1e40af; }
+.info-box.yellow .info-box-title { color: #854d0e; }
+.info-box.yellow .info-box-text { color: #854d0e; }
+.info-box.green .info-box-title { color: #166534; }
+.info-box.green .info-box-text { color: #166534; }
+
+.page-footer {
+    position: absolute; bottom: 8mm; left: 12mm; right: 12mm;
+    text-align: center; font-size: 9px; color: #bbb;
+    border-top: 0.5px solid #e5e7eb; padding-top: 4px;
+}
+
+@media print { body { background: #fff; } .page { box-shadow: none; margin: 0; } }
+@media screen { .page { box-shadow: 0 2px 12px rgba(0,0,0,0.12); } body { background: #e5e7eb; padding: 20px 0; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="header-title">과제 제출 방법 안내</div>
+        <div class="header-sub">국어농장 성적표 생성 프로그램 — 학생용 가이드</div>
+    </div>
+
+    <!-- 흐름 요약 -->
+    <div class="flow">
+        <div class="flow-item a">로그인</div><span class="flow-arrow">→</span>
+        <div class="flow-item b">내 과제</div><span class="flow-arrow">→</span>
+        <div class="flow-item b">과제 선택</div><span class="flow-arrow">→</span>
+        <div class="flow-item c">페이지 클릭</div><span class="flow-arrow">→</span>
+        <div class="flow-item c">촬영/파일</div><span class="flow-arrow">→</span>
+        <div class="flow-item d">제출 완료</div>
+    </div>
+
+    <!-- 4단계 모바일 목업 -->
+    <div class="steps">
+        <!-- STEP 1: 사이드바 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">1</div><div class="step-title">내 과제 메뉴</div></div>
+            <div class="step-desc">☰ 버튼 → <strong>내 과제</strong> 클릭</div>
+            <div class="phone">
+                <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+                <div class="phone-header"><span class="hamburger">☰</span> 대시보드</div>
+                <div class="phone-body" style="position:relative;padding:0;">
+                    <div style="padding:7px 8px;filter:brightness(0.7);">
+                        <div style="font-size:8.5px;color:#4b5563;">안녕하세요, 홍길동님!</div>
+                        <div style="font-size:7.5px;color:#9ca3af;margin-top:2px;">오늘도 열심히 공부해봐요!</div>
+                        <div class="mc" style="margin-top:8px;">
+                            <div class="mc-t">해야 할 것</div>
+                            <div class="mc-s">받아쓰기 연습 1회 (2/5)</div>
+                        </div>
+                    </div>
+                    <div class="mini-sidebar">
+                        <div class="logo">국어<span style="color:#ec4899;">농장</span></div>
+                        <div class="mini-nav">🏠 대시보드</div>
+                        <div class="mini-nav">📄 내 성적표</div>
+                        <div class="mini-nav active">📋 내 과제</div>
+                        <div class="mini-nav">📓 오답 노트</div>
+                        <div class="mini-nav">📈 성적 추이</div>
+                    </div>
+                    <div class="mini-overlay"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: 과제 목록 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">2</div><div class="step-title">과제 선택</div></div>
+            <div class="step-desc">제출할 과제 카드를 <strong>터치</strong></div>
+            <div class="phone">
+                <div class="phone-status"><span>9:41</span><span>📶 🔋</span></div>
+                <div class="phone-header"><span class="hamburger">☰</span> 내 과제</div>
+                <div class="phone-body">
+                    <div class="mc selected">
+                        <div class="mc-t">받아쓰기 연습 1회</div>
+                        <div class="mc-s">마감: 2026. 2. 10.</div>
+                        <div class="mc-bar"><div class="mc-bar-fill" style="width:40%"></div></div>
+                        <div class="mc-s" style="margin-top:2px;">2/5 페이지 완료</div>
+                    </div>
+                    <div class="mc">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div class="mc-t">독서록 과제</div>
+                            <span class="mc-badge ok">완료</span>
+                        </div>
+                        <div class="mc-s">마감: 2026. 1. 31.</div>
+                        <div class="mc-bar"><div class="mc-bar-fill" style="width:100%"></div></div>
+                    </div>
+                    <div class="mc">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div class="mc-t">일기 쓰기</div>
+                            <span class="mc-badge over">마감 지남</span>
+                        </div>
+                        <div class="mc-s">마감: 2026. 1. 25.</div>
+                        <div class="mc-bar"><div class="mc-bar-fill" style="width:0%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: 페이지 그리드 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">3</div><div class="step-title">페이지 클릭</div></div>
+            <div class="step-desc">제출할 페이지를 <strong>터치</strong></div>
+            <div class="phone">
+                <div class="phone-status"><span>9:42</span><span>📶 🔋</span></div>
+                <div class="phone-header"><span style="font-size:9px;">←</span> 받아쓰기 연습 1회</div>
+                <div class="phone-body">
+                    <div style="font-size:7.5px;color:#6b7280;margin-bottom:4px;">2/5 페이지 완료 | 마감: 2026. 2. 10.</div>
+                    <div style="font-size:7.5px;color:#3b82f6;background:#f0f9ff;padding:3px 6px;border-left:2px solid #3b82f6;border-radius:3px;margin-bottom:6px;">촬영할 페이지를 클릭하세요</div>
+                    <div class="mp-grid">
+                        <div>
+                            <div class="mp done">1</div>
+                            <div class="mp-lbl" style="text-align:center;">완료</div>
+                        </div>
+                        <div>
+                            <div class="mp done">2</div>
+                            <div class="mp-lbl" style="text-align:center;">완료</div>
+                        </div>
+                        <div>
+                            <div class="mp hl">3</div>
+                            <div class="mp-lbl" style="text-align:center;color:#3b82f6;font-weight:600;">선택</div>
+                        </div>
+                        <div>
+                            <div class="mp">4</div>
+                        </div>
+                        <div>
+                            <div class="mp rej">5</div>
+                            <div class="mp-lbl" style="text-align:center;color:#ef4444;">거부</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px;font-size:7.5px;color:#6b7280;background:#fff;padding:5px 7px;border-radius:5px;border-left:2px solid #f59e0b;">
+                        <strong style="color:#92400e;">선생님 코멘트:</strong><br>3페이지부터 다시 제출해 주세요.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: 카메라 -->
+        <div class="step-card">
+            <div class="step-label"><div class="step-num">4</div><div class="step-title">촬영 / 제출</div></div>
+            <div class="step-desc">가이드에 맞춰 <strong>촬영</strong> 또는 <strong>파일</strong></div>
+            <div class="phone">
+                <div class="phone-status"><span>9:42</span><span>📶 🔋</span></div>
+                <div class="phone-header"><span style="font-size:9px;">✕</span> 3페이지 촬영</div>
+                <div class="phone-body" style="padding:0;background:#111;">
+                    <div class="mini-cam">
+                        <div class="mini-cam-view">
+                            <div class="mini-cam-guide"></div>
+                        </div>
+                        <div class="mini-cam-btns">
+                            <div class="mini-cam-btn sec">파일 선택</div>
+                            <div class="mini-cam-btn pri">촬영</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 2열: 상태 + FAQ / 촬영 팁 + 안내 -->
+    <div class="bottom-row">
+        <div>
+            <div class="section-title">페이지 상태 표시</div>
+            <table class="status-tbl">
+                <tr><th>상태</th><th>표시</th><th>의미</th></tr>
+                <tr><td><span class="sdot" style="background:#e5e7eb;"></span>미제출</td><td>빈 테두리</td><td>아직 제출 전</td></tr>
+                <tr><td><span class="sdot" style="background:#f59e0b;"></span>제출됨</td><td>노란 <b>!</b></td><td>확인 대기 중</td></tr>
+                <tr><td><span class="sdot" style="background:#10b981;"></span>완료</td><td>초록 <b>O</b></td><td>선생님 확인 완료</td></tr>
+                <tr><td><span class="sdot" style="background:#ef4444;"></span>거부됨</td><td>빨간 <b>X</b></td><td>다시 촬영 필요</td></tr>
+            </table>
+
+            <div style="margin-top:12px;">
+                <div class="section-title">자주 묻는 질문</div>
+                <div class="faq-item"><b>Q. 카메라가 안 켜져요</b><br>→ 권한 허용 팝업에서 "허용" 클릭. 안 되면 [파일 선택] 사용</div>
+                <div class="faq-item"><b>Q. 다시 제출 가능한가요?</b><br>→ 네, 페이지를 다시 클릭하면 새 사진으로 교체됩니다</div>
+                <div class="faq-item"><b>Q. 업로드 중 닫아도 되나요?</b><br>→ "업로드 완료!" 메시지가 나올 때까지 화면을 닫지 마세요</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">잘 찍는 방법</div>
+            <div class="tip-item"><b>밝은 곳</b>에서 촬영하세요. 어두우면 글씨가 안 보여요.</div>
+            <div class="tip-item">점선 가이드 <b>안에 용지를 맞춰</b>주세요.</div>
+            <div class="tip-item"><b>그림자</b>가 과제 위에 지지 않게 하세요.</div>
+            <div class="tip-item">양손으로 잡고 <b>흔들리지 않게</b> 촬영하세요.</div>
+            <div class="tip-item"><b>기울어지지 않게</b> 과제를 바르게 놓으세요.</div>
+
+            <div class="info-box blue">
+                <div class="info-box-title">거부된 페이지는?</div>
+                <div class="info-box-text">사진이 흐리거나 과제 내용이 아닌 경우 선생님이 거부합니다. 해당 페이지를 다시 터치하여 재촬영 후 제출하세요.</div>
+            </div>
+
+            <div class="info-box yellow">
+                <div class="info-box-title">마감일 주의!</div>
+                <div class="info-box-text">마감일이 지나면 카드에 "마감 지남" 표시가 뜹니다. 마감 전에 모든 페이지를 제출해 주세요.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box green" style="margin-top:12px;text-align:center;">
+        <div class="info-box-text" style="font-size:12px;font-weight:700;">모든 페이지가 초록 <b>O</b>가 되면 과제 완료! 카드에 "완료" 뱃지가 표시됩니다.</div>
+    </div>
+
+    <div class="page-footer">과제 제출 방법 안내 — 학생용 | 국어농장 성적표 생성 프로그램</div>
+</div>
+
+</body>
+</html>

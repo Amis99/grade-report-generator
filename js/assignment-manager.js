@@ -113,6 +113,14 @@ class AssignmentManager {
             filtered = filtered.filter(a => a.name.toLowerCase().includes(query));
         }
 
+        // 정렬: 진행 중 → 초안 → 종료, 같은 상태 내에서는 최신순
+        const statusOrder = { active: 0, draft: 1, closed: 2 };
+        filtered.sort((a, b) => {
+            const orderDiff = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+            if (orderDiff !== 0) return orderDiff;
+            return (b.createdAt || '').localeCompare(a.createdAt || '');
+        });
+
         if (countBadge) countBadge.textContent = `${filtered.length}`;
 
         if (filtered.length === 0) {
@@ -344,6 +352,13 @@ class AssignmentManager {
                     <tbody>
                         ${this.currentSubmissions.map(s => {
                             const hasSubmissions = s.submittedPages && s.submittedPages.length > 0;
+                            // 이미지 확인 아이콘 상태: 거부된 페이지 있으면 빨강, 모두 인정이면 초록
+                            const hasRejected = hasSubmissions && s.submittedPages.some(p => !p.passed);
+                            const allPassed = hasSubmissions && s.submittedPages.every(p => p.passed);
+                            const imageIconStatus = !hasSubmissions ? '' : hasRejected ? 'status-rejected' : allPassed ? 'status-approved' : '';
+                            // 유사도 아이콘 상태: 검사 안 했으면 노랑, 거부 있으면 빨강, 모두 인정이면 초록
+                            const hasSimilarityChecked = hasSubmissions && s.submittedPages.some(p => p.similarity !== undefined && p.similarity !== null);
+                            const similarityIconStatus = !hasSubmissions ? '' : !hasSimilarityChecked ? 'status-pending' : hasRejected ? 'status-rejected' : allPassed ? 'status-approved' : 'status-pending';
                             return `
                             <tr>
                                 <td>
@@ -359,9 +374,9 @@ class AssignmentManager {
                                 <td>${s.lastSubmittedAt ? new Date(s.lastSubmittedAt).toLocaleDateString('ko-KR') : '-'}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <button class="btn-icon ${hasSubmissions ? '' : 'disabled'}"
+                                        <button class="btn-icon ${hasSubmissions ? imageIconStatus : 'disabled'}"
                                                 onclick="${hasSubmissions ? `assignmentManager.showStudentSubmissionModal('${s.student.id}')` : ''}"
-                                                title="${hasSubmissions ? '이미지 확인' : '제출된 이미지 없음'}"
+                                                title="${hasSubmissions ? '이미지 확인 (더블클릭으로 상태 변경)' : '제출된 이미지 없음'}"
                                                 ${hasSubmissions ? '' : 'disabled'}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -369,7 +384,7 @@ class AssignmentManager {
                                                 <polyline points="21 15 16 10 5 21"></polyline>
                                             </svg>
                                         </button>
-                                        <button class="btn-icon ${hasSubmissions ? '' : 'disabled'}"
+                                        <button class="btn-icon ${hasSubmissions ? similarityIconStatus : 'disabled'}"
                                                 onclick="${hasSubmissions ? `assignmentManager.checkSimilarity('${s.student.id}')` : ''}"
                                                 title="${hasSubmissions ? '이미지 유사도 검사' : '제출된 이미지 없음'}"
                                                 ${hasSubmissions ? '' : 'disabled'}>
@@ -819,7 +834,8 @@ class AssignmentManager {
                                         <img src="${p.imageUrl || ''}" alt="Page ${p.pageNumber}"
                                              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%22113%22><rect fill=%22%23f0f0f0%22 width=%2280%22 height=%22113%22/><text x=%2240%22 y=%2256%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2210%22>${p.pageNumber}</text></svg>'">
                                         <span class="thumb-label">${p.pageNumber}p</span>
-                                        <span class="thumb-status ${p.passed ? 'passed' : 'rejected'}">${p.passed ? 'O' : 'X'}</span>
+                                        <span class="thumb-status ${p.passed ? 'passed' : 'rejected'}"
+                                              onclick="event.stopPropagation(); assignmentManager.togglePageStatus(${p.pageNumber}, ${p.passed})">${p.passed ? 'O' : 'X'}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -899,6 +915,113 @@ class AssignmentManager {
             console.error('Failed to update page status:', error);
             alert('상태 업데이트에 실패했습니다: ' + error.message);
         }
+    }
+
+
+    /**
+     * 더블클릭/더블터치로 페이지 상태 토글 (인정 ↔ 거부)
+     */
+    async togglePageStatus(pageNumber, currentPassed) {
+        if (!this.selectedAssignment || !this.currentStudentSubmission) return;
+
+        const newPassed = !currentPassed;
+        const action = newPassed ? '인정' : '거부';
+
+        try {
+            await storage.updateSubmissionStatus(
+                this.selectedAssignment.id,
+                this.currentStudentSubmission.student.id,
+                pageNumber,
+                newPassed
+            );
+
+            // 로컬 데이터 업데이트
+            const page = this.currentStudentSubmission.submittedPages.find(p => p.pageNumber === pageNumber);
+            if (page) {
+                page.passed = newPassed;
+                page.manuallyReviewed = true;
+            }
+
+            // passedCount 재계산
+            this.currentStudentSubmission.passedCount = this.currentStudentSubmission.submittedPages.filter(p => p.passed).length;
+
+            // 토스트 알림 표시
+            this.showToggleToast(`${pageNumber}페이지 → ${action}`);
+
+            // 모달 내 해당 요소만 직접 업데이트 (전체 재렌더링 안 함)
+            this.updateModalStatusInPlace(pageNumber, newPassed);
+
+            // 제출 현황 테이블도 업데이트
+            await this.loadSubmissions();
+
+        } catch (error) {
+            console.error('Failed to toggle page status:', error);
+            alert('상태 변경 실패: ' + error.message);
+        }
+    }
+
+    /**
+     * 모달 내 상태만 직접 업데이트 (스크롤 유지)
+     */
+    updateModalStatusInPlace(pageNumber, newPassed) {
+        const modal = document.getElementById('studentSubmissionModal');
+        if (!modal) return;
+
+        // 썸네일 O/X 뱃지 업데이트
+        const thumbItems = modal.querySelectorAll('.thumb-item');
+        const pages = this.currentStudentSubmission.submittedPages;
+        thumbItems.forEach((item, idx) => {
+            const p = pages[idx];
+            if (!p) return;
+            // 클래스 업데이트
+            item.classList.toggle('passed', p.passed);
+            item.classList.toggle('rejected', !p.passed);
+            // O/X 뱃지
+            const badge = item.querySelector('.thumb-status');
+            if (badge) {
+                badge.textContent = p.passed ? 'O' : 'X';
+                badge.className = `thumb-status ${p.passed ? 'passed' : 'rejected'}`;
+                badge.setAttribute('onclick', `event.stopPropagation(); assignmentManager.togglePageStatus(${p.pageNumber}, ${p.passed})`);
+            }
+        });
+
+        // 현재 보고 있는 페이지의 메인 영역 상태 업데이트
+        const currentPage = pages[this.currentPageIndex];
+        if (currentPage && currentPage.pageNumber === pageNumber) {
+            // 상태 뱃지
+            const statusBadge = modal.querySelector('.status-row .status-badge');
+            if (statusBadge) {
+                statusBadge.className = `status-badge ${newPassed ? 'status-active' : 'status-draft'}`;
+                statusBadge.textContent = newPassed ? '인정됨' : '거부됨';
+            }
+            // 인정/거부 버튼
+            const actionsDiv = modal.querySelector('.submission-actions');
+            if (actionsDiv) {
+                actionsDiv.innerHTML = newPassed
+                    ? `<button class="btn btn-danger" onclick="assignmentManager.updatePageStatus(${pageNumber}, false)">제출 거부</button>`
+                    : `<button class="btn btn-success" onclick="assignmentManager.updatePageStatus(${pageNumber}, true)">제출 인정</button>`;
+            }
+        }
+    }
+
+    /**
+     * 상태 토글 토스트 알림
+     */
+    showToggleToast(message) {
+        const existing = document.getElementById('toggleToast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'toggleToast';
+        toast.className = 'toggle-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 1500);
     }
 
     /**

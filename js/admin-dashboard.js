@@ -321,11 +321,5 @@ let adminDashboard;
 
 document.addEventListener('DOMContentLoaded', () => {
     adminDashboard = new AdminDashboard();
-
-    // 초기 대시보드 데이터 로드
-    setTimeout(() => {
-        if (typeof storage !== 'undefined') {
-            adminDashboard.loadDashboardData();
-        }
-    }, 500);
+    // 대시보드 데이터는 app.js에서 데이터 로딩 완료 후 호출됨
 });

@@ -35,6 +35,11 @@ class App {
         this.setupBackupRestore();
         this.initializeModules();
 
+        // 데이터 로딩 완료 후 대시보드 로드
+        if (typeof adminDashboard !== 'undefined' && adminDashboard) {
+            adminDashboard.loadDashboardData();
+        }
+
         // 포털 컨트롤러의 pendingPage 처리 (인증 전에 해시가 있었던 경우)
         if (typeof portalController !== 'undefined' && portalController.pendingPage) {
             portalController.navigateTo(portalController.pendingPage);
@@ -98,6 +103,15 @@ class App {
             window.location.href = 'login.html';
             return false;
         }
+
+        // 보안: 학생이 관리자 페이지에 접근하면 학생 페이지로 리다이렉트
+        const user = cognitoAuth.getCurrentUser();
+        if (user && user.role === 'student') {
+            console.warn('⚠️ 학생이 관리자 페이지에 접근 시도 - student.html로 리다이렉트');
+            window.location.href = 'student.html';
+            return false;
+        }
+
         return true;
     }
 
