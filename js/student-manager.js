@@ -1027,7 +1027,7 @@ class StudentManager {
         // 자동 아이디 생성
         const username = this.getOrganizationPrefix() + String(this.accountCounter).padStart(3, '0');
         document.getElementById('newStudentUsername').value = username;
-        document.getElementById('newStudentPassword').value = '1234';
+        document.getElementById('newStudentPassword').value = '12345678';
 
         document.getElementById('addStudentModal').classList.add('active');
     }
@@ -1060,6 +1060,18 @@ class StudentManager {
             return;
         }
 
+        // 계정 생성 시 유효성 검사
+        if (createAccount) {
+            if (!username || !/^[a-zA-Z0-9_]{3,}$/.test(username)) {
+                alert('아이디는 영문, 숫자, 밑줄만 사용 가능하며 3자 이상이어야 합니다.');
+                return;
+            }
+            if (!password || password.length < 8) {
+                alert('비밀번호는 8자 이상이어야 합니다.');
+                return;
+            }
+        }
+
         try {
             const user = SessionManager.getCurrentUser();
             const newStudent = {
@@ -1070,15 +1082,27 @@ class StudentManager {
                 organization: user?.organization || '국어농장'
             };
 
-            if (createAccount) {
-                newStudent.hasAccount = true;
-                newStudent.username = username;
-                newStudent.password = password;
-            }
-
+            // 먼저 학생 저장
             await storage.saveStudent(newStudent);
 
-            alert('학생이 추가되었습니다.');
+            // 계정 생성이 체크된 경우 Cognito 계정 생성
+            if (createAccount) {
+                try {
+                    await storage.createStudentAccount(newStudent.id, {
+                        username,
+                        password
+                    });
+                    newStudent.hasAccount = true;
+                    newStudent.username = username;
+                    alert(`학생이 추가되고 계정이 생성되었습니다.\n\n아이디: ${username}\n비밀번호: ${password}`);
+                } catch (accountError) {
+                    console.error('계정 생성 오류:', accountError);
+                    alert(`학생은 추가되었으나 계정 생성에 실패했습니다.\n${accountError.message || ''}`);
+                }
+            } else {
+                alert('학생이 추가되었습니다.');
+            }
+
             this.closeAddStudentModal();
             this.accountCounter++;
             this.loadAccountList();
@@ -1111,7 +1135,7 @@ class StudentManager {
         const username = this.getOrganizationPrefix(student.organization) +
             String(this.accountCounter).padStart(3, '0');
         document.getElementById('createAccountUsername').value = username;
-        document.getElementById('createAccountPassword').value = '1234';
+        document.getElementById('createAccountPassword').value = '12345678';
 
         document.getElementById('createAccountModal').classList.add('active');
     }
@@ -1135,13 +1159,28 @@ class StudentManager {
             return;
         }
 
+        if (!/^[a-zA-Z0-9_]{3,}$/.test(username)) {
+            alert('아이디는 영문, 숫자, 밑줄만 사용 가능하며 3자 이상이어야 합니다.');
+            return;
+        }
+
+        if (password.length < 8) {
+            alert('비밀번호는 8자 이상이어야 합니다.');
+            return;
+        }
+
         try {
             const student = this.currentCreateAccountStudent;
+
+            // Cognito 계정 생성 API 호출
+            await storage.createStudentAccount(student.id, {
+                username,
+                password
+            });
+
+            // 로컬 캐시 업데이트
             student.hasAccount = true;
             student.username = username;
-            student.password = password;
-
-            await storage.saveStudent(student);
 
             alert('계정이 생성되었습니다.');
             this.closeCreateAccountModal();
