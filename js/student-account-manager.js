@@ -443,8 +443,8 @@ class StudentAccountManager {
                             </div>
                             <div class="form-group">
                                 <label>비밀번호</label>
-                                <input type="text" id="newStudentPassword" value="student1" autocomplete="off">
-                                <small>기본값: student1 (로그인 후 변경 권장)</small>
+                                <input type="text" id="newStudentPassword" value="Student1!" autocomplete="off">
+                                <small>기본값: Student1! (로그인 후 변경 권장)</small>
                             </div>
                         </div>
                         <div class="form-actions">
@@ -950,8 +950,8 @@ class StudentAccountManager {
                         </div>
                         <div class="form-group">
                             <label>비밀번호 <span class="required">*</span></label>
-                            <input type="text" id="accountPassword" value="student1" required autocomplete="off">
-                            <small>기본값: student1 (로그인 후 변경 권장)</small>
+                            <input type="text" id="accountPassword" value="Student1!" required autocomplete="off">
+                            <small>기본값: Student1! (로그인 후 변경 권장)</small>
                         </div>
                         <div class="form-group">
                             <label>이메일 (선택)</label>

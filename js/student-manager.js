@@ -1027,7 +1027,7 @@ class StudentManager {
         // 자동 아이디 생성
         const username = this.getOrganizationPrefix() + String(this.accountCounter).padStart(3, '0');
         document.getElementById('newStudentUsername').value = username;
-        document.getElementById('newStudentPassword').value = '12345678';
+        document.getElementById('newStudentPassword').value = 'Student1!';
 
         document.getElementById('addStudentModal').classList.add('active');
     }
@@ -1067,7 +1067,7 @@ class StudentManager {
                 return;
             }
             if (!password || password.length < 8) {
-                alert('비밀번호는 8자 이상이어야 합니다.');
+                alert('비밀번호는 8자 이상, 대문자/소문자/숫자/특수문자를 포함해야 합니다.');
                 return;
             }
         }
@@ -1135,7 +1135,7 @@ class StudentManager {
         const username = this.getOrganizationPrefix(student.organization) +
             String(this.accountCounter).padStart(3, '0');
         document.getElementById('createAccountUsername').value = username;
-        document.getElementById('createAccountPassword').value = '12345678';
+        document.getElementById('createAccountPassword').value = 'Student1!';
 
         document.getElementById('createAccountModal').classList.add('active');
     }
@@ -1165,7 +1165,7 @@ class StudentManager {
         }
 
         if (password.length < 8) {
-            alert('비밀번호는 8자 이상이어야 합니다.');
+            alert('비밀번호는 8자 이상, 대문자/소문자/숫자/특수문자를 포함해야 합니다.');
             return;
         }
 
