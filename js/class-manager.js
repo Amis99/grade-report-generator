@@ -265,10 +265,12 @@ class ClassManager {
     }
 
     showCreateClassModal() {
-        const modal = document.getElementById('classModal');
-        if (!modal) {
-            this.createClassModal();
+        // 모달이 이미 있으면 삭제 후 재생성 (기관 목록 업데이트 반영)
+        const existingModal = document.getElementById('classModal');
+        if (existingModal) {
+            existingModal.remove();
         }
+        this.createClassModal();
 
         document.getElementById('classModalTitle').textContent = '새 수강반 만들기';
         document.getElementById('classForm').reset();
@@ -282,19 +284,36 @@ class ClassManager {
         const cls = this.classes.find(c => c.id === this.selectedClassId);
         if (!cls) return;
 
-        const modal = document.getElementById('classModal');
-        if (!modal) {
-            this.createClassModal();
+        // 모달이 이미 있으면 삭제 후 재생성 (기관 목록 업데이트 반영)
+        const existingModal = document.getElementById('classModal');
+        if (existingModal) {
+            existingModal.remove();
         }
+        this.createClassModal();
 
         document.getElementById('classModalTitle').textContent = '수강반 수정';
         document.getElementById('className').value = cls.name;
         document.getElementById('classDescription').value = cls.description || '';
+
+        // 기관 선택 (admin인 경우에만)
+        const orgSelect = document.getElementById('classOrganization');
+        if (orgSelect && cls.organization) {
+            orgSelect.value = cls.organization;
+        }
+
         document.getElementById('classForm').dataset.classId = this.selectedClassId;
         document.getElementById('classModal').classList.add('active');
     }
 
     createClassModal() {
+        const session = SessionManager.getSession();
+        const isAdmin = session && session.role === 'admin';
+
+        // 기관 옵션 생성
+        const orgOptions = this.organizations.map(org =>
+            `<option value="${this.escapeHtml(org)}">${this.escapeHtml(org)}</option>`
+        ).join('');
+
         const modalHtml = `
             <div id="classModal" class="modal">
                 <div class="modal-content">
@@ -304,6 +323,15 @@ class ClassManager {
                     </div>
                     <form id="classForm" onsubmit="classManager.saveClass(event)">
                         <div class="modal-body">
+                            ${isAdmin ? `
+                            <div class="form-group" id="classOrgGroup">
+                                <label for="classOrganization">소속 기관 *</label>
+                                <select id="classOrganization" class="form-control" required>
+                                    <option value="">기관을 선택하세요</option>
+                                    ${orgOptions}
+                                </select>
+                            </div>
+                            ` : ''}
                             <div class="form-group">
                                 <label for="className">수강반 이름 *</label>
                                 <input type="text" id="className" class="form-control" required
@@ -344,16 +372,32 @@ class ClassManager {
         const name = document.getElementById('className').value.trim();
         const description = document.getElementById('classDescription').value.trim();
 
+        // admin인 경우 기관 선택값 가져오기
+        const orgSelect = document.getElementById('classOrganization');
+        const organization = orgSelect ? orgSelect.value : null;
+
         if (!name) {
             alert('수강반 이름을 입력해주세요.');
             return;
         }
 
+        // admin인 경우 기관 필수
+        const session = SessionManager.getSession();
+        if (session && session.role === 'admin' && !organization) {
+            alert('소속 기관을 선택해주세요.');
+            return;
+        }
+
         try {
+            const data = { name, description };
+            if (organization) {
+                data.organization = organization;
+            }
+
             if (classId) {
-                await storage.updateClass(classId, { name, description });
+                await storage.updateClass(classId, data);
             } else {
-                await storage.createClass({ name, description });
+                await storage.createClass(data);
             }
 
             this.closeClassModal();

@@ -34,7 +34,7 @@ exports.handler = async (event) => {
         }
 
         const body = parseBody(event);
-        const { name, description, teacherId, teacherName } = body;
+        const { name, description, teacherId, teacherName, organization } = body;
 
         // Build update expression
         const updates = [];
@@ -60,6 +60,12 @@ exports.handler = async (event) => {
         if (teacherName !== undefined) {
             updates.push('teacherName = :teacherName');
             expressionValues[':teacherName'] = teacherName;
+        }
+
+        // Only admin can update organization
+        if (organization !== undefined && user.role === 'admin') {
+            updates.push('organization = :organization');
+            expressionValues[':organization'] = organization;
         }
 
         // Always update updatedAt
