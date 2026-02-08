@@ -2,7 +2,7 @@
  * Add Submission Comment Handler
  * PUT /api/v1/assignments/{assignmentId}/submissions/{studentId}/comment
  */
-const { getItem, putItem, updateItem, Tables } = require('../../utils/dynamoClient');
+const { getItem, putItem, updateItem, queryByIndex, Tables } = require('../../utils/dynamoClient');
 const { success, error, validationError, getUserFromEvent, parseBody } = require('../../utils/response');
 
 exports.handler = async (event) => {
@@ -37,8 +37,26 @@ exports.handler = async (event) => {
         }
 
         // Check organization access
-        if (user.role !== 'admin' && assignment.organization !== user.organization) {
-            return error('Access denied', 403);
+        if (user.role !== 'admin') {
+            let hasAccess = assignment.organization === user.organization;
+
+            if (!hasAccess && assignment.classIds && assignment.classIds.length > 0) {
+                const orgClasses = await queryByIndex(
+                    Tables.CLASSES,
+                    'organization-name-index',
+                    'organization = :org',
+                    { ':org': user.organization }
+                );
+                const orgClassIds = orgClasses
+                    .filter(c => c.SK === 'METADATA')
+                    .map(c => c.classId);
+
+                hasAccess = assignment.classIds.some(cid => orgClassIds.includes(cid));
+            }
+
+            if (!hasAccess) {
+                return error('Access denied', 403);
+            }
         }
 
         // Get or create submission record
