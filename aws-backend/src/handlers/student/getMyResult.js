@@ -101,6 +101,18 @@ exports.handler = async (event) => {
             }
         }
 
+        // Calculate highest, lowest, average scores for trend chart
+        if (allScores.length > 0) {
+            const scores = allScores.map(s => s.score);
+            result.highestScore = Math.max(...scores);
+            result.lowestScore = Math.min(...scores);
+            result.averageScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+        } else {
+            result.highestScore = 0;
+            result.lowestScore = 0;
+            result.averageScore = 0;
+        }
+
         // Add exam info to result
         result.exam = {
             id: exam.examId,

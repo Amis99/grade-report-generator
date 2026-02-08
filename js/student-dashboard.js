@@ -270,26 +270,17 @@ class StudentDashboard {
     }
 
     renderRecentScore(exam, data, container) {
-        const percentile = data.totalStudents > 0 ? Math.round((1 - (data.rank / data.totalStudents)) * 100) : 0;
-        const badgeClass = percentile >= 80 ? 'high' : percentile >= 50 ? 'mid' : 'low';
-        const badgeText = percentile >= 80 ? '상위' : percentile >= 50 ? '중위' : '하위';
-
         container.innerHTML = `
             <div class="score-card">
                 <div class="score-card-header">
                     <div class="score-card-title">${this.escapeHtml(exam.name)}</div>
-                    <span class="score-card-badge ${badgeClass}">${badgeText} ${100 - percentile}%</span>
                 </div>
                 <div class="score-card-body">
-                    <div class="score-value">${this.formatScore(data.totalScore)}<span>/${this.formatScore(data.maxScore)}</span></div>
+                    <div class="score-value">${this.formatScoreInt(data.totalScore)}<span>/${this.formatScoreInt(data.maxScore)}</span></div>
                     <div class="score-details">
                         <div class="score-detail-item">
                             <span class="score-detail-label">등수</span>
                             <span class="score-detail-value">${data.rank}등 / ${data.totalStudents}명</span>
-                        </div>
-                        <div class="score-detail-item">
-                            <span class="score-detail-label">백분율</span>
-                            <span class="score-detail-value">${Math.round(data.percentage)}%</span>
                         </div>
                     </div>
                 </div>
@@ -429,6 +420,12 @@ class StudentDashboard {
     formatScore(score) {
         if (score === null || score === undefined) return '0.0';
         return (Math.round(score * 10) / 10).toFixed(1);
+    }
+
+    // 점수 포맷팅 (정수, 총점용)
+    formatScoreInt(score) {
+        if (score === null || score === undefined) return '0';
+        return Math.round(score).toString();
     }
 
     setupEventListeners() {
@@ -646,6 +643,9 @@ class StudentDashboard {
     renderReport(data) {
         const container = document.getElementById('reportContainer');
 
+        // Store current data for trend chart
+        this.currentReportData = data;
+
         container.innerHTML = `
             <div class="report-container" id="reportContent">
                 <div class="report-header">
@@ -663,8 +663,7 @@ class StudentDashboard {
                     <div class="score-cards">
                         <div class="score-card primary">
                             <div class="score-label">총점</div>
-                            <div class="score-value">${this.formatScore(data.totalScore)} / ${this.formatScore(data.maxScore)}</div>
-                            <div class="score-percent">${Math.round(data.percentage)}%</div>
+                            <div class="score-value">${this.formatScoreInt(data.totalScore)} / ${this.formatScoreInt(data.maxScore)}</div>
                         </div>
                         <div class="score-card">
                             <div class="score-label">등수</div>
@@ -672,11 +671,11 @@ class StudentDashboard {
                         </div>
                         <div class="score-card">
                             <div class="score-label">객관식</div>
-                            <div class="score-value">${this.formatScore(data.multipleChoiceScore)}</div>
+                            <div class="score-value">${this.formatScoreInt(data.multipleChoiceScore)}</div>
                         </div>
                         <div class="score-card">
                             <div class="score-label">서술형</div>
-                            <div class="score-value">${this.formatScore(data.essayScore)}</div>
+                            <div class="score-value">${this.formatScoreInt(data.essayScore)}</div>
                         </div>
                     </div>
                 </div>
@@ -712,6 +711,13 @@ class StudentDashboard {
                                     }).join('')}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <div class="trend-scores">
+                        <h3>성적 추이</h3>
+                        <div class="trend-chart">
+                            <canvas id="reportTrendChart" width="800" height="320"></canvas>
                         </div>
                     </div>
                 </div>
@@ -751,6 +757,9 @@ class StudentDashboard {
 
         // Render domain chart
         this.renderDomainChart('reportDomainChart', data.domainScores);
+
+        // Render trend chart (like admin)
+        this.renderReportTrendChart();
     }
 
     renderDomainChart(canvasId, domainScores) {
@@ -815,6 +824,198 @@ class StudentDashboard {
                 }
             },
             plugins: [backgroundPlugin]
+        });
+    }
+
+    /**
+     * 성적표 내 성적 추이 차트 (관리자 스타일)
+     */
+    async renderReportTrendChart() {
+        const canvas = document.getElementById('reportTrendChart');
+        if (!canvas) return;
+
+        // 최근 5개 시험 결과 로드
+        const token = await this.getAuthToken();
+        const recentExams = this.exams.slice(0, 5);
+
+        if (recentExams.length === 0) {
+            const trendSection = canvas.closest('.trend-scores');
+            if (trendSection) {
+                trendSection.style.display = 'none';
+            }
+            return;
+        }
+
+        // 각 시험의 결과 로드
+        const results = [];
+        for (const exam of recentExams) {
+            try {
+                const response = await fetch(
+                    `${APP_CONFIG.API_BASE_URL}/student/exams/${exam.id}/result`,
+                    { headers: { 'Authorization': `Bearer ${token}` } }
+                );
+                if (response.ok) {
+                    const result = await response.json();
+                    results.push({
+                        exam: exam,
+                        result: result.data
+                    });
+                }
+            } catch (error) {
+                console.error('Load result error:', error);
+            }
+        }
+
+        if (results.length === 0) {
+            const trendSection = canvas.closest('.trend-scores');
+            if (trendSection) {
+                trendSection.style.display = 'none';
+            }
+            return;
+        }
+
+        // 날짜순 정렬
+        results.sort((a, b) => new Date(a.exam.date || 0) - new Date(b.exam.date || 0));
+
+        const labels = results.map(r => r.exam.name);
+        const myScores = results.map(r => r.result.totalScore);
+        const averageScores = results.map(r => r.result.averageScore || null);
+        const maxScores = results.map(r => r.result.highestScore || null);
+        const minScores = results.map(r => r.result.lowestScore || null);
+
+        if (this.charts['reportTrendChart']) {
+            this.charts['reportTrendChart'].destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        const isMobile = this.isMobile();
+
+        this.charts['reportTrendChart'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '최고점',
+                    data: maxScores,
+                    borderColor: 'rgba(34, 197, 94, 0.3)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: '+1',
+                    tension: 0.3,
+                    order: 3
+                }, {
+                    label: '최저점',
+                    data: minScores,
+                    borderColor: 'rgba(239, 68, 68, 0.3)',
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                    tension: 0.3,
+                    order: 4
+                }, {
+                    label: '평균 점수',
+                    data: averageScores,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: isMobile ? 1 : 2,
+                    borderDash: [5, 5],
+                    pointRadius: isMobile ? 2 : 4,
+                    pointHoverRadius: isMobile ? 3 : 6,
+                    pointHitRadius: isMobile ? 20 : 10,
+                    tension: 0.3,
+                    order: 2
+                }, {
+                    label: '내 점수',
+                    data: myScores,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 2 : 5,
+                    pointHoverRadius: isMobile ? 4 : 7,
+                    pointHitRadius: isMobile ? 20 : 10,
+                    tension: 0.3,
+                    fill: false,
+                    order: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    mode: isMobile ? 'nearest' : 'index',
+                    intersect: false,
+                    axis: 'x'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: !isMobile,
+                            text: '점수',
+                            font: { size: 12 }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '점';
+                            },
+                            font: { size: isMobile ? 9 : 12 }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            display: !isMobile,
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45,
+                            callback: function(value, index, ticks) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 8 ? label.substring(0, 8) + '…' : label;
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: { left: 10, right: 10 }
+                },
+                plugins: {
+                    legend: {
+                        display: !isMobile,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        titleFont: { size: isMobile ? 9 : 14 },
+                        bodyFont: { size: isMobile ? 8 : 13 },
+                        padding: isMobile ? 4 : 10,
+                        boxPadding: isMobile ? 2 : 4,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(1) + '점';
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    filler: { propagate: true }
+                }
+            }
         });
     }
 
@@ -1085,6 +1286,8 @@ class StudentDashboard {
         const labels = results.map(r => r.exam.name);
         const myScores = results.map(r => r.result.totalScore);
         const averageScores = results.map(r => r.result.averageScore || null);
+        const maxScores = results.map(r => r.result.highestScore || null);
+        const minScores = results.map(r => r.result.lowestScore || null);
 
         // 최대 점수 계산 (y축 범위 설정용)
         const maxScore = Math.max(...results.map(r => r.result.maxScore || 100));
@@ -1099,6 +1302,30 @@ class StudentDashboard {
             data: {
                 labels: labels,
                 datasets: [{
+                    label: '최고점',
+                    data: maxScores,
+                    borderColor: 'rgba(34, 197, 94, 0.3)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: '+1',
+                    tension: 0.3,
+                    order: 3
+                }, {
+                    label: '최저점',
+                    data: minScores,
+                    borderColor: 'rgba(239, 68, 68, 0.3)',
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                    tension: 0.3,
+                    order: 4
+                }, {
                     label: '평균 점수',
                     data: averageScores,
                     borderColor: '#f59e0b',
@@ -1120,7 +1347,7 @@ class StudentDashboard {
                     pointHoverRadius: isMobile ? 4 : 7,
                     pointHitRadius: isMobile ? 20 : 10,
                     tension: 0.3,
-                    fill: true,
+                    fill: false,
                     order: 1
                 }]
             },
