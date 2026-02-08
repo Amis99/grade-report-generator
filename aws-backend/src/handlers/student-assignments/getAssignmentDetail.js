@@ -15,17 +15,17 @@ exports.handler = async (event) => {
     try {
         const user = getUserFromEvent(event);
         if (!user) {
-            return error('Unauthorized', 401);
+            return error('로그인이 필요합니다.', 401);
         }
 
         // Only students can access this
         if (user.role !== 'student') {
-            return error('This API is for students only', 403);
+            return error('학생 계정으로만 접근할 수 있습니다.', 403);
         }
 
         const studentId = user.studentId;
         if (!studentId) {
-            return error('Student ID not found in user profile', 400);
+            return error('학생 정보를 찾을 수 없습니다. 관리자에게 문의하세요.', 400);
         }
 
         const { assignmentId } = event.pathParameters;
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
         );
 
         if (!assignment) {
-            return error('Assignment not found', 404);
+            return error('과제를 찾을 수 없습니다.', 404);
         }
 
         // Check if student is in one of the assigned classes using PK pattern
@@ -51,12 +51,12 @@ exports.handler = async (event) => {
 
         const hasAccess = assignment.classIds && assignment.classIds.some(cid => classIds.includes(cid));
         if (!hasAccess) {
-            return error('You are not enrolled in a class for this assignment', 403);
+            return error('이 과제에 접근할 수 없습니다. 수강반 등록 여부를 확인하세요.', 403);
         }
 
         // Check if assignment is active
         if (assignment.status !== 'active') {
-            return error('This assignment is not active', 400);
+            return error('현재 진행 중인 과제가 아닙니다.', 400);
         }
 
         // Get pages
@@ -153,6 +153,6 @@ exports.handler = async (event) => {
         });
     } catch (err) {
         console.error('Get assignment detail error:', err);
-        return error('Failed to get assignment details', 500);
+        return error('과제 정보를 불러오는 중 오류가 발생했습니다.', 500);
     }
 };

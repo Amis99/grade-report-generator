@@ -99,7 +99,9 @@ class StudentAssignments {
             this.renderAssignmentDetail();
         } catch (error) {
             console.error('Failed to load assignment detail:', error);
-            this.showError('과제 정보를 불러오는데 실패했습니다.');
+            // 백엔드 오류 메시지가 있으면 그대로 표시
+            const message = error.message || '과제 정보를 불러오는데 실패했습니다.';
+            this.showError(message);
         }
     }
 

@@ -28,8 +28,8 @@ exports.handler = async (event) => {
         const body = parseBody(event);
         const { totalPages } = body;
 
-        if (!totalPages || totalPages < 1 || totalPages > 100) {
-            return validationError('Total pages must be between 1 and 100');
+        if (!totalPages || totalPages < 1 || totalPages > 500) {
+            return validationError('Total pages must be between 1 and 500');
         }
 
         // Get existing assignment

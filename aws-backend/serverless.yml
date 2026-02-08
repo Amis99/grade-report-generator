@@ -666,6 +666,8 @@ functions:
 
   getAssignmentUploadUrls:
     handler: src/handlers/assignments/getUploadUrls.handler
+    timeout: 60
+    memorySize: 512
     events:
       - http:
           path: /api/v1/assignments/{assignmentId}/upload-urls
@@ -677,6 +679,8 @@ functions:
 
   finalizeAssignmentPdfUpload:
     handler: src/handlers/assignments/finalizePdfUpload.handler
+    timeout: 60
+    memorySize: 512
     events:
       - http:
           path: /api/v1/assignments/{assignmentId}/finalize-upload
