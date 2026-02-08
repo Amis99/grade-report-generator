@@ -113,10 +113,13 @@ class AssignmentManager {
             filtered = filtered.filter(a => a.name.toLowerCase().includes(query));
         }
 
-        // 정렬: 진행 중 → 초안 → 종료, 같은 상태 내에서는 최신순
+        // 정렬: 진행 중 → 초안 → 마감, 같은 상태 내에서는 최신순
+        // 마감일 기반 실제 상태로 정렬
         const statusOrder = { active: 0, draft: 1, closed: 2 };
         filtered.sort((a, b) => {
-            const orderDiff = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+            const aStatus = this.getEffectiveStatus(a);
+            const bStatus = this.getEffectiveStatus(b);
+            const orderDiff = (statusOrder[aStatus] ?? 9) - (statusOrder[bStatus] ?? 9);
             if (orderDiff !== 0) return orderDiff;
             return (b.createdAt || '').localeCompare(a.createdAt || '');
         });
@@ -128,19 +131,50 @@ class AssignmentManager {
             return;
         }
 
-        container.innerHTML = filtered.map(a => `
+        container.innerHTML = filtered.map(a => {
+            const effectiveStatus = this.getEffectiveStatus(a);
+            return `
             <div class="assignment-list-item ${this.selectedAssignment?.id === a.id ? 'selected' : ''}"
                  onclick="assignmentManager.selectAssignment('${a.id}')">
                 <div class="assignment-item-header">
                     <span class="assignment-name">${this.escapeHtml(a.name)}</span>
-                    <span class="status-badge status-${a.status}">${this.getStatusText(a.status)}</span>
+                    <span class="status-badge status-${effectiveStatus}">${this.getStatusText(effectiveStatus)}</span>
                 </div>
                 <div class="assignment-item-info">
                     <span>${a.totalPages || 0}페이지</span>
                     ${a.dueDate ? `<span>마감: ${new Date(a.dueDate).toLocaleDateString('ko-KR')}</span>` : ''}
                 </div>
             </div>
-        `).join('');
+        `;}).join('');
+    }
+
+    /**
+     * 마감일 기반 실제 상태 계산
+     * - 마감일이 지나면 자동으로 'closed' 반환
+     */
+    getEffectiveStatus(assignment) {
+        // 종료된 상태는 그대로 유지
+        if (assignment.status === 'closed') return 'closed';
+
+        // 초안 상태는 마감일 상관없이 그대로 유지
+        if (assignment.status === 'draft') return 'draft';
+
+        // 진행 중 상태인 경우, 마감일 확인
+        if (assignment.status === 'active' && assignment.dueDate) {
+            const dueDate = new Date(assignment.dueDate);
+            const today = new Date();
+
+            // 오늘 날짜만 비교 (시간 제외)
+            today.setHours(0, 0, 0, 0);
+            dueDate.setHours(0, 0, 0, 0);
+
+            // 마감일 다음 날부터 종료로 표시
+            if (today > dueDate) {
+                return 'closed';
+            }
+        }
+
+        return assignment.status;
     }
 
     /**
@@ -150,7 +184,7 @@ class AssignmentManager {
         const statusMap = {
             'draft': '초안',
             'active': '진행 중',
-            'closed': '종료'
+            'closed': '마감'
         };
         return statusMap[status] || status;
     }
@@ -189,11 +223,12 @@ class AssignmentManager {
         content.style.display = 'block';
 
         const a = this.selectedAssignment;
+        const effectiveStatus = this.getEffectiveStatus(a);
 
         // 기본 정보
         document.getElementById('assignmentDetailTitle').textContent = a.name;
-        document.getElementById('assignmentStatusBadge').textContent = this.getStatusText(a.status);
-        document.getElementById('assignmentStatusBadge').className = `status-badge status-${a.status}`;
+        document.getElementById('assignmentStatusBadge').textContent = this.getStatusText(effectiveStatus);
+        document.getElementById('assignmentStatusBadge').className = `status-badge status-${effectiveStatus}`;
 
         const classNames = (a.classIds || []).map(cid => {
             const cls = this.classes.find(c => c.id === cid);
@@ -556,8 +591,6 @@ class AssignmentManager {
 
         if (this.selectedAssignment.status === newStatus) return;
 
-        const statusNames = { draft: '초안', active: '진행 중', closed: '마감' };
-
         try {
             await storage.updateAssignment(this.selectedAssignment.id, { status: newStatus });
             this.selectedAssignment.status = newStatus;
@@ -571,11 +604,12 @@ class AssignmentManager {
             this.renderAssignmentList();
             this.updateStatusButtons();
 
-            // 상태 배지 업데이트
+            // 상태 배지 업데이트 (마감일 기반 실제 상태 사용)
+            const effectiveStatus = this.getEffectiveStatus(this.selectedAssignment);
             const badge = document.getElementById('assignmentStatusBadge');
             if (badge) {
-                badge.textContent = statusNames[newStatus];
-                badge.className = `status-badge status-${newStatus}`;
+                badge.textContent = this.getStatusText(effectiveStatus);
+                badge.className = `status-badge status-${effectiveStatus}`;
             }
         } catch (error) {
             console.error('Failed to change status:', error);
@@ -587,10 +621,13 @@ class AssignmentManager {
      * 상태 버튼 업데이트
      */
     updateStatusButtons() {
+        if (!this.selectedAssignment) return;
+
+        const effectiveStatus = this.getEffectiveStatus(this.selectedAssignment);
         const buttons = document.querySelectorAll('.status-btn');
         buttons.forEach(btn => {
             btn.classList.remove('current');
-            if (this.selectedAssignment && btn.classList.contains(this.selectedAssignment.status)) {
+            if (btn.classList.contains(effectiveStatus)) {
                 btn.classList.add('current');
             }
         });
