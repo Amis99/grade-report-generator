@@ -32,13 +32,29 @@ exports.handler = async (event) => {
                 assignments = await scanTable(Tables.ASSIGNMENTS);
             }
         } else {
-            // Others see only their organization's assignments
-            assignments = await queryByIndex(
-                Tables.ASSIGNMENTS,
-                'organization-dueDate-index',
+            // 기관 관리자: 자기 조직 과제 + 자기 조직 수강반에 배정된 과제
+
+            // 1. 기관의 수강반 목록 조회
+            const orgClasses = await queryByIndex(
+                Tables.CLASSES,
+                'organization-name-index',
                 'organization = :org',
                 { ':org': user.organization }
             );
+            const orgClassIds = orgClasses
+                .filter(c => c.SK === 'METADATA')
+                .map(c => c.classId);
+
+            // 2. 전체 과제 스캔 후 필터링
+            const allAssignments = await scanTable(Tables.ASSIGNMENTS);
+            assignments = allAssignments.filter(a => {
+                if (a.SK !== 'METADATA') return false;
+                // 조건 1: 자기 조직의 과제
+                if (a.organization === user.organization) return true;
+                // 조건 2: 자기 조직 수강반에 배정된 과제
+                if (a.classIds && a.classIds.some(cid => orgClassIds.includes(cid))) return true;
+                return false;
+            });
         }
 
         // Filter only METADATA items

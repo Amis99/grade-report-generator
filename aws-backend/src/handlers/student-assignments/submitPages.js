@@ -49,10 +49,8 @@ exports.handler = async (event) => {
             return error('Assignment not found', 404);
         }
 
-        // Check organization
-        if (assignment.organization !== user.organization) {
-            return error('Access denied', 403);
-        }
+        // 조직 체크 제거: 본사관리자가 타 기관 수강반에 배정한 과제도 제출 가능하도록
+        // 수강반 체크(아래)로 이미 접근 권한이 검증됨
 
         // Check if student is in one of the assigned classes using PK pattern
         const studentClasses = await queryByPK(

@@ -19,25 +19,25 @@ class ClassManager {
     async init() {
         console.log('[ClassManager] init 호출, isInitialized:', this.isInitialized);
 
-        // 이미 초기화된 경우 목록만 새로고침
-        if (this.isInitialized) {
-            await this.loadClasses();
-            return;
-        }
-
         // 로딩 표시
         const container = document.getElementById('classList');
         if (container) {
             container.innerHTML = '<div class="panel-placeholder"><p>로딩 중...</p></div>';
         }
 
-        // 사용자 역할에 따라 기관 필터 표시
+        // 사용자 역할에 따라 기관 필터 표시 (항상 확인)
         const session = SessionManager.getSession();
         console.log('[ClassManager] session:', session);
 
         if (session && session.role === 'admin') {
-            await this.loadOrganizations();
-            document.getElementById('orgFilterGroup').style.display = 'flex';
+            // 기관 목록이 비어있으면 로드
+            if (this.organizations.length === 0) {
+                await this.loadOrganizations();
+            }
+            const orgFilterGroup = document.getElementById('orgFilterGroup');
+            if (orgFilterGroup) {
+                orgFilterGroup.style.display = 'flex';
+            }
         }
 
         await this.loadClasses();
@@ -47,8 +47,11 @@ class ClassManager {
     async loadOrganizations() {
         try {
             // API에서 기관 목록 로드
+            console.log('[ClassManager] loadOrganizations 호출');
             const response = await apiClient.request('GET', '/admin/organizations');
+            console.log('[ClassManager] API 응답:', response);
             this.organizations = response.organizations || [];
+            console.log('[ClassManager] organizations 설정됨:', this.organizations);
 
             const select = document.getElementById('classOrgFilter');
             if (select) {
@@ -58,7 +61,7 @@ class ClassManager {
                     ).join('');
             }
         } catch (error) {
-            console.error('기관 목록 로드 오류:', error);
+            console.error('[ClassManager] 기관 목록 로드 오류:', error);
             // Fallback: 기존 캐시에서 시도
             const users = storage.cache.users || [];
             const orgSet = new Set();
@@ -66,6 +69,7 @@ class ClassManager {
                 if (u.organization) orgSet.add(u.organization);
             });
             this.organizations = Array.from(orgSet).sort();
+            console.log('[ClassManager] Fallback organizations:', this.organizations);
         }
     }
 
@@ -312,10 +316,14 @@ class ClassManager {
         const session = SessionManager.getSession();
         const isAdmin = session && session.role === 'admin';
 
+        console.log('[ClassManager] createClassModal - isAdmin:', isAdmin);
+        console.log('[ClassManager] createClassModal - organizations:', this.organizations);
+
         // 기관 옵션 생성
         const orgOptions = this.organizations.map(org =>
             `<option value="${this.escapeHtml(org)}">${this.escapeHtml(org)}</option>`
         ).join('');
+        console.log('[ClassManager] createClassModal - orgOptions:', orgOptions);
 
         const modalHtml = `
             <div id="classModal" class="modal">

@@ -177,8 +177,8 @@ class PortalController {
                 }
                 break;
             case 'class-management':
-                if (typeof classManager !== 'undefined' && classManager.loadClasses) {
-                    classManager.loadClasses();
+                if (typeof classManager !== 'undefined' && classManager.init) {
+                    classManager.init();
                 }
                 break;
             case 'assignment-management':

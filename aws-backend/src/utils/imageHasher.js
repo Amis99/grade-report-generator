@@ -264,7 +264,7 @@ function findBestMatchFromRemaining(img, pages, matchedPages, threshold) {
 }
 
 // Similarity threshold constant
-const SIMILARITY_THRESHOLD = 0.7;
+const SIMILARITY_THRESHOLD = 0.55;
 
 module.exports = {
     hammingDistance,
