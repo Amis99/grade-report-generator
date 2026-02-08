@@ -47,7 +47,7 @@ class ClassManager {
     async loadOrganizations() {
         try {
             // API에서 기관 목록 로드
-            const response = await apiClient.request('/admin/organizations');
+            const response = await apiClient.request('GET', '/admin/organizations');
             this.organizations = response.organizations || [];
 
             const select = document.getElementById('classOrgFilter');
