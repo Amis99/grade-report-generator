@@ -50,24 +50,35 @@ exports.handler = async (event) => {
             await batchWrite(Tables.ASSIGNMENT_SUBMISSIONS, submissions, 'delete');
         }
 
-        // Delete files from S3
+        // Delete files from S3 (with pagination for large assignments)
         try {
-            const listParams = {
-                Bucket: process.env.PDF_BUCKET,
-                Prefix: `assignments/${assignmentId}/`
-            };
+            let continuationToken = null;
+            let totalDeleted = 0;
 
-            const listedObjects = await s3Client.send(new ListObjectsV2Command(listParams));
-
-            if (listedObjects.Contents && listedObjects.Contents.length > 0) {
-                const deleteParams = {
+            do {
+                const listParams = {
                     Bucket: process.env.PDF_BUCKET,
-                    Delete: {
-                        Objects: listedObjects.Contents.map(({ Key }) => ({ Key }))
-                    }
+                    Prefix: `assignments/${assignmentId}/`,
+                    ContinuationToken: continuationToken
                 };
-                await s3Client.send(new DeleteObjectsCommand(deleteParams));
-            }
+
+                const listedObjects = await s3Client.send(new ListObjectsV2Command(listParams));
+
+                if (listedObjects.Contents && listedObjects.Contents.length > 0) {
+                    const deleteParams = {
+                        Bucket: process.env.PDF_BUCKET,
+                        Delete: {
+                            Objects: listedObjects.Contents.map(({ Key }) => ({ Key }))
+                        }
+                    };
+                    await s3Client.send(new DeleteObjectsCommand(deleteParams));
+                    totalDeleted += listedObjects.Contents.length;
+                }
+
+                continuationToken = listedObjects.IsTruncated ? listedObjects.NextContinuationToken : null;
+            } while (continuationToken);
+
+            console.log(`Deleted ${totalDeleted} S3 objects for assignment ${assignmentId}`);
         } catch (s3Error) {
             console.warn('Error deleting S3 files:', s3Error);
             // Continue even if S3 deletion fails
