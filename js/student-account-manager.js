@@ -414,7 +414,7 @@ class StudentAccountManager {
                         </div>
                         <div class="form-group">
                             <label>학년 <span class="required">*</span></label>
-                            <input type="text" id="newStudentGrade" placeholder="숫자만 입력 (예: 1, 2, 3)" required autocomplete="off">
+                            <input type="text" id="newStudentGrade" placeholder="1, 2, 3..." required autocomplete="off">
                         </div>
                         ${isAdmin ? `
                         <div class="form-group">
