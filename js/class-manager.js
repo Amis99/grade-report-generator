@@ -46,13 +46,9 @@ class ClassManager {
 
     async loadOrganizations() {
         try {
-            // 기존 사용자 목록에서 기관 추출
-            const users = storage.cache.users || [];
-            const orgSet = new Set();
-            users.forEach(u => {
-                if (u.organization) orgSet.add(u.organization);
-            });
-            this.organizations = Array.from(orgSet).sort();
+            // API에서 기관 목록 로드
+            const response = await apiClient.request('/admin/organizations');
+            this.organizations = response.organizations || [];
 
             const select = document.getElementById('classOrgFilter');
             if (select) {
@@ -63,6 +59,13 @@ class ClassManager {
             }
         } catch (error) {
             console.error('기관 목록 로드 오류:', error);
+            // Fallback: 기존 캐시에서 시도
+            const users = storage.cache.users || [];
+            const orgSet = new Set();
+            users.forEach(u => {
+                if (u.organization) orgSet.add(u.organization);
+            });
+            this.organizations = Array.from(orgSet).sort();
         }
     }
 

@@ -405,6 +405,17 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: !Ref ApiGatewayAuthorizer
 
+  getOrganizations:
+    handler: src/handlers/admin/getOrganizations.handler
+    events:
+      - http:
+          path: /api/v1/admin/organizations
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
   # Student Account Management (for org_admin)
   createStudentAccount:
     handler: src/handlers/students/createStudentAccount.handler
