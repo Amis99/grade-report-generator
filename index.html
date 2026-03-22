@@ -7,11 +7,11 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>성적표 생성 프로그램</title>
-    <link rel="stylesheet" href="css/portal.css?v=20260208d">
+    <link rel="stylesheet" href="css/portal.css?v=20260322a">
     <link rel="stylesheet" href="css/dashboard.css?v=20260208d">
-    <link rel="stylesheet" href="css/style.css?v=20260208d">
+    <link rel="stylesheet" href="css/style.css?v=20260322a">
     <link rel="stylesheet" href="css/sheet-style.css?v=20260208d">
-    <link rel="stylesheet" href="css/auth-style.css">
+    <link rel="stylesheet" href="css/auth-style.css?v=20260322a">
 </head>
 <body class="portal-layout">
     <!-- 사이드바 오버레이 (모바일) -->
@@ -75,6 +75,10 @@
                     <a class="nav-item" data-page="report">
                         <span class="nav-item-icon">📄</span>
                         <span class="nav-item-text">성적표 생성</span>
+                    </a>
+                    <a class="nav-item" data-page="assignment-history">
+                        <span class="nav-item-icon">📊</span>
+                        <span class="nav-item-text">과제 수행 현황</span>
                     </a>
                     <a class="nav-item" data-page="wrong-note">
                         <span class="nav-item-icon">📓</span>
@@ -542,6 +546,18 @@
 
                 <!-- 과제 관리 페이지 -->
                 <div id="assignment-management" class="page">
+                    <!-- 탭 네비게이션 -->
+                    <div class="assignment-tabs">
+                        <button class="assignment-tab-btn active" data-tab="assignment-list-tab" onclick="switchAssignmentTab('assignment-list-tab')">
+                            📋 과제 목록
+                        </button>
+                        <button class="assignment-tab-btn" data-tab="pdf-library-tab" onclick="switchAssignmentTab('pdf-library-tab')">
+                            📚 PDF 라이브러리
+                        </button>
+                    </div>
+
+                    <!-- 탭 1: 과제 목록 -->
+                    <div id="assignment-list-tab" class="assignment-tab-content active">
                     <div class="assignment-management-layout">
                         <!-- 좌측: 과제 목록 -->
                         <div class="assignment-list-panel">
@@ -635,14 +651,67 @@
 
                     <!-- 모바일용 하단 FAB -->
                     <button class="mobile-fab" id="mobileCreateAssignmentBtn" onclick="assignmentManager.showCreateModal()">+</button>
+                    </div>
+
+                    <!-- 탭 2: PDF 라이브러리 -->
+                    <div id="pdf-library-tab" class="assignment-tab-content">
+                        <div class="pdf-library-layout">
+                            <!-- 좌측: PDF 목록 -->
+                            <div class="pdf-list-panel">
+                                <div class="panel-header">
+                                    <h3>PDF 목록</h3>
+                                    <button class="btn btn-primary btn-sm" onclick="pdfLibraryManager.showUploadModal()">+ 새 PDF</button>
+                                </div>
+                                <div class="filter-bar">
+                                    <input type="text" id="pdfLibrarySearchInput" class="form-control" placeholder="PDF 검색..." oninput="pdfLibraryManager.onSearchChange(this.value)">
+                                </div>
+                                <div class="list-count">
+                                    <span id="pdfLibraryCount">0</span>개의 PDF
+                                </div>
+                                <div id="pdfLibraryList" class="pdf-library-list">
+                                    <div class="empty-state">PDF가 없습니다.</div>
+                                </div>
+                            </div>
+
+                            <!-- 우측: PDF 상세 -->
+                            <div class="pdf-detail-panel">
+                                <div id="pdfDetailPlaceholder" class="detail-placeholder">
+                                    <div class="placeholder-icon">📄</div>
+                                    <p>PDF를 선택하세요</p>
+                                    <span class="placeholder-hint">좌측 목록에서 PDF를 클릭하면 상세 정보와 페이지 미리보기가 표시됩니다</span>
+                                </div>
+                                <div id="pdfDetailContent" class="detail-content" style="display: none;">
+                                    <!-- 헤더 -->
+                                    <div class="detail-header-card">
+                                        <div class="header-top">
+                                            <h2 id="pdfDetailTitle">PDF 제목</h2>
+                                        </div>
+                                        <div id="pdfDetailInfo" class="header-info"></div>
+                                        <div class="header-actions">
+                                            <button class="btn btn-edit" onclick="pdfLibraryManager.showEditModal()">수정</button>
+                                            <button class="btn btn-delete" onclick="pdfLibraryManager.deleteSelectedPdf()">삭제</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 페이지 미리보기 카드 -->
+                                    <div class="detail-card">
+                                        <div class="card-header">
+                                            <h4>페이지 미리보기</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="pdfDetailPages" class="pdf-pages-preview">
+                                                <p class="empty-hint">페이지가 없습니다.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 답안 입력 페이지 -->
                 <div id="answer-input" class="page">
-                    <div class="section-header">
-                        <h2>답안 입력</h2>
-                    </div>
-
                     <div class="answer-input-controls">
                         <div class="form-group">
                             <label>시험 선택</label>
@@ -669,10 +738,6 @@
 
                 <!-- 채점 및 분석 페이지 -->
                 <div id="grading" class="page">
-                    <div class="section-header">
-                        <h2>채점 및 분석</h2>
-                    </div>
-
                     <div class="grading-controls">
                         <div class="form-group">
                             <label>시험 선택</label>
@@ -711,10 +776,6 @@
 
                 <!-- 성적표 생성 페이지 -->
                 <div id="report" class="page">
-                    <div class="section-header">
-                        <h2>성적표 생성</h2>
-                    </div>
-
                     <div class="report-controls">
                         <div class="form-group">
                             <label>시험 선택</label>
@@ -746,12 +807,31 @@
                     </div>
                 </div>
 
-                <!-- 오답 노트 페이지 -->
-                <div id="wrong-note" class="page">
-                    <div class="section-header">
-                        <h2>학생별 오답 노트</h2>
+                <!-- 과제 수행 현황 페이지 -->
+                <div id="assignment-history" class="page">
+                    <div class="assignment-history-controls">
+                        <div class="form-group">
+                            <label>학생 선택</label>
+                            <div class="searchable-select" id="assignHistoryStudentSelectWrapper">
+                                <select id="assignHistoryStudentSelect" class="form-control">
+                                    <option value="">학생을 선택하세요</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
+                    <div id="assignHistoryLoading" class="loading-message" style="display: none;">
+                        과제 수행 현황을 불러오는 중...
+                    </div>
+
+                    <div id="assignHistoryResults" style="display: none;">
+                        <div id="assignHistorySummary" class="assign-history-summary"></div>
+                        <div id="assignHistoryList" class="assign-history-list"></div>
+                    </div>
+                </div>
+
+                <!-- 오답 노트 페이지 -->
+                <div id="wrong-note" class="page">
                     <div class="wrong-note-controls">
                         <div class="form-group">
                             <label>학생 선택</label>
@@ -823,10 +903,6 @@
 
                 <!-- 설정 페이지 -->
                 <div id="settings" class="page">
-                    <div class="section-header">
-                        <h2>설정</h2>
-                    </div>
-
                     <div class="settings-content">
                         <div class="card">
                             <div class="card-header">
@@ -963,7 +1039,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>학생 정보 수정</h3>
-                <button class="modal-close" id="closeEditStudentModal">&times;</button>
+                <button class="modal-close" onclick="studentManager.closeEditModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editStudentId">
@@ -1025,6 +1101,9 @@
     <!-- AWS Cognito SDK -->
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
 
+    <!-- 토스트 알림 -->
+    <script src="js/toast.js?v=20260303a"></script>
+
     <!-- 애플리케이션 스크립트 -->
     <script src="js/config.js?v=20260208d"></script>
     <script src="js/data-model.js?v=20260208d"></script>
@@ -1042,12 +1121,32 @@
     <script src="js/answer-input-sheet.js?v=20260208d"></script>
     <script src="js/grading.js?v=20260208d"></script>
     <script src="js/report-generator.js?v=20260208d"></script>
+    <script src="js/assignment-history.js?v=20260303b"></script>
     <script src="js/wrong-note.js?v=20260208d"></script>
     <script src="js/student-manager.js?v=20260202f"></script>
     <script src="js/auto-merge-students.js?v=20260208d"></script>
     <script src="js/class-manager.js?v=20260208d"></script>
-    <script src="js/assignment-manager.js?v=20260208d"></script>
-    <script src="js/portal.js?v=20260208d"></script>
+    <script src="js/assignment-manager.js?v=20260304a"></script>
+    <script src="js/pdf-library-manager.js?v=20260210a"></script>
+    <script src="js/page-cart.js?v=20260210a"></script>
+    <script>
+        // 과제 관리 탭 전환
+        function switchAssignmentTab(tabId) {
+            // 탭 버튼 활성화 상태 변경
+            document.querySelectorAll('.assignment-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabId);
+            });
+            // 탭 컨텐츠 표시/숨기기
+            document.querySelectorAll('.assignment-tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === tabId);
+            });
+            // PDF 라이브러리 탭으로 전환 시 초기화
+            if (tabId === 'pdf-library-tab' && window.pdfLibraryManager) {
+                pdfLibraryManager.init();
+            }
+        }
+    </script>
+    <script src="js/portal.js?v=20260303b"></script>
     <script src="js/admin-dashboard.js?v=20260208d"></script>
     <script src="js/app.js?v=20260208d"></script>
 </body>

@@ -13,8 +13,8 @@
     --accent: #db2777;
     --background: #fafafa;
     --surface: #ffffff;
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
     --border: #e5e7eb;
     --success: #10b981;
     --warning: #f59e0b;
@@ -377,7 +377,7 @@ body.portal-layout {
 .content-area {
     flex: 1;
     padding: 24px;
-    overflow-x: auto;
+    overflow: visible;
 }
 
 /* Page Container */
@@ -510,7 +510,7 @@ body.portal-layout {
         margin-left: 0;
     }
 
-    .hamburger-btn {
+    .portal-layout .hamburger-btn {
         display: flex;
     }
 
@@ -752,4 +752,48 @@ body.portal-layout {
     background: #fee2e2;
     border-color: var(--error);
     color: var(--error);
+}
+
+/* ============================================
+   Responsive - Wide screens (1440px+)
+   ============================================ */
+@media (min-width: 1440px) {
+    .content-area {
+        padding: 32px 40px;
+    }
+}
+
+/* ============================================
+   Responsive - Small phones (< 480px)
+   ============================================ */
+@media (max-width: 480px) {
+    .content-area {
+        padding: 8px;
+    }
+
+    .main-header {
+        padding: 0 12px;
+        height: 50px;
+    }
+
+    .page-title {
+        font-size: 14px;
+    }
+
+    .card-body {
+        padding: 12px;
+    }
+
+    .card-header {
+        padding: 12px 14px;
+    }
+
+    .btn {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+
+    .sidebar.open {
+        width: 260px;
+    }
 }

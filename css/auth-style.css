@@ -2,148 +2,6 @@
  * 인증 페이지 스타일
  */
 
-/* 인증 페이지 배경 */
-.auth-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1rem;
-}
-
-/* 인증 컨테이너 */
-.auth-container {
-    width: 100%;
-    max-width: 420px;
-}
-
-/* 인증 박스 */
-.auth-box {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    padding: 2.5rem;
-}
-
-/* 로고 */
-.auth-logo {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.auth-logo-image {
-    height: 60px;
-    width: auto;
-}
-
-/* 타이틀 */
-.auth-title {
-    text-align: center;
-    color: #333;
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    font-weight: 700;
-}
-
-/* 섹션 */
-.auth-section h2 {
-    text-align: center;
-    color: #444;
-    font-size: 1.25rem;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-}
-
-/* 폼 스타일 */
-.auth-form .form-group {
-    margin-bottom: 1rem;
-}
-
-.auth-form .form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-weight: 500;
-    color: #555;
-    font-size: 0.9rem;
-}
-
-.auth-form .form-group label .required {
-    color: #e74c3c;
-}
-
-.auth-form .form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    box-sizing: border-box;
-}
-
-.auth-form .form-control:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-}
-
-.auth-form .form-control::placeholder {
-    color: #aaa;
-}
-
-/* 버튼 */
-.btn-block {
-    width: 100%;
-    padding: 0.85rem;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-top: 1rem;
-}
-
-/* 에러 메시지 */
-.auth-error {
-    background: #fee;
-    color: #c00;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    border: 1px solid #fcc;
-}
-
-/* 성공 메시지 */
-.auth-success {
-    background: #efe;
-    color: #060;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    border: 1px solid #cfc;
-}
-
-/* 푸터 (링크) */
-.auth-footer {
-    text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.auth-footer a {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 600;
-    margin-left: 0.5rem;
-}
-
-.auth-footer a:hover {
-    text-decoration: underline;
-}
-
 /* 승인 대기 안내 */
 .pending-notice {
     text-align: center;
@@ -240,7 +98,7 @@
     color: #444;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #667eea;
+    border-bottom: 2px solid #2563eb;
 }
 
 /* 가입 신청 카드 */
@@ -376,7 +234,7 @@
     font-size: 0.8rem;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    background: #667eea;
+    background: #2563eb;
     color: white;
 }
 
@@ -625,16 +483,8 @@
     }
 }
 
-/* 기존 반응형 (이전 디자인 유지) */
+/* 기존 반응형 */
 @media (max-width: 480px) {
-    .auth-box {
-        padding: 1.5rem;
-    }
-
-    .auth-title {
-        font-size: 1.25rem;
-    }
-
     .registration-card-info {
         grid-template-columns: 1fr;
     }
@@ -686,8 +536,8 @@
 
 .student-account-controls .search-box input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .student-account-controls .filter-buttons {
@@ -907,8 +757,8 @@
 
 .modal-body .form-group input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .modal-body .form-group small {
@@ -1014,15 +864,4 @@
 
 .btn-warning:hover {
     background-color: #ec971f;
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 1px solid #6c757d;
-    color: #6c757d;
-}
-
-.btn-outline:hover {
-    background-color: #6c757d;
-    color: #fff;
 }
